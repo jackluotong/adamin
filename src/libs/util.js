@@ -31,6 +31,10 @@ const showThisMenuEle = (item, access) => {
  * @returns {Array}
  */
 export const getMenuByRouter = (list, access) => {
+  // console.log('-----')
+  // console.log(list)
+  // console.log(access)
+  // console.log('-----')
   let res = []
   forEach(list, item => {
     if (!item.meta || (item.meta && !item.meta.hideInMenu)) {

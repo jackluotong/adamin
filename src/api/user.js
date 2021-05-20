@@ -2,11 +2,11 @@ import axios from '@/libs/api.request'
 
 export const login = ({ userName, password }) => {
   const data = {
-    userName,
-    password
+    'userName': userName,
+    'wordPass': password
   }
   return axios.request({
-    url: 'login',
+    url: '/dcenter/admin/userInfo/LoginByUserAndPwd',
     data,
     method: 'post'
   })
@@ -14,18 +14,15 @@ export const login = ({ userName, password }) => {
 
 export const getUserInfo = (token) => {
   return axios.request({
-    url: 'get_info',
-    params: {
-      token
-    },
+    url: '/dcenter/admin/userInfo/getUserInfoByToken/' + token,
     method: 'get'
   })
 }
 
 export const logout = (token) => {
   return axios.request({
-    url: 'logout',
-    method: 'post'
+    url: '/dcenter/admin/userInfo/logout/' + token,
+    method: 'get'
   })
 }
 

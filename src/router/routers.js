@@ -51,30 +51,241 @@ export default [
     ]
   },
   {
-    path: '',
-    name: 'doc',
+    path: '/systemManage',
+    name: 'systemManage',
     meta: {
-      title: '文档',
-      href: 'https://lison16.github.io/iview-admin-doc/#/',
-      icon: 'ios-book'
-    }
-  },
-  {
-    path: '/join',
-    name: 'join',
-    component: Main,
-    meta: {
-      hideInBread: true
+      icon: 'ios-construct',
+      title: '系统管理',
+      access: ['root']
     },
+    component: Main,
     children: [
       {
-        path: 'join_page',
-        name: 'join_page',
+        path: '/systemConfig',
+        name: 'systemConfig',
         meta: {
-          icon: '_qq',
-          title: 'QQ群'
+          icon: 'ios-settings',
+          title: '系统配置'
         },
-        component: () => import('@/view/join-page.vue')
+        // component: () => import('@/view/join-page.vue')
+        component: () => import('@/view/systemManage/systemConfig/systemConfig.vue')
+      },
+      {
+        path: '/timedTask',
+        name: 'timedTask',
+        meta: {
+          icon: 'md-timer',
+          title: '定时任务'
+        },
+        // component: () => import('@/view/join-page.vue')
+        component: () => import('@/view/systemManage/timedTask/timedTask.vue')
+      },
+      {
+        path: '/redisConfig',
+        name: 'redisConfig',
+        meta: {
+          icon: 'ios-cube-outline',
+          title: 'Redis管理'
+        },
+        // component: () => import('@/view/join-page.vue')
+        component: () => import('@/view/systemManage/redisConfig/redisConfig.vue')
+      },
+      {
+        path: '/userManage',
+        name: 'userManage',
+        meta: {
+          icon: 'md-contacts',
+          title: '用户管理'
+        },
+        // component: () => import('@/view/join-page.vue')
+        component: () => import('@/view/systemManage/userManage/userManage.vue')
+      },
+      {
+        path: '/dictManage',
+        name: 'dictMain',
+        meta: {
+          icon: 'ios-book',
+          title: '字典管理'
+        },
+        // component: () => import('@/view/join-page.vue')
+        component: () => import('@/view/systemManage/dictManage/dictMain.vue')
+      },
+      {
+        path: '/dictManage',
+        name: 'dictDetail',
+        meta: {
+          title: '字典明细',
+          hideInMenu: true
+        },
+        // component: () => import('@/view/join-page.vue')
+        component: () => import('@/view/systemManage/dictManage/dictDetail.vue')
+      },
+      {
+        path: '/smsCodeQuery',
+        name: 'smsCodeQuery',
+        meta: {
+          icon: 'md-chatboxes',
+          title: '短信验证码查询'
+        },
+        // component: () => import('@/view/join-page.vue')
+        component: () => import('@/view/systemManage/smsCodeQuery/smsCodeQuery.vue')
+      }
+    ]
+  },
+  {
+    path: '/operationsManage',
+    name: 'operationsManage',
+    meta: {
+      icon: 'ios-construct',
+      title: '运营管理',
+      access: ['root']
+    },
+    component: Main,
+    children: [
+      {
+        path: '/releaseVersionInfo',
+        name: 'releaseVersionInfo',
+        meta: {
+          icon: 'ios-folder-open-outline',
+          title: '版本信息'
+        },
+        // component: () => import('@/view/join-page.vue')
+        component: () => import('@/view/operationsManage/versionManage/releaseVersionInfo.vue')
+      },
+      {
+        path: '/releaseVersion',
+        name: 'releaseVersion',
+        meta: {
+          icon: 'ios-download-outline',
+          title: '版本发布',
+          hideInMenu: true
+        },
+        // component: () => import('@/view/join-page.vue')
+        component: () => import('@/view/operationsManage/versionManage/releaseVersion.vue')
+      },
+      {
+        path: '/appUserManage',
+        name: 'appUserManage',
+        meta: {
+          icon: 'ios-archive',
+          title: '用户管理'
+          // hideInMenu: true
+        },
+        // component: () => import('@/view/join-page.vue')
+        component: () => import('@/view/operationsManage/roleManage/appUserManage.vue')
+      },
+      {
+        path: '/roleManage',
+        name: 'roleManage',
+        meta: {
+          icon: 'md-people',
+          title: '角色管理'
+          // hideInMenu: true
+        },
+        // component: () => import('@/view/join-page.vue')
+        component: () => import('@/view/operationsManage/roleManage/roleManage.vue')
+      },
+      {
+        path: '/menuManage',
+        name: 'menuManage',
+        meta: {
+          icon: 'ios-archive',
+          title: '菜单管理'
+          // hideInMenu: true
+        },
+        // component: () => import('@/view/join-page.vue')
+        component: () => import('@/view/operationsManage/menuManage/menuManage.vue')
+      },
+      {
+        path: '/addMenu',
+        name: 'addMenu',
+        meta: {
+          icon: 'ios-archive',
+          title: '新建菜单',
+          hideInMenu: true
+        },
+        // component: () => import('@/view/join-page.vue')
+        component: () => import('@/view/operationsManage/menuManage/addMenu.vue')
+      },
+      {
+        path: '/resourceManage',
+        name: 'resourceManage',
+        meta: {
+          icon: 'ios-archive',
+          title: '资源管理'
+        },
+        // component: () => import('@/view/join-page.vue')
+        component: () => import('@/view/operationsManage/resourceManage/resourceManage.vue')
+      },
+      {
+        path: '/addResource',
+        name: 'addResource',
+        meta: {
+          icon: 'ios-archive',
+          title: '新建资源',
+          hideInMenu: true
+        },
+        // component: () => import('@/view/join-page.vue')
+        component: () => import('@/view/operationsManage/resourceManage/addResource.vue')
+      },
+      {
+        path: '/splashManage',
+        name: 'splashManage',
+        meta: {
+          icon: 'ios-archive',
+          title: '新建资源'
+          // hideInMenu: true
+        },
+        // component: () => import('@/view/join-page.vue')
+        component: () => import('@/view/operationsManage/resourceManage/splashManage.vue')
+      }
+    ]
+  },
+  {
+    path: '/queryLog',
+    name: 'queryLog',
+    meta: {
+      icon: 'ios-search',
+      title: '数据查询',
+      access: ['root']
+    },
+    component: Main,
+    children: [
+      {
+        path: '/behaviorLog',
+        name: 'behaviorLog',
+        meta: {
+          icon: 'ios-hand-outline',
+          title: '行为日志'
+        },
+        component: () => import('@/view/queryLog/behaviorLog/behaviorLog.vue')
+      },
+      {
+        path: '/exceptionLog',
+        name: 'exceptionLog',
+        meta: {
+          icon: 'md-alert',
+          title: '异常日志'
+        },
+        component: () => import('@/view/queryLog/exceptionLog/exceptionLog.vue')
+      },
+      {
+        path: '/smsMessageLog',
+        name: 'smsMessageLog',
+        meta: {
+          icon: 'ios-chatboxes',
+          title: '短信日志'
+        },
+        component: () => import('@/view/queryLog/smsMessageLog/smsMessageLog.vue')
+      },
+      {
+        path: '/emailMessageLog',
+        name: 'emailMessageLog',
+        meta: {
+          icon: 'md-mail',
+          title: '邮件日志'
+        },
+        component: () => import('@/view/queryLog/emailMessageLog/emailMessageLog.vue')
       }
     ]
   },
@@ -103,7 +314,8 @@ export default [
     name: 'components',
     meta: {
       icon: 'logo-buffer',
-      title: '组件'
+      title: '组件',
+      access: ['root']
     },
     component: Main,
     children: [
@@ -222,7 +434,8 @@ export default [
     name: 'update',
     meta: {
       icon: 'md-cloud-upload',
-      title: '数据上传'
+      title: '数据上传',
+      access: ['user']
     },
     component: Main,
     children: [
@@ -251,7 +464,8 @@ export default [
     name: 'excel',
     meta: {
       icon: 'ios-stats',
-      title: 'EXCEL导入导出'
+      title: 'EXCEL导入导出',
+      access: ['user']
     },
     component: Main,
     children: [
@@ -279,7 +493,8 @@ export default [
     path: '/tools_methods',
     name: 'tools_methods',
     meta: {
-      hideInBread: true
+      hideInBread: true,
+      access: ['user']
     },
     component: Main,
     children: [
@@ -299,7 +514,8 @@ export default [
     path: '/i18n',
     name: 'i18n',
     meta: {
-      hideInBread: true
+      hideInBread: true,
+      access: ['user']
     },
     component: Main,
     children: [
@@ -318,7 +534,8 @@ export default [
     path: '/error_store',
     name: 'error_store',
     meta: {
-      hideInBread: true
+      hideInBread: true,
+      access: ['user']
     },
     component: Main,
     children: [
@@ -357,7 +574,8 @@ export default [
     path: '/directive',
     name: 'directive',
     meta: {
-      hideInBread: true
+      hideInBread: true,
+      access: ['user']
     },
     component: Main,
     children: [
@@ -377,7 +595,8 @@ export default [
     name: 'multilevel',
     meta: {
       icon: 'md-menu',
-      title: '多级菜单'
+      title: '多级菜单',
+      access: ['user']
     },
     component: Main,
     children: [
@@ -394,7 +613,7 @@ export default [
         path: 'level_2_2',
         name: 'level_2_2',
         meta: {
-          access: ['super_admin'],
+          access: ['root'],
           icon: 'md-funnel',
           showAlways: true,
           title: '二级-2'

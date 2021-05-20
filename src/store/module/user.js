@@ -6,10 +6,10 @@ import {
   getContentByMsgId,
   hasRead,
   removeReaded,
-  restoreTrash,
-  getUnreadCount
+  restoreTrash
 } from '@/api/user'
 import { setToken, getToken } from '@/libs/util'
+import encrypt from '@/libs/RSAutil'
 
 export default {
   state: {
@@ -19,8 +19,8 @@ export default {
     token: getToken(),
     access: '',
     hasGetInfo: false,
-    unreadCount: 0,
-    messageUnreadList: [],
+    unreadCount: 0, // 消息数量
+    messageUnreadList: [], // 消息
     messageReadedList: [],
     messageTrashList: [],
     messageContentStore: {}
@@ -76,13 +76,15 @@ export default {
     // 登录
     handleLogin ({ commit }, { userName, password }) {
       userName = userName.trim()
+      password = encrypt(password)
+      // console.log('password-->' + password)
       return new Promise((resolve, reject) => {
         login({
           userName,
           password
         }).then(res => {
           const data = res.data
-          commit('setToken', data.token)
+          commit('setToken', data.data)
           resolve()
         }).catch(err => {
           reject(err)
@@ -110,10 +112,11 @@ export default {
       return new Promise((resolve, reject) => {
         try {
           getUserInfo(state.token).then(res => {
-            const data = res.data
-            commit('setAvatar', data.avatar)
-            commit('setUserName', data.name)
-            commit('setUserId', data.user_id)
+            const data = res.data.data
+            console.log(data)
+            commit('setAvatar', data.headImg)
+            commit('setUserName', data.nickName)
+            commit('setUserId', data.userId)
             commit('setAccess', data.access)
             commit('setHasGetInfo', true)
             resolve(data)
@@ -127,10 +130,11 @@ export default {
     },
     // 此方法用来获取未读消息条数，接口只返回数值，不返回消息列表
     getUnreadMessageCount ({ state, commit }) {
-      getUnreadCount().then(res => {
-        const { data } = res
-        commit('setMessageCount', data)
-      })
+      // getUnreadCount().then(res => {
+      //   const { data } = res
+      //   commit('setMessageCount', data)
+      // })
+      commit('setMessageCount', 99)
     },
     // 获取消息列表，其中包含未读、已读、回收站三个列表
     getMessageList ({ state, commit }) {
