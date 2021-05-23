@@ -1,2 +1,2 @@
-# adamin
-adamin
+# admin
+admin
