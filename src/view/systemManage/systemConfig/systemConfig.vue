@@ -1,16 +1,19 @@
 <template>
   <div class="user-content">
-    <div class="content-button">
-      <Input v-model.trim="confName" placeholder="参数名称"/>
-      <Input v-model.trim="confKey" placeholder="参数键名"/>
-      <Button type="primary" icon="md-search" @click="search()">查询</Button>
-      <Button type="primary" icon="md-refresh" @click="reset()">重置</Button>
+    <h1 style="margin:10px 10px 10px 10px">账户管理-角色管理</h1>
+    <div class="content-button" >
+      <span style="padding:10px">角色名称</span>
+      <Input v-model.trim="confName" />
+      <span style="padding:10px">角色code</span>
+      <Input v-model.trim="confKey" />
+      <Button type="primary" icon="md-search" @click="search()" style="margin:0 10px 0 20px">查询</Button>
+      <!-- <Button type="primary" icon="md-refresh" @click="reset()">重置</Button> -->
       <Button type="primary" icon="md-add" @click="addSetting()">新增配置</Button>
     </div>
     <Table highlight-row stripe :columns="columns" :data="confData" style="margin-top: 5px">
        <template slot-scope="{ row, index }" slot="action">
           <div>
-            <Button type="primary" size="small" style="margin-right: 5px" @click="edit(index)">修改</Button>
+            <Button type="primary" size="small" style="margin-right: 5px" @click="edit(index)">编辑</Button>
             <Button type="error" size="small" style="margin-right: 5px" @click="del(index)">删除</Button>
           </div>
         </template>
@@ -18,22 +21,29 @@
      <Page :total='total' :page-size='pageSize' :show-total="true" show-sizer style="text-align: center;margin-top: 5px"/>
      <Modal v-model.trim="modalAddOrUpdate" width="600" :mask-closable="false" :closable="false" v-bind:title="detailTitle">
       <Form ref="formInline" :model="formInline" :rules="ruleInline" inline>
-        <FormItem label="参数名称" prop="confName" style="width:270px;">
-          <Input placeholder="请输入参数名称" v-model.trim="formInline.confName"/>
+        <FormItem label="角色名称" prop="confName" style="width:270px;">
+          <Input v-model.trim="formInline.confName"/>
         </FormItem>
-        <FormItem label="参数键名" prop="confKey" style="width:270px;">
-          <Input placeholder="请输入参数键名" v-model.trim="formInline.confKey"/>
+        <FormItem label="角色code" prop="confKey" style="width:270px;">
+          <Input  v-model.trim="formInline.confKey"/>
         </FormItem>
-        <FormItem label="参数键值" prop="confValue" style="width:100%;">
-          <Input v-model.trim="formInline.confValue" type="textarea" :rows="8" :autosize="{minRows: 8,maxRows: 10}" placeholder="请输入参数键值"/>
-        </FormItem>
-        <FormItem label="配置描述" prop="confDescribtion" style="width:100%;">
-          <Input v-model.trim="formInline.confDescribtion" type="textarea" :rows="3" :autosize="{minRows: 3,maxRows: 6}" placeholder="请输入配置描述"/>
+        <FormItem>
+<div style="width:300px">
+   <a-tree-select
+    v-model="value"
+    style="width: 100%"
+    :tree-data="treeData"
+    tree-checkable
+    :show-checked-strategy="SHOW_PARENT"
+    search-placeholder="Please select"
+  />
+</div>
+
         </FormItem>
       </Form>
       <div slot="footer">
-        <Button type="primary" ghost size="large" @click="cancelAddOrUpdate('formInline')">取消</Button>
-        <Button type="primary" size="large" @click="handleSubmitAddOrUpdate('formInline')">确定</Button>
+        <Button type="primary" ghost size="large" @click="cancelAddOrUpdate('formInline')">返回</Button>
+        <Button type="primary" size="large" @click="handleSubmitAddOrUpdate('formInline')">保存</Button>
       </div>
      </Modal>
     <Modal v-model.trim="modalDelete" width="450" title="删除参数配置提示">
@@ -50,6 +60,40 @@
 
 <script>
 import { confPageList, confDelete, conf } from '@/api/data'
+import { TreeSelect } from 'ant-design-vue'
+const SHOW_PARENT = TreeSelect.SHOW_PARENT
+const treeData = [
+  {
+    title: '账号管理',
+    value: '0-0',
+    key: '0-0',
+    children: [
+      {
+        title: '角色管理',
+        value: '0-0-0',
+        key: '0-0-0',
+        children: [
+          {
+            title: '添加',
+            value: '0-0-0',
+            key: '0-0-0'
+          },
+          {
+            title: '编辑',
+            value: '0-0-0',
+            key: '0-0-0'
+          }
+        ]
+      },
+      {
+        title: '权限管理',
+        value: '0-0-0',
+        key: '0-0-0'
+      }
+    ]
+  }
+
+]
 export default {
   data () {
     function getByteLen (val) {
@@ -99,6 +143,9 @@ export default {
       }
     }
     return {
+      value: ['0-0-0'],
+      treeData,
+      SHOW_PARENT,
       total: 0, // 总数
       pageNum: 1, // 第几页
       pageSize: 30, // 每页几条数据
@@ -129,61 +176,55 @@ export default {
         ]
       },
       confData: [ // 参数配置数据
-
+        { confName: 'jack', confKey: '29' }
       ],
       columns: [
         {
-          title: '参数名称',
+          title: '角色名称',
           key: 'confName',
           tooltip: true,
           width: 300,
           align: 'center'
         },
         {
-          title: '参数键名',
+          title: '角色code',
           key: 'confKey',
           width: 300,
           align: 'center'
         },
-        {
-          title: '参数键值',
-          key: 'confValue',
-          align: 'center',
-          render: (h, params) => {
-            return h('div', [
-              h('span', {
-                style: {
-                  display: 'inline-block',
-                  width: '100%',
-                  overflow: 'hidden',
-                  textOverflow: 'ellipsis',
-                  whiteSpace: 'nowrap'
-                },
-                domProps: {
-                  title: params.row.confValue
-                },
-                on: {
-                  click: () => {
-                    // 识别逗号换行
-                    var text = params.row.confValue
-                    var reg = /[,，]/g
-                    text = text.replace(reg, ',<br>')
-                    this.$Modal.info({
-                      title: '参数键值',
-                      content: text
-                    })
-                  }
-                }
-              }, params.row.confValue)
-            ])
-          }
-        },
-        {
-          title: '配置描述',
-          key: 'confDescribtion',
-          width: 300,
-          align: 'center'
-        },
+        // {
+        //   title: '参数键值',
+        //   key: 'confValue',
+        //   align: 'center',
+        //   render: (h, params) => {
+        //     return h('div', [
+        //       h('span', {
+        //         style: {
+        //           display: 'inline-block',
+        //           width: '100%',
+        //           overflow: 'hidden',
+        //           textOverflow: 'ellipsis',
+        //           whiteSpace: 'nowrap'
+        //         },
+        //         domProps: {
+        //           title: params.row.confValue
+        //         },
+        //         on: {
+        //           click: () => {
+        //             // 识别逗号换行
+        //             var text = params.row.confValue
+        //             var reg = /[,，]/g
+        //             text = text.replace(reg, ',<br>')
+        //             this.$Modal.info({
+        //               title: '参数键值',
+        //               content: text
+        //             })
+        //           }
+        //         }
+        //       }, params.row.confValue)
+        //     ])
+        //   }
+        // },
         {
           title: '操作',
           slot: 'action',
@@ -328,6 +369,7 @@ export default {
 .user-content{
   .content-button {
     padding: 5px;
+    display: inline;
     .ivu-select-single {
       width: 150px;
     }

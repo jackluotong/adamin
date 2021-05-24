@@ -1,66 +1,51 @@
 <template>
   <div class="user-content">
-    <div class="content-button">
-      <Input v-model.trim="userName" placeholder="登录账号"/>
-      <Input v-model.trim="nickName" placeholder="用户名"/>
-      <Button type="primary" icon="md-search" @click="search()">查询</Button>
-      <Button type="primary" icon="md-refresh" @click="reset()">重置</Button>
-      <Button type="primary" icon="md-add" @click="addSetting()">新增用户</Button>
+    <h1 style="margin:10px 10px 10px 10px">账户管理-用户管理</h1>
+    <div class="content-button" >
+      <span style="padding:10px">用户code</span>
+      <Input v-model.trim="confKey" />
+      <Button type="primary" icon="md-search" @click="search()" style="margin:0 10px 0 20px">查询</Button>
     </div>
-    <Table highlight-row stripe :columns="columns" :data="userInfoAdminData" style="margin-top: 5px">
+    <Table highlight-row stripe :columns="columns" :data="confData" style="margin-top: 5px">
        <template slot-scope="{ row, index }" slot="action">
           <div>
-            <Button type="primary" size="small" style="margin-right: 5px" @click="edit(index)">修改</Button>
+            <Button type="primary" size="small" style="margin-right: 5px" @click="edit(index)">编辑</Button>
             <Button type="error" size="small" style="margin-right: 5px" @click="del(index)">删除</Button>
           </div>
         </template>
      </Table>
-     <Page @on-change="changePage" @on-page-size-change="ageSizeChange" :total='total' :page-size='pageSize' :show-total="true" show-sizer style="text-align: center;margin-top: 5px"/>
+     <Page :total='total' :page-size='pageSize' :show-total="true" show-sizer style="text-align: center;margin-top: 5px"/>
      <Modal v-model.trim="modalAddOrUpdate" width="600" :mask-closable="false" :closable="false" v-bind:title="detailTitle">
-      <Form ref="formInline" :model="formInline" :rules="ruleInline" :label-width="100" style="margin-left:20%;">
-        <FormItem label="登录账号" prop="userName" style="width:270px;">
-          <Input placeholder="请输入登录账号" v-model.trim="formInline.userName"/>
+      <Form ref="formInline" :model="formInline" :rules="ruleInline" inline>
+        <FormItem label="用户code" prop="confName" style="width:270px;">
+            <span>test</span>
+          <!-- <Input v-model.trim="formInline.confName"/> -->
         </FormItem>
-        <FormItem label="用户名" prop="nickName" style="width:270px;">
-          <Input placeholder="请输入用户名" v-model.trim="formInline.nickName"/>
-        </FormItem>
-        <FormItem label="用户类型" prop="access" style="width:270px;">
-          <CheckboxGroup v-model.trim="formInline.access">
-            <Checkbox label="root">Root</Checkbox>
-            <Checkbox label="user">User</Checkbox>
-          </CheckboxGroup>
-        </FormItem>
-        <FormItem label="性别" prop="gender" style="width:270px;">
-          <RadioGroup v-model.trim="formInline.gender">
-              <Radio label="0" >男</Radio>
-              <Radio label="1" >女</Radio>
-          </RadioGroup>
-        </FormItem>
-        <Row>
-        <FormItem label="手机号" prop="mobileNum" style="width:270px;">
-          <Input placeholder="请输入手机号" v-model.trim="formInline.mobileNum"/>
-        </FormItem>
-        </Row>
-        <FormItem label="邮箱" prop="email" style="width:270px;">
-          <Input v-model.trim="formInline.email" placeholder="请输入邮箱"/>
-        </FormItem>
-        <FormItem label="头像：" prop='headImg'>
-          <Upload action="//jsonplaceholder.typicode.com/posts/">
-            <Button icon="ios-cloud-upload-outline">点击上传</Button>
-          </Upload>
+        <FormItem>
+        <Checkbox-group v-model="social">
+        <Checkbox label="管理员">
+            <Icon type="social-twitter"></Icon>
+            <span>管理员</span>
+        </Checkbox>
+        <Checkbox label="查询员">
+            <Icon type="social-facebook"></Icon>
+            <span>查询员</span>
+        </Checkbox>
+        <Checkbox label="服务管理员">
+            <Icon type="social-github"></Icon>
+            <span>服务管理员</span>
+        </Checkbox>
+       </Checkbox-group>
         </FormItem>
       </Form>
       <div slot="footer">
-        <Button type="primary" ghost size="large" @click="cancelAddOrUpdate('formInline')">取消</Button>
-        <Button type="primary" size="large" @click="handleSubmitAddOrUpdate('formInline')">确定</Button>
+        <Button type="primary" ghost size="large" @click="cancelAddOrUpdate('formInline')">返回</Button>
+        <Button type="primary" size="large" @click="handleSubmitAddOrUpdate('formInline')">保存</Button>
       </div>
      </Modal>
-    <Modal title="头像预览" footer-hide v-model.trim="visible">
-      <img :src="visibleSrc" v-if="visible" style="width: 100%;">
-    </Modal>
-    <Modal v-model.trim="modalDelete" width="450" title="删除用户信息提示">
+    <Modal v-model.trim="modalDelete" width="450" title="删除参数配置提示">
       <div >
-        <p>确定删除该用户吗？</p>
+        <p>确定删除该参数配置吗？</p>
       </div>
       <div slot="footer">
           <Button type="text" @click="cancelDelete" size="large">取消</Button>
@@ -71,7 +56,7 @@
 </template>
 
 <script>
-import { userInfoAdminPageList, userInfoAdminDelete, userInfoAdmin, userInfoAdminEnable, userInfoAdminDisable } from '@/api/data'
+import { confPageList, confDelete, conf } from '@/api/data'
 export default {
   data () {
     function getByteLen (val) {
@@ -86,180 +71,121 @@ export default {
       }
       return len
     }
-    const validateUserName = function (rule, value, callback) {
+    const validateConfName = function (rule, value, callback) {
       if (!value) {
-        callback(new Error('请输入登录账号'))
+        callback(new Error('请输入参数名称'))
       } else if (getByteLen(value) > 128) {
         callback(new Error('字符串长度不能超过128'))
       } else {
         callback()
       }
     }
-    const validateNickName = (rule, value, callback) => {
+    const validateConfKey = (rule, value, callback) => {
       if (!value) {
-        callback(new Error('请输入用户名'))
+        callback(new Error('请输入参数键名'))
       } else if (getByteLen(value) > 64) {
         callback(new Error('字符串长度不能超过64'))
       } else {
         callback()
       }
     }
-    const validateAccess = (rule, value, callback) => {
-      let arr = this.formInline.access
-      if (!arr || arr.length === 0) {
-        callback(new Error('请至少勾选一个用户类型'))
+    const validateConfValue = (rule, value, callback) => {
+      if (!value) {
+        callback(new Error('请输入参数键名'))
+      } else {
+        callback()
+      }
+    }
+    const validateConfDescribtion = (rule, value, callback) => {
+      if (!value) {
+        callback(new Error('请输入配置描述'))
+      } else if (getByteLen(value) > 256) {
+        callback(new Error('字符串长度不能超过256'))
       } else {
         callback()
       }
     }
     return {
+      social: ['管理员', '查询员', '服务管理员'],
       total: 0, // 总数
       pageNum: 1, // 第几页
       pageSize: 30, // 每页几条数据
-      userName: '', // 登录账号
-      nickName: '', // 用户名
-      modalAddOrUpdate: false, // 是否显示弹窗
-      modalDelete: false, // 是否显示删除提示弹窗
-      visible: false, // 图片预览弹框控制
-      isValid: '', // 开启/暂停
+      confName: '', // 参数名称
+      confKey: '', // 参数键名
+      modalAddOrUpdate: false, // 是否显示新增弹窗
       detailTitle: '', // 表单标题
       showType: '', // 表单展示类型（edit、add）
+      modalDelete: false, // 是否显示删除提示弹窗
       formInline: { // 实体
-        userName: '', // 登录账号
-        nickName: '', // 用户名
-        access: ['root'], // 用户类型
-        gender: '0', // 性别
-        mobileNum: '', // 手机号
-        email: '', // 邮箱
-        headImg: '' // 头像
-      },
-      startOrSuspendSession: {
-        isValid: '',
-        id: ''
+        confName: '', // 参数名称
+        confKey: '', // 参数键名
+        confValue: '', // 参数键值
+        confDescribtion: '' // 配置描述
       },
       ruleInline: {
-        userName: [
-          { required: true, validator: validateUserName, trigger: 'blur' }
+        confName: [
+          { required: true, validator: validateConfName, trigger: 'blur' }
         ],
-        nickName: [
-          { required: true, validator: validateNickName, trigger: 'blur' }
+        confKey: [
+          { required: true, validator: validateConfKey, trigger: 'blur' }
         ],
-        access: [
-          { required: true, validator: validateAccess, trigger: 'change' }
+        confValue: [
+          { required: true, validator: validateConfValue, trigger: 'blur' }
+        ],
+        confDescribtion: [
+          { required: true, validator: validateConfDescribtion, trigger: 'blur' }
         ]
       },
-      userInfoAdminData: [ // 参数配置数据
-
+      confData: [ // 参数配置数据
+        { confName: 'jack', confKey: '29' }
       ],
       columns: [
         {
-          title: '登录账号',
-          key: 'userName',
+          title: '角色名称',
+          key: 'confName',
           tooltip: true,
-          width: 200,
-          align: 'center'
-        },
-        {
-          title: '用户名',
-          key: 'nickName',
-          width: 200,
-          align: 'center'
-        },
-        {
-          title: '用户类型',
-          key: 'access',
-          width: 200,
-          align: 'center'
-        },
-        {
-          title: '性别',
-          key: 'gender',
-          width: 100,
-          align: 'center',
-          render: (h, params) => {
-            const row = params.row.gender
-            let text
-            switch (row) {
-              case '0':
-                text = '男'
-                break
-              case '1':
-                text = '女'
-                break
-            }
-            return h('Span', {
-              props: {
-                type: 'dot'
-              }
-            }, text)
-          }
-        },
-        {
-          title: '手机号',
-          key: 'mobileNum',
-          width: 200,
-          align: 'center'
-        },
-        {
-          title: '邮箱',
-          key: 'email',
           width: 300,
           align: 'center'
         },
         {
-          title: '头像',
-          key: 'headImg',
-          width: 100,
-          align: 'center',
-          render: (h, params) => {
-            let headImg = params.row.headImg
-            if (!headImg) {
-              headImg = '../../assets/index/noQR.jpg'
-            }
-            return h('div', [
-              h('img', {
-                attrs: {
-                  src: headImg
-                },
-                style: {
-                  width: '33px',
-                  height: '33px'
-                },
-                on: {
-                  click: () => {
-                    this.visibleSrc = headImg
-                    this.visible = true
-                  }
-                }
-              })
-            ])
-          }
+          title: '角色code',
+          key: 'confKey',
+          width: 300,
+          align: 'center'
         },
-        {
-          title: '状态(停用/启用)',
-          key: 'isValid',
-          align: 'center',
-          width: 140,
-          render: (h, params) => { // 重点
-            return h('i-switch', { // 按钮的话是：button自行替换
-              props: { // 这里可以设置它的属性
-                value: params.row.isValid === '1' // 设置它的值比如：true或false
-                // disabled: !params.row.online 设置是否可以操作，变灰
-              },
-              on: { // 操作事件
-                'on-change': (value) => { // 触发事件是on-change,用双引号括起来，
-                  if (value === true) {
-                    this.startOrSuspendSession.isValid = '1'
-                  } else {
-                    this.startOrSuspendSession.isValid = '0'
-                  }
-                  this.startOrSuspendSession.id = params.row.id
-                  this.switch()
-                }
-              }
-            })
-          }
-        },
+        // {
+        //   title: '参数键值',
+        //   key: 'confValue',
+        //   align: 'center',
+        //   render: (h, params) => {
+        //     return h('div', [
+        //       h('span', {
+        //         style: {
+        //           display: 'inline-block',
+        //           width: '100%',
+        //           overflow: 'hidden',
+        //           textOverflow: 'ellipsis',
+        //           whiteSpace: 'nowrap'
+        //         },
+        //         domProps: {
+        //           title: params.row.confValue
+        //         },
+        //         on: {
+        //           click: () => {
+        //             // 识别逗号换行
+        //             var text = params.row.confValue
+        //             var reg = /[,，]/g
+        //             text = text.replace(reg, ',<br>')
+        //             this.$Modal.info({
+        //               title: '参数键值',
+        //               content: text
+        //             })
+        //           }
+        //         }
+        //       }, params.row.confValue)
+        //     ])
+        //   }
+        // },
         {
           title: '操作',
           slot: 'action',
@@ -272,77 +198,74 @@ export default {
   methods: {
     search () { // 点击查询按钮
       const date = {
-        'userName': this.userName,
-        'nickName': this.nickName,
+        'confName': this.confName,
+        'confKey': this.confKey,
         'pageNum': this.pageNum,
         'pageSize': this.pageSize
       }
-      userInfoAdminPageList(date).then(res => {
+      confPageList(date).then(res => {
         // this.$Message['success']({
         //   background: true,
         //   content: res.data.data
         // })
-        this.userInfoAdminData = res.data.data.resultList
+        this.confData = res.data.data.resultList
         this.total = res.data.data.totalAmount
       }).catch(err => {
         console.log(err)
       })
     },
     reset () { // 点击重置按钮
-      this.userName = ''
-      this.nickName = ''
+      this.confName = ''
+      this.confKey = ''
+      this.confValue = ''
+      this.confDescribtion = ''
       this.pageNum = 1
-      this.userInfoAdminPageList()
+      this.confPageList()
     },
     addSetting () { // 点击新增按钮
       this.showType = 'add'
-      this.detailTitle = '新增用户信息'
+      this.detailTitle = '新增全局配置信息'
       this.modalAddOrUpdate = true
     },
-    handleSubmitAddOrUpdate (index) { // 点击提交新增或更新按钮
+    handleSubmitAddOrUpdate (index) { // 点击提交新增按钮
+      console.log(index)
       this.$refs[index].validate((valid) => {
+        console.log(valid)
         if (valid) {
           if (this.showType === 'add') {
-            this.access = JSON.stringify(this.formInline.access, null)
             const date = {
-              'userName': this.formInline.userName,
-              'nickName': this.formInline.nickName,
-              'access': this.access,
-              'gender': this.formInline.gender,
-              'mobileNum': this.formInline.mobileNum,
-              'email': this.formInline.email,
-              'headImg': 'https://wsmblobdev01.blob.core.chinacloudapi.cn/zejia/avatar.png'
+              'confName': this.formInline.confName,
+              'confKey': this.formInline.confKey,
+              'confValue': this.formInline.confValue,
+              'confDescribtion': this.formInline.confDescribtion
             }
-            userInfoAdmin(date).then(res => {
+            conf(date).then(res => {
               this.$Message['success']({
                 background: true,
                 content: res.data.message
               })
               this.modalAddOrUpdate = false
-              this.userInfoAdminPageList()
+              this.confPageList()
               this.$refs[index].resetFields()
             }).catch(err => {
               console.log(err)
             })
           } else if (this.showType === 'edit') {
-            this.access = JSON.stringify(this.formInline.access, null)
             const date = {
               'id': this.id,
-              'userName': this.formInline.userName,
-              'nickName': this.formInline.nickName,
-              'access': this.access,
-              'gender': this.formInline.gender,
-              'mobileNum': this.formInline.mobileNum,
-              'email': this.formInline.email
+              'confName': this.formInline.confName,
+              'confKey': this.formInline.confKey,
+              'confValue': this.formInline.confValue,
+              'confDescribtion': this.formInline.confDescribtion
             }
-            userInfoAdmin(date).then(res => {
+            conf(date).then(res => {
               this.$Message['success']({
                 background: true,
                 content: res.data.message
               })
+              this.$refs['formInline'].resetFields()
               this.modalAddOrUpdate = false
-              this.userInfoAdminPageList()
-              this.$refs[index].resetFields()
+              this.confPageList()
             }).catch(err => {
               console.log(err)
             })
@@ -357,80 +280,49 @@ export default {
       this.modalAddOrUpdate = false
     },
     edit (index) { // 点击修改按钮
-      this.id = this.userInfoAdminData[index].id
-      this.formInline.userName = this.userInfoAdminData[index].userName
-      this.formInline.nickName = this.userInfoAdminData[index].nickName
-      this.formInline.access = JSON.parse(this.userInfoAdminData[index].access)
-      this.formInline.gender = this.userInfoAdminData[index].gender
-      this.formInline.mobileNum = this.userInfoAdminData[index].mobileNum
-      this.formInline.email = this.userInfoAdminData[index].email
-      this.formInline.headImg = this.userInfoAdminData[index].headImg
+      this.id = this.confData[index].id
+      this.formInline.confName = this.confData[index].confName
+      this.formInline.confKey = this.confData[index].confKey
+      this.formInline.confValue = this.confData[index].confValue
+      this.formInline.confDescribtion = this.confData[index].confDescribtion
       this.showType = 'edit'
-      this.detailTitle = '修改用户信息'
-      this.modalAddOrUpdate = true
+      this.detailTitle = '账户管理-用户管理'
+      this.modalAddOrUpdate = true // 用于展示model框
     },
     del (index) { // 提交删除按钮
       this.modalDelete = true
-      this.id = this.userInfoAdminData[index].id
+      this.id = this.confData[index].id
     },
     cancelDelete () { // 取消删除
       this.modalDelete = false
     },
     handleSubmitDelete () { // 确认删除
-      userInfoAdminDelete(this.id).then(res => {
+      confDelete(this.id).then(res => {
         this.$Message['success']({
           background: true,
           content: res.data.message
         })
         this.modalDelete = false
-        this.userInfoAdminPageList()
+        this.confPageList()
       }).catch(err => {
         console.log(err)
       })
     },
-    userInfoAdminPageList () { // 根据条件分页查询全部配置
+    confPageList () { // 根据条件分页查询全部配置
       const date = {
         'pageNum': this.pageNum,
         'pageSize': this.pageSize
       }
-      userInfoAdminPageList(date).then(res => {
-        this.userInfoAdminData = res.data.data.resultList
+      confPageList(date).then(res => {
+        this.confData = res.data.data.resultList
         this.total = res.data.data.totalAmount
       }).catch(err => {
         console.log(err)
       })
-    },
-    changePage (date) {
-      this.pageNum = date
-      this.userInfoAdminPageList()
-    },
-    ageSizeChange (date) {
-      this.pageNum = 1
-      this.pageSize = date
-      this.userInfoAdminPageList()
-    },
-    switch () {
-      // 打开是true
-      this.updateFeedbackMessage()
-    },
-    updateFeedbackMessage () { // 点击更新状态按钮
-      if (this.startOrSuspendSession.isValid === '1') { // 置为生效
-        userInfoAdminEnable(this.startOrSuspendSession.id).then(res => {
-          this.userInfoAdminPageList()
-        }).catch(err => {
-          console.log(err)
-        })
-      } else { // 置为失效
-        userInfoAdminDisable(this.startOrSuspendSession.id).then(res => {
-          this.userInfoAdminPageList()
-        }).catch(err => {
-          console.log(err)
-        })
-      }
     }
   },
   created () {
-    this.userInfoAdminPageList()
+    this.confPageList()
   }
 }
 </script>
@@ -438,6 +330,7 @@ export default {
 .user-content{
   .content-button {
     padding: 5px;
+    display: inline;
     .ivu-select-single {
       width: 150px;
     }
@@ -453,5 +346,12 @@ export default {
       border-color: #2d8cf0;
     }
   }
+}
+.ivu-modal-confirm-body {
+  padding-left: 42px;
+  font-size: 14px;
+  color: #515a6e;
+  position: relative;
+  word-break: break-all;
 }
 </style>

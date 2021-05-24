@@ -8,13 +8,17 @@ import iView from 'iview'
 import i18n from '@/locale'
 import config from '@/config'
 import importDirective from '@/directive'
-import { directive as clickOutside } from 'v-click-outside-x'
+import {
+  directive as clickOutside
+} from 'v-click-outside-x'
 import installPlugin from '@/plugin'
 import './index.less'
 import '@/assets/icons/iconfont.css'
 import TreeTable from 'tree-table-vue'
 import VOrgTree from 'v-org-tree'
 import 'v-org-tree/dist/v-org-tree.css'
+import 'ant-design-vue/dist/antd.css'
+import Antd from 'ant-design-vue'
 // 实际打包时应该不引入mock
 /* eslint-disable */
 // if (process.env.NODE_ENV !== 'production') require('@/mock')
@@ -23,11 +27,12 @@ import 'v-org-tree/dist/v-org-tree.css'
 Vue.use(iView, {
   i18n: (key, value) => i18n.t(key, value)
 })
+Vue.use(Antd)
 Vue.use(TreeTable)
 Vue.use(VOrgTree)
 Vue.prototype.$Message.config({
   top: 70,
-  duration:3
+  duration: 3
 });
 /**
  * @description 注册admin内置插件
