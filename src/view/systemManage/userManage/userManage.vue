@@ -153,39 +153,6 @@ export default {
           width: 300,
           align: 'center'
         },
-        // {
-        //   title: '参数键值',
-        //   key: 'confValue',
-        //   align: 'center',
-        //   render: (h, params) => {
-        //     return h('div', [
-        //       h('span', {
-        //         style: {
-        //           display: 'inline-block',
-        //           width: '100%',
-        //           overflow: 'hidden',
-        //           textOverflow: 'ellipsis',
-        //           whiteSpace: 'nowrap'
-        //         },
-        //         domProps: {
-        //           title: params.row.confValue
-        //         },
-        //         on: {
-        //           click: () => {
-        //             // 识别逗号换行
-        //             var text = params.row.confValue
-        //             var reg = /[,，]/g
-        //             text = text.replace(reg, ',<br>')
-        //             this.$Modal.info({
-        //               title: '参数键值',
-        //               content: text
-        //             })
-        //           }
-        //         }
-        //       }, params.row.confValue)
-        //     ])
-        //   }
-        // },
         {
           title: '操作',
           slot: 'action',
