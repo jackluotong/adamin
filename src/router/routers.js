@@ -53,7 +53,7 @@ export default [{
   meta: {
     icon: 'ios-construct',
     title: '账户管理',
-    access: ['root']
+    access: ['user']
   },
   component: Main,
   children: [{
@@ -133,7 +133,7 @@ export default [{
   meta: {
     icon: 'ios-construct',
     title: ' 服务类型管理',
-    access: ['root']
+    access: ['user']
   },
   component: Main,
   children: [{
@@ -239,7 +239,7 @@ export default [{
   meta: {
     icon: 'ios-search',
     title: '第三方服务管理',
-    access: ['root']
+    access: ['user']
   },
   component: Main,
   children: [{
@@ -498,7 +498,7 @@ export default [{
     name: 'i18n_page',
     meta: {
       icon: 'md-planet',
-      title: 'i18n -                       {{ i18n_page }}'
+      title: 'i18n -{{ i18n_page }}'
     },
     component: () => import('@/view/i18n/i18n-page.vue')
   }]
@@ -664,9 +664,94 @@ export default [{
 
   /*
   新定义的路由配置
-
   */
+{
+  path: '/AccountManage',
+  name: 'AccountManage',
+  meta: {
+    icon: 'ios-construct',
+    title: '账户管理',
+    access: ['root']
+  },
+  component: Main,
+  children: [
 
+    {
+      path: '/RoleManage',
+      name: 'RoleManage',
+      meta: {
+        icon: 'ios-settings',
+        title: '角色管理'
+      },
+      component: () => import('@/view/newView/AccountManage/RoleManage')
+    },
+    {
+      path: '/PermissionManage',
+      name: 'PermissionManage',
+      meta: {
+        icon: 'ios-settings',
+        title: '权限管理'
+      },
+      component: () => import('@/view/newView/AccountManage/PermissionManage')
+    },
+    {
+      path: '/UserManage',
+      name: 'UserManage',
+      meta: {
+        icon: 'ios-settings',
+        title: '用户管理'
+      },
+      component: () => import('@/view/newView/AccountManage/UserManage')
+    }
+  ]
+},
+
+{
+  path: '/ServiceTypeManage',
+  name: 'ServiceTypeManage',
+  meta: {
+    icon: 'ios-construct',
+    title: ' 服务类型管理',
+    access: ['root']
+  },
+  component: Main,
+  children: [{
+    path: '/ServiceTypeManage',
+    name: 'ServiceTypeManage',
+    meta: {
+      icon: 'ios-folder-open-outline',
+      title: '服务类型管理'
+    },
+    component: () => import('@/view/newView/ServiceTypeManage/ServiceTypeManage')
+  }]
+},
+{
+  path: '/ThirdPartManage',
+  name: 'ThirdPartManage',
+  meta: {
+    icon: 'ios-search',
+    title: '第三方服务管理',
+    access: ['root']
+  },
+  component: Main,
+  children: [{
+    path: '/ThirdManufacturerManage',
+    name: 'ThirdManufacturerManage',
+    meta: {
+      icon: 'ios-hand-outline',
+      title: '第三方厂商管理 '
+    },
+    component: () => import('@/view/newView/ThirdPartManage/ThirdManufacturerManage')
+  }, {
+    path: '/ThirdServiceManage',
+    name: 'ThirdServiceManage',
+    meta: {
+      icon: 'md-alert',
+      title: '第三方服务管理'
+    },
+    component: () => import('@/view/newView/ThirdPartManage/ThirdServiceManage')
+  }]
+},
 {
   path: '/UseSystemManage',
   name: 'UseSystemManage',

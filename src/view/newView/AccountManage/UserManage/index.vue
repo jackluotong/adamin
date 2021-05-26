@@ -1,40 +1,45 @@
 <template>
   <div class="user-content">
-    <h1 style="margin:10px 10px 10px 10px">第三方服务管理-第三方厂商管理</h1>
+    <h1 style="margin:10px 10px 10px 10px">账户管理-用户管理</h1>
     <div class="content-button" >
-      <span style="padding:10px">厂商名称</span>
-      <Input v-model.trim="confName" />
-
+      <span style="padding:10px">用户code</span>
+      <Input v-model.trim="confKey" />
       <Button type="primary" icon="md-search" @click="search()" style="margin:0 10px 0 20px">查询</Button>
-      <Button type="primary" icon="md-add" @click="addSetting()">新增厂商</Button>
     </div>
     <Table highlight-row stripe :columns="columns" :data="confData" style="margin-top: 5px">
        <template slot-scope="{ row, index }" slot="action">
           <div>
-            <Button type="primary" size="small" style="margin-right: 5px" @click="editModule(index)">编辑模块</Button>
+            <Button type="primary" size="small" style="margin-right: 5px" @click="edit(index)">编辑</Button>
+            <Button type="error" size="small" style="margin-right: 5px" @click="del(index)">删除</Button>
           </div>
         </template>
      </Table>
      <Page :total='total' :page-size='pageSize' :show-total="true" show-sizer style="text-align: center;margin-top: 5px"/>
      <Modal v-model.trim="modalAddOrUpdate" width="600" :mask-closable="false" :closable="false" v-bind:title="detailTitle">
       <Form ref="formInline" :model="formInline" :rules="ruleInline" inline>
-        <FormItem label="服务模块" prop="confName" style="width:270px;">
-          <Input v-model.trim="formInline.confName"/>
+        <FormItem label="用户code" prop="confName" style="width:270px;">
+            <span>test</span>
+          <!-- <Input v-model.trim="formInline.confName"/> -->
+        </FormItem>
+        <FormItem>
+        <Checkbox-group v-model="social">
+        <Checkbox label="管理员">
+            <Icon type="social-twitter"></Icon>
+            <span>管理员</span>
+        </Checkbox>
+        <Checkbox label="查询员">
+            <Icon type="social-facebook"></Icon>
+            <span>查询员</span>
+        </Checkbox>
+        <Checkbox label="服务管理员">
+            <Icon type="social-github"></Icon>
+            <span>服务管理员</span>
+        </Checkbox>
+       </Checkbox-group>
         </FormItem>
       </Form>
       <div slot="footer">
-        <Button type="primary" size="large" @click="handleSubmitAddOrUpdate('formInline')">保存</Button>
         <Button type="primary" ghost size="large" @click="cancelAddOrUpdate('formInline')">返回</Button>
-      </div>
-     </Modal>
-    <Modal v-model.trim="modalAddOrUpdateType" width="600" :mask-closable="false" :closable="false" v-bind:title="detailTitle">
-      <Form ref="formInline" :model="formInline"  >
-          <FormItem label="厂商名称" prop="confName" style="width:270px;">
-                  <Input v-model.trim="formInline.confKey"/>
-          </FormItem>
-      </Form>
-      <div slot="footer">
-        <Button type="primary" ghost size="large" @click="cancelAddOrUpdateType('formInline')">返回</Button>
         <Button type="primary" size="large" @click="handleSubmitAddOrUpdate('formInline')">保存</Button>
       </div>
      </Modal>
@@ -52,7 +57,6 @@
 
 <script>
 import { confPageList, confDelete, conf } from '@/api/data'
-
 export default {
   data () {
     function getByteLen (val) {
@@ -102,23 +106,21 @@ export default {
       }
     }
     return {
-      out_arr: '',
-      inarr: '',
+      social: ['管理员', '查询员', '服务管理员'],
       total: 0, // 总数
       pageNum: 1, // 第几页
       pageSize: 30, // 每页几条数据
       confName: '', // 参数名称
       confKey: '', // 参数键名
-      confAddress: '', // 服务地址
       modalAddOrUpdate: false, // 是否显示新增弹窗
-      modalAddOrUpdateType: false,
       detailTitle: '', // 表单标题
       showType: '', // 表单展示类型（edit、add）
       modalDelete: false, // 是否显示删除提示弹窗
-      formInline: {
-        confName: '',
-        confKey: '',
-        confAddress: ''
+      formInline: { // 实体
+        confName: '', // 参数名称
+        confKey: '', // 参数键名
+        confValue: '', // 参数键值
+        confDescribtion: '' // 配置描述
       },
       ruleInline: {
         confName: [
@@ -135,14 +137,19 @@ export default {
         ]
       },
       confData: [ // 参数配置数据
-        { confName: 'OCR', confKey: '29', confAddress: 'SHANGHAI' },
-        { confName: '人脸识别', confKey: '30', confAddress: 'BEIJING' }
+        { confName: 'jack', confKey: '29' }
       ],
       columns: [
         {
-          title: '厂商名称',
+          title: '角色名称',
           key: 'confName',
           tooltip: true,
+          width: 300,
+          align: 'center'
+        },
+        {
+          title: '角色code',
+          key: 'confKey',
           width: 300,
           align: 'center'
         },
@@ -175,14 +182,16 @@ export default {
       })
     },
     reset () { // 点击重置按钮
-      this.confName = null
-      this.confKey = null
-      this.confAddress = null
+      this.confName = ''
+      this.confKey = ''
+      this.confValue = ''
+      this.confDescribtion = ''
+      this.pageNum = 1
+      this.confPageList()
     },
     addSetting () { // 点击新增按钮
-      this.reset()
       this.showType = 'add'
-      this.detailTitle = '新增厂商'
+      this.detailTitle = '新增全局配置信息'
       this.modalAddOrUpdate = true
     },
     handleSubmitAddOrUpdate (index) { // 点击提交新增按钮
@@ -237,15 +246,19 @@ export default {
       this.$refs[name].resetFields()
       this.modalAddOrUpdate = false
     },
-    cancelAddOrUpdateType () {
-      this.modalAddOrUpdateType = false
-    },
-    editModule (index) { // 点击修改按钮
+    edit (index) { // 点击修改按钮
       this.id = this.confData[index].id
       this.formInline.confName = this.confData[index].confName
+      this.formInline.confKey = this.confData[index].confKey
+      this.formInline.confValue = this.confData[index].confValue
+      this.formInline.confDescribtion = this.confData[index].confDescribtion
       this.showType = 'edit'
-      this.detailTitle = '编辑模块'
-      this.modalAddOrUpdate = true
+      this.detailTitle = '账户管理-用户管理'
+      this.modalAddOrUpdate = true // 用于展示model框
+    },
+    del (index) { // 提交删除按钮
+      this.modalDelete = true
+      this.id = this.confData[index].id
     },
     cancelDelete () { // 取消删除
       this.modalDelete = false
