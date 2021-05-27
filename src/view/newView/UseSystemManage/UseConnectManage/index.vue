@@ -1,83 +1,121 @@
 <template>
-  <div class="user-content">
-    <h1 style="margin:10px 10px 10px 10px">应用系统管理-应用系统管理</h1>
-    <div class="content-button">
-      <span style="padding:10px">应用名称</span>
-      <Input v-model.trim="useName" />
-      <span style="padding:10px">应用简称</span>
-      <Input v-model.trim="useCalled" />
-      <span style="padding:10px">服务模块</span>
-      <Select v-model.trim="formInline" style="width:200px" >
-            <Option selected>{{formInline.confName}}</Option>
-        </Select>
-      <Button type="primary" icon="md-search" @click="search()" style="margin:0 10px 0 20px">查询</Button>
-      <Button type="primary" icon="md-add" @click="addSetting()">应用注册</Button>
-      <Button type="primary" icon="md-add" @click="lookConfig()">查看AES配置</Button>
-    </div>
-    <Table highlight-row stripe :columns="columns" :data="confData" style="margin-top: 5px">
-      <template slot-scope="{ row, index }" slot="action">
-        <div>
-          <Button
-            type="primary"
-            size="small"
-            style="margin-right: 5px"
-            @click="edit(index)"
-          >编辑</Button>
+    <div class="user-content">
+        <h1 style="margin:10px 10px 10px 10px">应用系统管理-应用系统管理</h1>
+        <div class="content-button">
+            <span style="padding:10px">应用名称</span>
+            <Input v-model.trim="useName" />
+            <span style="padding:10px">应用简称</span>
+            <Input v-model.trim="useCalled" />
+            <span style="padding:10px">服务模块</span>
+            <Select v-model.trim="formInline" style="width:200px">
+                <Option selected>{{ formInline.confName }}</Option>
+            </Select>
+            <Button
+                type="primary"
+                icon="md-search"
+                @click="search()"
+                style="margin:0 10px 0 20px"
+                >查询</Button
+            >
+            <Button type="primary" icon="md-add" @click="addSetting()"
+                >服务关联</Button
+            >
         </div>
-      </template>
-    </Table>
-    <Page
-      :total="total"
-      :page-size="pageSize"
-      :show-total="true"
-      show-sizer
-      style="text-align: center;margin-top: 5px"
-    />
+        <Table
+            highlight-row
+            stripe
+            :columns="columns"
+            :data="confData"
+            style="margin-top: 5px"
+        >
+            <template slot-scope="{ row, index }" slot="action">
+                <div>
+                    <Button
+                        type="primary"
+                        size="small"
+                        style="margin-right: 5px"
+                        @click="edit(index)"
+                        >编辑</Button
+                    >
+                </div>
+            </template>
+        </Table>
+        <Page
+            :total="total"
+            :page-size="pageSize"
+            :show-total="true"
+            show-sizer
+            style="text-align: center;margin-top: 5px"
+        />
 
-    <Modal
-      v-model.trim="modalEdit"
-      width="600"
-      :mask-closable="false"
-      :closable="false"
-      v-bind:title="detailTitle"
-    >
-      <Form ref="formInline" :model="formInline">
-        <div style="display:inline-table">
-          <FormItem label="应用名称" prop="useName" style="width:270px;">
-              <Input v-model.trim="formInline.useName" style="width:auto"/>
-          </FormItem>
-        </div>
-        <FormItem label="应用简称" prop="useCalled" style="width:270px;">
-          <Input v-model.trim="formInline.useCalled" style="width:auto"/>
-        </FormItem>
-        <FormItem label="联系人手机" prop="contactPhone" style="width:270px;">
-          <Input v-model.trim="formInline.contactPhone" style="width:auto" />
-        </FormItem>
-        <FormItem label="联系人邮箱" prop="contactEmails" style="width:270px;">
-          <Input v-model.trim="formInline.contactEmails" style="width:auto"/>
-        </FormItem>
-         <FormItem label="AESKEY" prop="AESKEY" style="width:270px;">
-          <Input v-model.trim="formInline.AESKEY" style="width:auto"/>
-        </FormItem>
-        <FormItem label="AESLV" prop="AESLV" style="width:270px;">
-          <Input v-model.trim="formInline.AESLV" style="width:auto" />
-        </FormItem>
-      </Form>
-      <div slot="footer">
-        <Button type="primary" ghost size="large" @click="cancelAddOrUpdateType('formInline')">查询</Button>
-        <Button type="primary" size="large" @click="handleSubmitAddOrUpdate('formInline')">新增</Button>
-      </div>
-    </Modal>
-    <Modal v-model.trim="modalDelete" width="450" title="删除参数配置提示">
-      <div>
-        <p>确定删除该参数配置吗？</p>
-      </div>
-      <div slot="footer">
-        <Button type="text" @click="cancelDelete" size="large">取消</Button>
-        <Button type="primary" @click="handleSubmitDelete" size="large">确定</Button>
-      </div>
-    </Modal>
-  </div>
+        <Modal
+            v-model.trim="modalEdit"
+            width="600"
+            :mask-closable="false"
+            :closable="false"
+            v-bind:title="detailTitle"
+        >
+            <Form ref="formInline" :model="formInline">
+                <div style="display:inline-table">
+                    <FormItem
+                        label="应用名称"
+                        prop="useName"
+                        style="width:270px;"
+                    >
+                         <Select v-model.trim="formInline" style="width:200px">
+                            <Option selected>{{ formInline.useName }}</Option>
+                         </Select>
+                    </FormItem>
+                </div>
+                <FormItem
+                    label="应用简称"
+                    prop="useCalled"
+                    style="width:270px;"
+                >
+                    <Select v-model.trim="formInline" style="width:200px">
+                            <Option selected>{{ formInline.useCalled }}</Option>
+                    </Select>
+                </FormItem>
+                <FormItem
+                    label="服务模块"
+                    prop="confName"
+                    style="width:270px;"
+                >
+                    <Select v-model.trim="formInline" style="width:200px">
+                            <Option selected>{{ formInline.confName }}</Option>
+                    </Select>
+                </FormItem>
+            </Form>
+            <div slot="footer">
+                <Button
+                    type="primary"
+                    ghost
+                    size="large"
+                    @click="cancelAddOrUpdateType('formInline')"
+                    >查询</Button
+                >
+                <Button
+                    type="primary"
+                    size="large"
+                    @click="handleSubmitAddOrUpdate('formInline')"
+                    >新增</Button
+                >
+            </div>
+        </Modal>
+        <Modal v-model.trim="modalDelete" width="450" title="删除参数配置提示">
+            <div>
+                <p>确定删除该参数配置吗？</p>
+            </div>
+            <div slot="footer">
+                <Button type="text" @click="cancelDelete" size="large"
+                    >取消</Button
+                >
+                <Button type="primary" @click="handleSubmitDelete" size="large"
+                    >确定</Button
+                >
+            </div>
+        </Modal>
+    </div>
 </template>
 
 <script>
@@ -145,19 +183,31 @@ export default {
       },
       ruleInline: {
         useName: [
-          { required: true, validator: validateuseName, trigger: 'blur' }
+          {
+            required: true,
+            validator: validateuseName,
+            trigger: 'blur'
+          }
         ],
         useCalled: [
-          { required: true, validator: validateuseCalled, trigger: 'blur' }
+          {
+            required: true,
+            validator: validateuseCalled,
+            trigger: 'blur'
+          }
         ],
         confValue: [
-          { required: true, validator: validateConfValue, trigger: 'blur' }
+          {
+            required: true,
+            validator: validateConfValue,
+            trigger: 'blur'
+          }
         ]
       },
       confData: [
         // 参数配置数据
-        { useName: 'OCR', useCalled: '29', contactPhone: '1212321321321', contactEmails: '1111111@outlook.com' },
-        { useName: '人脸识别', useCalled: '30', contactPhone: '983127321', contactEmails: '1111111@outlook.com' }
+        { useName: 'OCR', useCalled: '29', confName: '1212321321321' },
+        { useName: '人脸识别', useCalled: '30', confName: '983127321' }
       ],
       columns: [
         {
@@ -174,14 +224,8 @@ export default {
           align: 'center'
         },
         {
-          title: '联系人手机',
-          key: 'contactPhone',
-          width: 300,
-          align: 'center'
-        },
-        {
-          title: '联系人邮箱',
-          key: 'contactEmails',
+          title: '服务模块',
+          key: 'confName',
           width: 300,
           align: 'center'
         },
@@ -227,13 +271,6 @@ export default {
       this.reset()
       this.showType = 'add'
       this.detailTitle = '新增模块'
-      this.modalEdit = true
-    },
-    lookConfig () {
-      // 点击新增按钮
-      this.reset()
-      this.showType = 'add'
-      this.detailTitle = '新增服务类型'
       this.modalEdit = true
     },
     handleSubmitAddOrUpdate (index) {
@@ -302,8 +339,7 @@ export default {
       this.id = this.confData[index].id
       this.formInline.useName = this.confData[index].useName
       this.formInline.useCalled = this.confData[index].useCalled
-      this.formInline.contactPhone = this.confData[index].contactPhone
-      this.formInline.contactEmails = this.confData[index].contactEmails
+      this.formInline.confName = this.confData[index].confName
       this.showType = 'edit'
       this.detailTitle = '编辑模块'
       this.modalEdit = true
@@ -350,30 +386,30 @@ export default {
 </script>
 <style lang="less" scoped>
 .user-content {
-  .content-button {
-    padding: 5px;
-    display: inline;
-    .ivu-select-single {
-      width: 150px;
+    .content-button {
+        padding: 5px;
+        display: inline;
+        .ivu-select-single {
+            width: 150px;
+        }
+        .ivu-input-type {
+            width: 150px;
+            margin-left: 10px;
+        }
+        .ivu-btn {
+            margin-left: 10px;
+        }
+        .ivu-btn-info {
+            background: #2d8cf0;
+            border-color: #2d8cf0;
+        }
     }
-    .ivu-input-type {
-      width: 150px;
-      margin-left: 10px;
-    }
-    .ivu-btn {
-      margin-left: 10px;
-    }
-    .ivu-btn-info {
-      background: #2d8cf0;
-      border-color: #2d8cf0;
-    }
-  }
 }
 .ivu-modal-confirm-body {
-  padding-left: 42px;
-  font-size: 14px;
-  color: #515a6e;
-  position: relative;
-  word-break: break-all;
+    padding-left: 42px;
+    font-size: 14px;
+    color: #515a6e;
+    position: relative;
+    word-break: break-all;
 }
 </style>

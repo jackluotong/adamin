@@ -832,8 +832,8 @@ export default [{
   },
   component: Main,
   children: [{
-    path: '/UseThresholdManage',
-    name: 'UseThresholdManage',
+    path: '/InformManage',
+    name: 'InformManage',
     meta: {
       icon: 'ios-settings',
       title: '提醒通知管理'

@@ -3,8 +3,7 @@
         <h1 style="margin:10px 10px 10px 10px">第三方服务管理-第三方厂商管理</h1>
         <div class="content-button">
             <span style="padding:10px">厂商名称</span>
-            <Input v-model.trim="confName" />
-
+            <Input v-model.trim="manufacturerName" />
             <Button
                 type="primary"
                 icon="md-search"
@@ -40,8 +39,8 @@
             v-bind:title="detailTitle"
         >
             <Form ref="formInline" :model="formInline" :rules="ruleInline" inline>
-                <FormItem label="服务模块" prop="confName" style="width:270px;">
-                    <Input v-model.trim="formInline.confName" />
+                <FormItem label="服务模块" prop="manufacturerName" style="width:270px;">
+                    <Input v-model.trim="formInline.manufacturerName" />
                 </FormItem>
             </Form>
             <div slot="footer">
@@ -66,7 +65,7 @@
             v-bind:title="detailTitle"
         >
             <Form ref="formInline" :model="formInline">
-                <FormItem label="厂商名称" prop="confName" style="width:270px;">
+                <FormItem label="厂商名称" prop="manufacturerName" style="width:270px;">
                     <Input v-model.trim="formInline.confKey" />
                 </FormItem>
             </Form>
@@ -113,7 +112,7 @@ export default {
       }
       return len
     }
-    const validateConfName = function (rule, value, callback) {
+    const validatemanufacturerName = function (rule, value, callback) {
       if (!value) {
         callback(new Error('请输入参数名称'))
       } else if (getByteLen(value) > 128) {
@@ -153,7 +152,7 @@ export default {
       total: 0, // 总数
       pageNum: 1, // 第几页
       pageSize: 30, // 每页几条数据
-      confName: '', // 参数名称
+      manufacturerName: '', // 参数名称
       confKey: '', // 参数键名
       confAddress: '', // 服务地址
       modalAddOrUpdate: false, // 是否显示新增弹窗
@@ -162,15 +161,15 @@ export default {
       showType: '', // 表单展示类型（edit、add）
       modalDelete: false, // 是否显示删除提示弹窗
       formInline: {
-        confName: '',
+        manufacturerName: '',
         confKey: '',
         confAddress: ''
       },
       ruleInline: {
-        confName: [
+        manufacturerName: [
           {
             required: true,
-            validator: validateConfName,
+            validator: validatemanufacturerName,
             trigger: 'blur'
           }
         ],
@@ -198,13 +197,13 @@ export default {
       },
       confData: [
         // 参数配置数据
-        { confName: 'OCR', confKey: '29', confAddress: 'SHANGHAI' },
-        { confName: '人脸识别', confKey: '30', confAddress: 'BEIJING' }
+        { manufacturerName: 'OCR', confKey: '29', confAddress: 'SHANGHAI' },
+        { manufacturerName: '人脸识别', confKey: '30', confAddress: 'BEIJING' }
       ],
       columns: [
         {
           title: '厂商名称',
-          key: 'confName',
+          key: 'manufacturerName',
           tooltip: true,
           width: 300,
           align: 'center'
@@ -221,7 +220,7 @@ export default {
     search () {
       // 点击查询按钮
       const date = {
-        confName: this.confName,
+        manufacturerName: this.manufacturerName,
         confKey: this.confKey,
         pageNum: this.pageNum,
         pageSize: this.pageSize
@@ -241,7 +240,7 @@ export default {
     },
     reset () {
       // 点击重置按钮
-      this.confName = null
+      this.manufacturerName = null
       this.confKey = null
       this.confAddress = null
     },
@@ -260,7 +259,7 @@ export default {
         if (valid) {
           if (this.showType === 'add') {
             const date = {
-              confName: this.formInline.confName,
+              manufacturerName: this.formInline.manufacturerName,
               confKey: this.formInline.confKey,
               confValue: this.formInline.confValue,
               confDescribtion: this.formInline.confDescribtion
@@ -281,7 +280,7 @@ export default {
           } else if (this.showType === 'edit') {
             const date = {
               id: this.id,
-              confName: this.formInline.confName,
+              manufacturerName: this.formInline.manufacturerName,
               confKey: this.formInline.confKey,
               confValue: this.formInline.confValue,
               confDescribtion: this.formInline.confDescribtion
@@ -316,7 +315,7 @@ export default {
     editModule (index) {
       // 点击修改按钮
       this.id = this.confData[index].id
-      this.formInline.confName = this.confData[index].confName
+      this.formInline.manufacturerName = this.confData[index].manufacturerName
       this.showType = 'edit'
       this.detailTitle = '编辑模块'
       this.modalAddOrUpdate = true

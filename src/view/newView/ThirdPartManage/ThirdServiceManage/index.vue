@@ -1,22 +1,21 @@
 <template>
   <div class="user-content">
     <div class="content-button">
-
 <span style="padding:10px 10px 10px 10px ">厂商名称</span>
-<Select label="" v-model.trim="manufacturerName" style="width:150px; marginRight:20px;">
+<Select label="" v-model.trim="manufacturerName" style="width:150px; margin-right:20px;">
         <Option v-for="item of statusEnumList" :key="item.value" :value="item.value">{{item.label}}</Option>
       </Select>
 <span style="padding:10px 10px 10px 10px ">服务模块</span>
- <Select label="" v-model.trim="serviceModule" style="width:150px; marginRight:20px;">
+ <Select label="" v-model.trim="serviceModule" style="width:150px; margin-right:20px;">
         <Option v-for="item of emailTypeEnumList" :key="item.value" :value="item.value">{{item.label}}</Option>
       </Select>
 <div style="padding:10px 10px 10px 10px ">
 <span style="padding:10px 10px 10px 0 ">服务类型</span>
-      <Select label="" v-model.trim="serviceType" style="width:150px; marginRight:20px;">
+      <Select label="" v-model.trim="serviceType" style="width:150px;margin-right:20px">
         <Option v-for="item of serviceTypeEnumList" :key="item.value" :value="item.value">{{item.label}}</Option>
       </Select>
 <span style="padding:10px 10px 10px 10px ">服务状态</span>
-      <Select label="" v-model.trim="serviceStatus" style="width:150px; marginRight:20px;">
+      <Select label="" v-model.trim="serviceStatus" style="width:150px; margin-right:20px;">
         <Option v-for="item of serviceStatusEnumList" :key="item.value" :value="item.value">{{item.label}}</Option>
       </Select>
 </div>
@@ -40,19 +39,19 @@
     <Modal v-model="modalCheck" width="30%" height="40%"  :mask-closable="false" :closable="true" title="详情" >
       <Form :model="formInline"  inline>
         <FormItem  label="厂商名称" style="width:300px;" >
-<Select label="" v-model.trim="manufacturerName" style="width:150px; marginRight:20px;">
+<Select label="" v-model.trim="manufacturerName" style="width:150px; margin-right:20px;">
         <Option v-for="item of statusEnumList" :key="item.value" :value="item.value">{{item.label}}</Option>
       </Select>        </FormItem><br>
         <FormItem label="服务模块" style="width:300px;" >
- <Select label="" v-model.trim="serviceModule" style="width:150px; marginRight:20px;">
+ <Select label="" v-model.trim="serviceModule" style="width:150px; margin-right:20px;">
         <Option v-for="item of emailTypeEnumList" :key="item.value" :value="item.value">{{item.label}}</Option>
       </Select>        </FormItem>
         <FormItem label="服务类型" style="width:300px;" >
-<Select label="" v-model.trim="serviceType" style="width:150px; marginRight:20px;">
+<Select label="" v-model.trim="serviceType" style="width:150px; margin-right:20px;">
         <Option v-for="item of serviceTypeEnumList" :key="item.value" :value="item.value">{{item.label}}</Option>
       </Select>        </FormItem><br>
         <FormItem label="服务状态" style="width:300px;" >
-<Select label="" v-model.trim="serviceStatus" style="width:150px; marginRight:20px;">
+<Select label="" v-model.trim="serviceStatus" style="width:150px; margin-right:20px;">
         <Option >{{formInline.serviceStatus}}</Option>
       </Select>        </FormItem><br>
         <FormItem label="厂商接口地址" style="width:100%;" >

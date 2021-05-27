@@ -7,7 +7,7 @@
       <span style="padding:10px">服务类型</span>
       <Input v-model.trim="confKey" />
       <Button type="primary" icon="md-search" @click="search()" style="margin:0 10px 0 20px">查询</Button>
-      <!-- <Button type="primary" icon="md-refresh" @click="reset()">重置</Button> -->
+      <Button type="primary" icon="md-refresh" @click="reset()">重置</Button>
       <Button type="primary" icon="md-add" @click="addSetting()">新增模块</Button>
       <Button type="primary" icon="md-add" @click="addSettingType()">新增服务类型</Button>
     </div>
@@ -45,8 +45,8 @@
           <FormItem label="服务类型" prop="confKey" style="width:270px;">
                   <Input v-model.trim="formInline.confKey"/>
           </FormItem>
-        <FormItem label="服务地址" prop="confAddress" style="width:270px;">
-                  <Input v-model.trim="formInline.confAddress"/>
+        <FormItem label="服务地址" prop="serviceAddress" style="width:270px;">
+                  <Input v-model.trim="formInline.serviceAddress"/>
         </FormItem>
       </Form>
       <div slot="footer">
@@ -125,7 +125,7 @@ export default {
       pageSize: 30, // 每页几条数据
       confName: '', // 参数名称
       confKey: '', // 参数键名
-      confAddress: '', // 服务地址
+      serviceAddress: '', // 服务地址
       modalAddOrUpdate: false, // 是否显示新增弹窗
       modalAddOrUpdateType: false,
       detailTitle: '', // 表单标题
@@ -134,7 +134,7 @@ export default {
       formInline: {
         confName: '',
         confKey: '',
-        confAddress: ''
+        serviceAddress: ''
       },
       ruleInline: {
         confName: [
@@ -151,8 +151,8 @@ export default {
         ]
       },
       confData: [ // 参数配置数据
-        { confName: 'OCR', confKey: '29', confAddress: 'SHANGHAI' },
-        { confName: '人脸识别', confKey: '30', confAddress: 'BEIJING' }
+        { confName: 'OCR', confKey: '29', serviceAddress: 'SHANGHAI' },
+        { confName: '人脸识别', confKey: '30', serviceAddress: 'BEIJING' }
       ],
       columns: [
         {
@@ -170,7 +170,7 @@ export default {
         },
         {
           title: '统一对外服务地址',
-          key: 'confAddress',
+          key: 'serviceAddress',
           width: 300,
           align: 'center'
         },
@@ -205,7 +205,7 @@ export default {
     reset () { // 点击重置按钮
       this.confName = null
       this.confKey = null
-      this.confAddress = null
+      this.serviceAddress = null
     },
     addSetting () { // 点击新增按钮
       this.reset()
@@ -288,7 +288,7 @@ export default {
       this.id = this.confData[index].id
       this.formInline.confName = this.confData[index].confName
       this.formInline.confKey = this.confData[index].confKey
-      this.formInline.confAddress = this.confData[index].confAddress
+      this.formInline.serviceAddress = this.confData[index].serviceAddress
       this.detailTitle = '编辑服务类型'
       this.modalAddOrUpdateType = true
     },
