@@ -110,7 +110,7 @@ export default {
     }
     const validateConfName = function (rule, value, callback) {
       if (!value) {
-        callback(new Error('请输入参数名称'))
+        callback(new Error('请输入角色名称'))
       } else if (getByteLen(value) > 128) {
         callback(new Error('字符串长度不能超过128'))
       } else {
@@ -119,25 +119,9 @@ export default {
     }
     const validateConfKey = (rule, value, callback) => {
       if (!value) {
-        callback(new Error('请输入参数键名'))
+        callback(new Error('请输入角色code'))
       } else if (getByteLen(value) > 64) {
         callback(new Error('字符串长度不能超过64'))
-      } else {
-        callback()
-      }
-    }
-    const validateConfValue = (rule, value, callback) => {
-      if (!value) {
-        callback(new Error('请输入参数键名'))
-      } else {
-        callback()
-      }
-    }
-    const validateConfDescribtion = (rule, value, callback) => {
-      if (!value) {
-        callback(new Error('请输入配置描述'))
-      } else if (getByteLen(value) > 256) {
-        callback(new Error('字符串长度不能超过256'))
       } else {
         callback()
       }
@@ -167,12 +151,6 @@ export default {
         ],
         confKey: [
           { required: true, validator: validateConfKey, trigger: 'blur' }
-        ],
-        confValue: [
-          { required: true, validator: validateConfValue, trigger: 'blur' }
-        ],
-        confDescribtion: [
-          { required: true, validator: validateConfDescribtion, trigger: 'blur' }
         ]
       },
       confData: [ // 参数配置数据

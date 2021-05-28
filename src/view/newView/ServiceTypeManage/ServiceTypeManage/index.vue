@@ -3,9 +3,9 @@
     <h1 style="margin:10px 10px 10px 10px">服务类型管理-服务类型管理</h1>
     <div class="content-button" >
       <span style="padding:10px">服务模块</span>
-      <Input v-model.trim="confName" />
+      <Input v-model.trim="serviceModule" />
       <span style="padding:10px">服务类型</span>
-      <Input v-model.trim="confKey" />
+      <Input v-model.trim="serviceType" />
       <Button type="primary" icon="md-search" @click="search()" style="margin:0 10px 0 20px">查询</Button>
       <Button type="primary" icon="md-refresh" @click="reset()">重置</Button>
       <Button type="primary" icon="md-add" @click="addSetting()">新增模块</Button>
@@ -24,8 +24,8 @@
      <Page :total='total' :page-size='pageSize' :show-total="true" show-sizer style="text-align: center;margin-top: 5px"/>
      <Modal v-model.trim="modalAddOrUpdate" width="600" :mask-closable="false" :closable="false" v-bind:title="detailTitle">
       <Form ref="formInline" :model="formInline" :rules="ruleInline" inline>
-        <FormItem label="服务模块" prop="confName" style="width:270px;">
-          <Input v-model.trim="formInline.confName"/>
+        <FormItem label="服务模块" prop="serviceModule" style="width:270px;">
+          <Input v-model.trim="formInline.serviceModule"/>
         </FormItem>
       </Form>
       <div slot="footer">
@@ -36,14 +36,14 @@
     <Modal v-model.trim="modalAddOrUpdateType" width="600" :mask-closable="false" :closable="false" v-bind:title="detailTitle">
       <Form ref="formInline" :model="formInline"  >
         <div style="display:inline-table">
-        <FormItem label="服务模块" prop="confName" style="width:270px;">
+        <FormItem label="服务模块" prop="serviceModule" style="width:270px;">
         <Select v-model.trim="formInline" style="width:200px" >
-            <Option selected>{{formInline.confName}}</Option>
+            <Option selected>{{formInline.serviceModule}}</Option>
         </Select>
           </FormItem>
        </div>
-          <FormItem label="服务类型" prop="confKey" style="width:270px;">
-                  <Input v-model.trim="formInline.confKey"/>
+          <FormItem label="服务类型" prop="serviceType" style="width:270px;">
+                  <Input v-model.trim="formInline.serviceType"/>
           </FormItem>
         <FormItem label="服务地址" prop="serviceAddress" style="width:270px;">
                   <Input v-model.trim="formInline.serviceAddress"/>
@@ -83,7 +83,7 @@ export default {
       }
       return len
     }
-    const validateConfName = function (rule, value, callback) {
+    const validateserviceModule = function (rule, value, callback) {
       if (!value) {
         callback(new Error('请输入参数名称'))
       } else if (getByteLen(value) > 128) {
@@ -92,7 +92,7 @@ export default {
         callback()
       }
     }
-    const validateConfKey = (rule, value, callback) => {
+    const validateserviceType = (rule, value, callback) => {
       if (!value) {
         callback(new Error('请输入参数键名'))
       } else if (getByteLen(value) > 64) {
@@ -123,8 +123,8 @@ export default {
       total: 0, // 总数
       pageNum: 1, // 第几页
       pageSize: 30, // 每页几条数据
-      confName: '', // 参数名称
-      confKey: '', // 参数键名
+      serviceModule: '', // 参数名称
+      serviceType: '', // 参数键名
       serviceAddress: '', // 服务地址
       modalAddOrUpdate: false, // 是否显示新增弹窗
       modalAddOrUpdateType: false,
@@ -132,16 +132,16 @@ export default {
       showType: '', // 表单展示类型（edit、add）
       modalDelete: false, // 是否显示删除提示弹窗
       formInline: {
-        confName: '',
-        confKey: '',
+        serviceModule: '',
+        serviceType: '',
         serviceAddress: ''
       },
       ruleInline: {
-        confName: [
-          { required: true, validator: validateConfName, trigger: 'blur' }
+        serviceModule: [
+          { required: true, validator: validateserviceModule, trigger: 'blur' }
         ],
-        confKey: [
-          { required: true, validator: validateConfKey, trigger: 'blur' }
+        serviceType: [
+          { required: true, validator: validateserviceType, trigger: 'blur' }
         ],
         confValue: [
           { required: true, validator: validateConfValue, trigger: 'blur' }
@@ -151,20 +151,20 @@ export default {
         ]
       },
       confData: [ // 参数配置数据
-        { confName: 'OCR', confKey: '29', serviceAddress: 'SHANGHAI' },
-        { confName: '人脸识别', confKey: '30', serviceAddress: 'BEIJING' }
+        { serviceModule: 'OCR', serviceType: '29', serviceAddress: 'SHANGHAI' },
+        { serviceModule: '人脸识别', serviceType: '30', serviceAddress: 'BEIJING' }
       ],
       columns: [
         {
           title: '服务模块',
-          key: 'confName',
+          key: 'serviceModule',
           tooltip: true,
           width: 300,
           align: 'center'
         },
         {
           title: '服务类型',
-          key: 'confKey',
+          key: 'serviceType',
           width: 300,
           align: 'center'
         },
@@ -186,8 +186,8 @@ export default {
   methods: {
     search () { // 点击查询按钮
       const date = {
-        'confName': this.confName,
-        'confKey': this.confKey,
+        'serviceModule': this.serviceModule,
+        'serviceType': this.serviceType,
         'pageNum': this.pageNum,
         'pageSize': this.pageSize
       }
@@ -203,8 +203,8 @@ export default {
       })
     },
     reset () { // 点击重置按钮
-      this.confName = null
-      this.confKey = null
+      this.serviceModule = null
+      this.serviceType = null
       this.serviceAddress = null
     },
     addSetting () { // 点击新增按钮
@@ -226,8 +226,8 @@ export default {
         if (valid) {
           if (this.showType === 'add') {
             const date = {
-              'confName': this.formInline.confName,
-              'confKey': this.formInline.confKey,
+              'serviceModule': this.formInline.serviceModule,
+              'serviceType': this.formInline.serviceType,
               'confValue': this.formInline.confValue,
               'confDescribtion': this.formInline.confDescribtion
             }
@@ -245,8 +245,8 @@ export default {
           } else if (this.showType === 'edit') {
             const date = {
               'id': this.id,
-              'confName': this.formInline.confName,
-              'confKey': this.formInline.confKey,
+              'serviceModule': this.formInline.serviceModule,
+              'serviceType': this.formInline.serviceType,
               'confValue': this.formInline.confValue,
               'confDescribtion': this.formInline.confDescribtion
             }
@@ -276,8 +276,8 @@ export default {
     },
     editModule (index) { // 点击修改按钮
       this.id = this.confData[index].id
-      this.formInline.confName = this.confData[index].confName
-      this.formInline.confKey = this.confData[index].confKey
+      this.formInline.serviceModule = this.confData[index].serviceModule
+      this.formInline.serviceType = this.confData[index].serviceType
       this.formInline.confValue = this.confData[index].confValue
       this.formInline.confDescribtion = this.confData[index].confDescribtion
       this.showType = 'edit'
@@ -286,8 +286,8 @@ export default {
     },
     editType (index) {
       this.id = this.confData[index].id
-      this.formInline.confName = this.confData[index].confName
-      this.formInline.confKey = this.confData[index].confKey
+      this.formInline.serviceModule = this.confData[index].serviceModule
+      this.formInline.serviceType = this.confData[index].serviceType
       this.formInline.serviceAddress = this.confData[index].serviceAddress
       this.detailTitle = '编辑服务类型'
       this.modalAddOrUpdateType = true

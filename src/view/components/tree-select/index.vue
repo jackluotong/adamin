@@ -115,8 +115,6 @@ export default {
       }
     }
     return {
-      out_arr: '',
-      inarr: '',
       total: 0, // 总数
       pageNum: 1, // 第几页
       pageSize: 30, // 每页几条数据
@@ -210,7 +208,7 @@ export default {
       this.detailTitle = '新增模块'
       this.modalAddOrUpdate = true
     },
-    addSettingType () { // 点击新增按钮
+    addSettingType () {
       this.reset()
       this.showType = 'add'
       this.detailTitle = '新增服务类型'

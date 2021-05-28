@@ -47,36 +47,38 @@
                         prop="informType"
                         style="width:270px;"
                     >
-                        <Input v-model.trim="formInline.useName"/>
+                        <Select v-model.trim="formInline" style="width:200px" >
+                                  <Option selected>{{formInline.informType}}</Option>
+                         </Select>
                     </FormItem>
                 </div>
                 <FormItem
                     label="场景"
-                    prop="useCalled"
+                    prop="scene"
                     style="width:270px;"
                 >
-                     <Input v-model.trim="formInline.useCalled"/>
+                     <Input v-model.trim="formInline.scene"/>
                 </FormItem>
                 <FormItem
                     label="内容"
-                    prop="thresholdCount"
+                    prop="content"
                     style="width:270px;"
                 >
-                     <Input v-model.trim="formInline.thresholdCount"/>
+                     <Input v-model.trim="formInline.content"/>
                 </FormItem>
                 <FormItem
                     label="短信收件人"
-                    prop="thresholdCount"
+                    prop="messageReciver"
                     style="width:270px;"
                 >
-                     <Input v-model.trim="formInline.thresholdCount"/>
+                     <Input v-model.trim="formInline.messageReciver"/>
                 </FormItem>
                 <FormItem
                     label="邮件收件人"
-                    prop="thresholdCount"
+                    prop="emailReciver"
                     style="width:270px;"
                 >
-                     <Input v-model.trim="formInline.thresholdCount"/>
+                     <Input v-model.trim="formInline.emailReciver"/>
                 </FormItem>
             </Form>
             <div slot="footer">
@@ -115,7 +117,7 @@ export default {
       }
       return len
     }
-    const validateuseName = function (rule, value, callback) {
+    const validateinformType = function (rule, value, callback) {
       if (!value) {
         callback(new Error('请输入参数名称'))
       } else if (getByteLen(value) > 128) {
@@ -124,7 +126,7 @@ export default {
         callback()
       }
     }
-    const validateuseCalled = (rule, value, callback) => {
+    const validatescene = (rule, value, callback) => {
       if (!value) {
         callback(new Error('请输入参数键名'))
       } else if (getByteLen(value) > 64) {
@@ -143,46 +145,36 @@ export default {
 
     return {
       modelThreshld: '',
-      threlodList: [
-        {
-          value: 1,
-          label: '应用通用阈值'
-        },
-        {
-          value: 2,
-          label: '应用定制阈值'
-        }
-      ],
       total: 0, // 总数
       pageNum: 1, // 第几页
       pageSize: 30, // 每页几条数据
-      useName: '',
-      useCalled: '',
-      thresholdCount: '',
+      informType: '',
+      scene: '',
+      content: '',
       thresholdType: '',
       modalEdit: false,
       detailTitle: '',
       showType: '',
       modalDelete: false,
       formInline: {
-        useName: '',
-        useCalled: '',
+        informType: '',
+        scene: '',
         confName: '',
-        thresholdCount: '',
+        content: '',
         thresholdType: ''
       },
       ruleInline: {
-        useName: [
+        informType: [
           {
             required: true,
-            validator: validateuseName,
+            validator: validateinformType,
             trigger: 'blur'
           }
         ],
-        useCalled: [
+        scene: [
           {
             required: true,
-            validator: validateuseCalled,
+            validator: validatescene,
             trigger: 'blur'
           }
         ],
@@ -196,19 +188,19 @@ export default {
       },
       confData: [
         // 参数配置数据
-        { useName: 'OCR', useCalled: '29', confName: '1212321321321', thresholdCount: 121, thresholdType: 'type1' },
-        { useName: '人脸识别', useCalled: '30', confName: '983127321', thresholdCount: 1121, thresholdType: 'type12' }
+        { informType: 'OCR', scene: '29', confName: '1212321321321', content: 121, thresholdType: 'type1' },
+        { informType: '人脸识别', scene: '30', confName: '983127321', content: 1121, thresholdType: 'type12' }
       ],
       columns: [
         {
           title: '应用名称',
-          key: 'useName',
+          key: 'informType',
           tooltip: true,
           align: 'center'
         },
         {
           title: '应用简称',
-          key: 'useCalled',
+          key: 'scene',
           align: 'center'
         },
         {
@@ -218,7 +210,7 @@ export default {
         },
         {
           title: '次数阈值（每分钟）',
-          key: 'thresholdCount',
+          key: 'content',
           align: 'center'
         },
         {
@@ -239,8 +231,8 @@ export default {
       console.log(this.formInline, 'formInline')
       // 点击查询按钮
       const date = {
-        useName: this.useName,
-        useCalled: this.useCalled,
+        informType: this.informType,
+        scene: this.scene,
         pageNum: this.pageNum,
         pageSize: this.pageSize
       }
@@ -259,9 +251,9 @@ export default {
     },
     reset () {
       // 点击重置按钮
-      this.useName = null
-      this.useCalled = null
-      this.thresholdCount = null
+      this.informType = null
+      this.scene = null
+      this.content = null
     },
     addSetting () {
       // 点击新增按钮
@@ -278,8 +270,8 @@ export default {
         if (valid) {
           if (this.showType === 'add') {
             const date = {
-              useName: this.formInline.useName,
-              useCalled: this.formInline.useCalled,
+              informType: this.formInline.informType,
+              scene: this.formInline.scene,
               confValue: this.formInline.confValue,
               confDescribtion: this.formInline.confDescribtion
             }
@@ -299,8 +291,8 @@ export default {
           } else if (this.showType === 'edit') {
             const date = {
               id: this.id,
-              useName: this.formInline.useName,
-              useCalled: this.formInline.useCalled,
+              informType: this.formInline.informType,
+              scene: this.formInline.scene,
               confValue: this.formInline.confValue,
               confDescribtion: this.formInline.confDescribtion
             }
@@ -334,10 +326,10 @@ export default {
     edit (index) {
       // 点击修改按钮
       this.id = this.confData[index].id
-      this.formInline.useName = this.confData[index].useName
-      this.formInline.useCalled = this.confData[index].useCalled
+      this.formInline.informType = this.confData[index].informType
+      this.formInline.scene = this.confData[index].scene
       this.formInline.confName = this.confData[index].confName
-      this.formInline.thresholdCount = this.confData[index].thresholdCount
+      this.formInline.content = this.confData[index].content
       this.formInline.thresholdType = this.confData[index].thresholdType
       this.showType = 'edit'
       this.detailTitle = '编辑模块'

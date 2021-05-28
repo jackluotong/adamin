@@ -1,9 +1,13 @@
 <template>
     <div class="user-content">
         <div class="content-button">
+            <span style="padding:10px">应用名称</span>
+            <Input v-model.trim="useName" />
+            <span style="padding:10px">应用简称</span>
+            <Input v-model.trim="useCalled" />
             <span style="padding:10px 10px 10px 10px ">厂商名称</span>
-            <Select label="" v-model.trim="manufacturerName" style="width:150px; margin-right:20px;">
-                <Option v-for="item of manufacturerEnum" :key="item.value" :value="item.value">{{item.label}}</Option>
+            <Select label="" v-model.trim="manufacturerName" style="width:150px; margin-right:20px;" >
+                <Option v-for="item of manufacturerEnum" :key="item.value" :value="item.code">{{item.label}}</Option>
             </Select>
             <span style="padding:10px 10px 10px 10px ">服务模块</span>
             <Select label="" v-model.trim="serviceModule" style="width:150px; margin-right:20px;">
@@ -14,20 +18,18 @@
                 <Select label="" v-model.trim="serviceType" style="width:150px;margin-right:20px">
                     <Option v-for="item of serviceTypeEnum" :key="item.value" :value="item.value">{{item.label}}</Option>
                 </Select>
-                <span style="padding:10px 10px 10px 10px ">服务状态</span>
-                <Select label="" v-model.trim="serviceStatus" style="width:150px; margin-right:20px;">
-                    <Option v-for="item of serviceStatusEnum" :key="item.value" :value="item.value">{{item.label}}</Option>
-                </Select>
+                <span style="padding:10px">请求时间</span>
+                 <Input v-model.trim="requestTime" />
             </div>
         </div>
         <div style="">
             <Button type="primary" icon="md-search" @click="search()" style="margin:10px">查询</Button>
                   <Button type="primary" icon="md-refresh" @click="reset()">重置</Button>
-            <Button type="primary" icon="md-refresh" @click="addNew()" style="margin:10px">新增服务</Button>
+            <Button type="primary" icon="md-refresh" @click="exportExel()" style="margin:10px" :loading="exportLoading">按条件导出</Button>
 
         </div>
 
-        <Table highlight-row="highlight-row" stripe="stripe" :columns="columns" :data="logEmailMessageData" style="margin-top: 5px">
+        <Table highlight-row="highlight-row" stripe="stripe" :columns="columns" :data="logEmailMessageData" style="margin-top: 5px" >
             <template slot-scope="{ row, index }" slot="action">
                 <div>
                     <Button type="info" size="small" style="margin-right: 5px" @click="edit(index)">编辑</Button>
@@ -35,54 +37,20 @@
             </template>
         </Table>
         <Page :total='total' :page-size='pageSize' :show-total="true" show-sizer="show-sizer" style="text-align: center;margin-top: 5px"/>
-        <Modal v-model="modalCheck" width="30%" height="40%" :mask-closable="false" :closable="true" title="详情">
-            <Form :model="formInline" inline="inline">
-                <FormItem label="厂商名称" style="width:300px;">
-                     <Select label="" v-model.trim="manufacturerName" style="width:150px; margin-right:20px;">
-                <Option v-for="item of manufacturerEnum" :key="item.value" :value="item.value">{{manufacturerName}}</Option>
-            </Select>
-                </FormItem>
-                <br>
-                    <FormItem label="服务模块" style="width:300px;">
-                        <Select label="" v-model.trim="formInline" style="width:150px; margin-right:20px;">
-                            <Option >{{formInline.serviceModule}}</Option>
-                        </Select>
-                    </FormItem>
-                    <FormItem label="服务类型" style="width:300px;">
-                        <Select label="" v-model.trim="formInline" style="width:150px; margin-right:20px;">
-                            <Option >{{formInline.serviceType}}</Option>
-                        </Select>
-                    </FormItem>
-                    <br>
-                        <FormItem label="服务状态" style="width:300px;">
-                            <Select label="" v-model.trim="formInline" style="width:150px; margin-right:20px;">
-                                <Option>{{serviceStatus}}</Option>
-                            </Select>
-                        </FormItem>
-                        <br>
-                            <FormItem label="超时阈值" style="width:100%;">
-                                <Input v-model.trim="formInline.outThreshold" style="width:auto"/>
-                            </FormItem>
-                            <FormItem label="超时次数阈值（每小时）" style="width:100%;">
-                                <Input v-model.trim="formInline.outCountThreshold" style="width:auto"/>
-                            </FormItem>
-                            <FormItem label="异常次数阈值（每小时）" style="width:100%;">
-                                <Input v-model.trim="formInline.abnormalCountThreshold" style="width:auto"/>
-                            </FormItem>
-                            <br></Form>
-                            <div slot="footer">
-                                <Button type="primary" ghost="ghost" size="large" @click="cancel('formInline')">返回</Button>
-                                <Button type="primary" size="large" @click="handleSubmitAddOrUpdate('formInline')">保存</Button>
-                            </div>
-                        </Modal>
-                    </div>
-                </template>
+
+    </div>
+</template>
 
 <script>
 import { logEmailMessagePageList } from '@/api/data'
+import excel from '@/libs/excel'
 export default {
   data () {
     return {
+      useName: '',
+      requestTime: '',
+      useCalled: '',
+      exportLoading: false,
       total: 0, // 总数
       pageNum: 1, // 第几页
       pageSize: 30, // 每页几条数据
@@ -110,10 +78,12 @@ export default {
       manufacturerEnum: [
         {
           'value': '1',
-          'label': '交通'
+          'label': '交通',
+          'code': 'transport'
         }, {
           'value': '2',
-          'label': '中化'
+          'label': '中化',
+          'code': 'china'
         }
       ],
       serviceModuleEnum: [
@@ -163,50 +133,99 @@ export default {
       operatingTime: [],
       columns: [
         {
+          title: '应用名称',
+          key: 'useName',
+          width: 100,
+          tooltip: true,
+          align: 'center'
+        },
+        {
+          title: '应用简称',
+          key: 'useCalled',
+          width: 100,
+          align: 'center'
+        },
+        {
+          title: '服务模块',
+          key: 'confName',
+
+          align: 'center'
+        },
+        {
           title: '厂商名称',
           key: 'manufacturerName',
+          width: 100,
           tooltip: true,
-          width: 150,
           align: 'center'
         },
         {
           title: '服务模块',
           key: 'serviceModule',
+          width: 100,
           align: 'center'
         },
         {
           title: '服务类型',
           key: 'serviceType',
+          width: 100,
+          align: 'center'
+        },
+        {
+          title: '请求参数',
+          key: 'requestParams',
+          width: 200,
+          align: 'center'
+        },
+        {
+          title: '请求时间',
+          key: 'requestTime',
           width: 150,
           align: 'center'
         },
         {
-          title: '服务状态',
-          key: 'serviceStatus',
-          width: 200,
-          align: 'center'
-        }, {
-          title: '统一对外服务地址',
-          key: 'serviceAddress',
+          title: '返回参数',
+          key: 'returnParams',
           width: 150,
           align: 'center'
-        }, {
-          title: '厂商接口地址',
-          key: 'manufacturerAddress',
+        },
+        {
+          title: '返回时间',
+          key: 'returnTime',
           width: 150,
           align: 'center'
-        }, {
-          title: '操作',
-          slot: 'action',
+        },
+        {
+          title: '请求厂商参数',
+          key: 'requestManufacturerParams',
+          width: 150,
+          align: 'center'
+        },
+        {
+          title: '请求厂商时间',
+          key: 'requestManufacturerTime',
+          width: 150,
+          align: 'center'
+        },
+        {
+          title: '厂商返回参数',
+          key: 'returnManufacturerParams',
+          width: 150,
+          align: 'center'
+        },
+        {
+          title: '厂商返回时间',
+          key: 'returnManufacturerTime',
+          width: 150,
           align: 'center'
         }
       ]
     }
   },
   methods: {
-    search () { // 点击查询按钮
+    search () {
+      console.log(this.manufacturerName, this.formInline.manufacturerName)
       const date = {
-        'receiveEmail': this.receiveEmail,
+        'manufacturerName': this.manufacturerName,
         'emailType': this.emailType,
         'status': this.status,
         'pageNum': this.pageNum,
@@ -232,20 +251,36 @@ export default {
     reset () {
       this.logEmailMessagePageList()
     },
-    edit (index) {
-      this.manufacturerName = this.logEmailMessageData[index].manufacturerName
-      console.log(this.logEmailMessageData[index].manufacturerName, ' this.manufacturerName')
-      this.formInline.serviceStatus = this.logEmailMessageData[index].serviceStatus
-      this.formInline.manufacturerAddress = this.logEmailMessageData[index].manufacturerAddress
-      //   this.formInline.manufacturerName = this.logEmailMessageData[index].manufacturerName
-      this.formInline.serviceModule = this.logEmailMessageData[index].serviceModule
-      this.formInline.serviceType = this.logEmailMessageData[index].serviceType
-
-      this.modalCheck = true
-    },
-    addNew () {
-      this.formInline.manufacturerAddress = ''
-      this.modalCheck = true
+    exportExel () {
+      /*
+        get all title and key
+    */
+      const titleArr = []
+      const keyArr = []
+      if (this.columns.length) {
+        for (let i = 0; i < this.columns.length; i++) {
+          titleArr.push(this.columns[i].title)
+          keyArr.push(this.columns[i].key)
+        }
+      } else {
+        this.$Message('表格为空')
+      }
+      //   let newArr = this.columns.map((item, index) => { return Object.assign({}, { '': item.title }) })
+      console.log(newArr, titleArr)
+      if (this.logEmailMessageData.length) {
+        this.exportLoading = true
+        const params = {
+          title: titleArr,
+          key: keyArr,
+          data: this.logEmailMessageData,
+          autoWidth: true,
+          filename: '分类列表'
+        }
+        excel.export_array_to_excel(params)
+        this.exportLoading = false
+      } else {
+        this.$Message.info('表格数据不能为空！')
+      }
     },
     cancel () {
       this.modalCheck = false
