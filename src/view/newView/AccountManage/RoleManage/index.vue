@@ -75,20 +75,20 @@ const treeData = [
         children: [
           {
             title: '添加',
-            value: '0-0-0',
-            key: '0-0-0'
+            value: '0-0-1',
+            key: '0-0-1'
           },
           {
             title: '编辑',
-            value: '0-0-0',
-            key: '0-0-0'
+            value: '0-0-2',
+            key: '0-0-2'
           }
         ]
       },
       {
         title: '权限管理',
-        value: '0-0-0',
-        key: '0-0-0'
+        value: '0-1-0',
+        key: '0-1-0'
       }
     ]
   }
@@ -127,7 +127,7 @@ export default {
       }
     }
     return {
-      value: ['0-0-0'],
+      value: ['0-0-1'],
       treeData,
       SHOW_PARENT,
       total: 0, // 总数

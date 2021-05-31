@@ -252,9 +252,6 @@ export default {
       this.logEmailMessagePageList()
     },
     exportExel () {
-      /*
-        get all title and key
-    */
       const titleArr = []
       const keyArr = []
       if (this.columns.length) {
@@ -265,7 +262,7 @@ export default {
       } else {
         this.$Message('表格为空')
       }
-      //   let newArr = this.columns.map((item, index) => { return Object.assign({}, { '': item.title }) })
+      let newArr = this.columns.map((item, index) => { return Object.assign({}, { '': item.title }) })
       console.log(newArr, titleArr)
       if (this.logEmailMessageData.length) {
         this.exportLoading = true
