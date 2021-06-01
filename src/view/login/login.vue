@@ -30,12 +30,16 @@ export default {
     handleSubmit ({ userName, password }) {
       this.$Loading.start()
       this.handleLogin({ userName, password }).then(res => {
-        this.getUserInfo().then(res => {
+        this.$Loading.finish()
+        this.$router.push({
+          name: this.$config.homeName
+        })
+        /*  this.getUserInfo().then(res => {
           this.$Loading.finish()
           this.$router.push({
             name: this.$config.homeName
           })
-        })
+        }) */
       })
     }
   }

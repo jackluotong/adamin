@@ -445,7 +445,7 @@ export default [{
   meta: {
     icon: 'ios-stats',
     title: 'EXCEL导入导出',
-    access: ['root']
+    access: ['user']
   },
   component: Main,
   children: [{

@@ -8,13 +8,13 @@ import {
   removeReaded,
   restoreTrash
 } from '@/api/user'
-import { setToken, getToken } from '@/libs/util'
+import { setToken, getToken, setAccess, storageSave } from '@/libs/util'
 import encrypt from '@/libs/RSAutil'
 
 export default {
   state: {
     userName: '',
-    userId: '',
+    userCode: '',
     avatarImgPath: '',
     token: getToken(),
     access: '',
@@ -29,14 +29,15 @@ export default {
     setAvatar (state, avatarPath) {
       state.avatarImgPath = avatarPath
     },
-    setUserId (state, id) {
-      state.userId = id
+    setUserCode (state, id) {
+      state.userCode = id
     },
     setUserName (state, name) {
       state.userName = name
     },
     setAccess (state, access) {
       state.access = access
+      setAccess(access)
     },
     setToken (state, token) {
       state.token = token
@@ -77,14 +78,21 @@ export default {
     handleLogin ({ commit }, { userName, password }) {
       userName = userName.trim()
       password = encrypt(password)
-      // console.log('password-->' + password)
       return new Promise((resolve, reject) => {
         login({
           userName,
           password
         }).then(res => {
-          const data = res.data
-          commit('setToken', data.data)
+          const userInfo = res.data.data.userInfo
+          const userAccess = res.data.data.permsSet
+          console.log(userAccess, res)
+          commit('setUserName', userInfo.userName)
+          commit('setUserCode', userInfo.userCode)
+          commit('setAccess', userAccess)
+          commit('setToken', userInfo.token) // get token from this interface return data.
+          commit('setHasGetInfo', true)
+          sessionStorage.setItem('access', userAccess)
+          storageSave(JSON.stringify(res.data.data))
           resolve()
         }).catch(err => {
           reject(err)
@@ -107,7 +115,25 @@ export default {
         // resolve()
       })
     },
-    // 获取用户相关信息
+    /*
+      to control router save value in this sessionStorage
+    */
+    getUserInfoForRouter ({ state, commit }) {
+      return new Promise((resolve, reject) => {
+        try {
+          if (!access) {
+            console.log(access, 'state.access')
+            resolve(access)
+          }
+        } catch (error) {
+          reject(error)
+        }
+      })
+    },
+    /*
+        get uer info
+        set user info by that interface return data
+    */
     getUserInfo ({ state, commit }) {
       return new Promise((resolve, reject) => {
         try {

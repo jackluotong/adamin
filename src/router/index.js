@@ -54,10 +54,29 @@ router.beforeEach((to, from, next) => {
       name: homeName // 跳转到homeName页
     })
   } else {
-    if (store.state.user.hasGetInfo) {
+    // 初次登录 没有token 页面跳转
+    const access = sessionStorage.getItem('access')
+    console.log(store.state.user, 'getUserInfo', access)
+    if (store.state.user.hasGetInfo) { // hava info
       turnTo(to, store.state.user.access, next)
     } else {
-      store.dispatch('getUserInfo').then(user => {
+      try {
+        let a = window.localStorage.getItem('result')
+        console.log(a)
+        store.dispatch('getUserInfoForRouter').then(user => {
+          console.log(user, 'user')
+          turnTo(to, user.access, next)
+        }).catch(() => {
+          setToken(store.state.user.token)
+          next({
+            name: 'login'
+          })
+        })
+      } catch (e) {
+        console.log(e)
+      }
+
+      /* store.dispatch('getUserInfo').then(user => {
         // 拉取用户信息，通过用户权限和跳转的页面的name来判断是否有权限访问;access必须是一个数组，如：['super_admin'] ['super_admin', 'admin']
         turnTo(to, user.access, next)
       }).catch(() => {
@@ -65,7 +84,7 @@ router.beforeEach((to, from, next) => {
         next({
           name: 'login'
         })
-      })
+      }) */
     }
   }
 })

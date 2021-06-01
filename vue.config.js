@@ -41,10 +41,13 @@ module.exports = {
   // devServer: {
   // proxy: 'http://localhost:8000'
   // }
+  /*
+  http://liangchangwei.cn.utools.club/dcenter/login/login
+  */
   devServer: {
     proxy: {
       '/dcenter': {
-        target: 'http://localhost:7799', // 源地址
+        target: 'http://liangchangwei.cn.utools.club/', // 源地址 7799
         changeOrigin: true, // 改变源
         pathRewrite: { // '^/bridge': '/bridge' // 路径重写
         }

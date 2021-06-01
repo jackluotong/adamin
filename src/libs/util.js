@@ -5,7 +5,13 @@ import { forEach, hasOneOf, objEqual } from '@/libs/tools'
 const { title, cookieExpires, useI18n } = config
 
 export const TOKEN_KEY = 'token'
-
+/*
+    save user info
+*/
+export const storageSave = (info) => {
+  const storage = window.localStorage
+  storage.setItem('result', info)
+}
 export const setToken = (token) => {
   Cookies.set(TOKEN_KEY, token, { expires: cookieExpires || 1 })
 }
@@ -15,7 +21,14 @@ export const getToken = () => {
   if (token) return token
   else return false
 }
-
+export const setAccess = (access) => {
+  Cookies.set('access', access)
+}
+export const getAccess = () => {
+  const access = Cookies.get('access')
+  if (access) return access
+  else return false
+}
 export const hasChild = (item) => {
   return item.children && item.children.length !== 0
 }

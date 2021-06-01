@@ -6,7 +6,7 @@ export const login = ({ userName, password }) => {
     'wordPass': password
   }
   return axios.request({
-    url: '/dcenter/admin/userInfo/LoginByUserAndPwd',
+    url: '/dcenter/login/login',
     data,
     method: 'post'
   })
