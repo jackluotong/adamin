@@ -55,16 +55,15 @@ router.beforeEach((to, from, next) => {
     })
   } else {
     // 初次登录 没有token 页面跳转
-    const access = sessionStorage.getItem('access')
-    console.log(store.state.user, 'getUserInfo', access)
+    let allInfo = window.localStorage.getItem('userInfo')
+    let getInfo = window.localStorage.getItem('HasGetInfo')
+    const userInfo = JSON.parse(allInfo)
+    console.log(userInfo, getInfo)
     if (store.state.user.hasGetInfo) { // hava info
-      turnTo(to, store.state.user.access, next)
+      turnTo(to, userInfo.permsSet, next)
     } else {
       try {
-        let a = window.localStorage.getItem('result')
-        console.log(a)
         store.dispatch('getUserInfoForRouter').then(user => {
-          console.log(user, 'user')
           turnTo(to, user.access, next)
         }).catch(() => {
           setToken(store.state.user.token)

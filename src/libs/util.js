@@ -8,9 +8,9 @@ export const TOKEN_KEY = 'token'
 /*
     save user info
 */
-export const storageSave = (info) => {
+export const storageSave = (name, info) => {
   const storage = window.localStorage
-  storage.setItem('result', info)
+  storage.setItem(name, info)
 }
 export const setToken = (token) => {
   Cookies.set(TOKEN_KEY, token, { expires: cookieExpires || 1 })
