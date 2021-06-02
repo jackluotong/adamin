@@ -213,7 +213,7 @@ export default {
       this.confData = data
       this.total = total
     },
-    getUserCode (data) {
+    translate (data) {
 
     },
     getRoleName (data) {
