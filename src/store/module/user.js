@@ -8,7 +8,7 @@ import {
   removeReaded,
   restoreTrash
 } from '@/api/user'
-import { setToken, getToken, setAccess, storageSave } from '@/libs/util'
+import { setToken, getToken, setAccess } from '@/libs/util'
 import encrypt from '@/libs/RSAutil'
 
 export default {
@@ -91,8 +91,8 @@ export default {
           commit('setAccess', userAccess)
           commit('setToken', userInfo.token) // get token from this interface return data.
           commit('setHasGetInfo', true)
-          sessionStorage.setItem('access', userAccess)
-          storageSave(JSON.stringify(res.data.data))
+          window.localStorage.setItem('allUserInfo', JSON.stringify(res.data.data))
+          window.localStorage.setItem('hasGetInfo', true)
           resolve()
         }).catch(err => {
           reject(err)

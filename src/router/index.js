@@ -55,15 +55,25 @@ router.beforeEach((to, from, next) => {
     })
   } else {
     // 初次登录 没有token 页面跳转
-    const access = sessionStorage.getItem('access')
-    console.log(store.state.user, 'getUserInfo', access)
-    if (store.state.user.hasGetInfo) { // hava info
-      turnTo(to, store.state.user.access, next)
+    const allUserInfo = window.localStorage.getItem('allUserInfo')
+    const hasGetInfo = window.localStorage.getItem('hasGetInfo')
+    const userInfo = JSON.parse(allUserInfo)
+    console.log(userInfo, hasGetInfo, 'hasGetInfo')
+    store.state.user.hasGetInfo = hasGetInfo
+
+    if (store.state.user.hasGetInfo) { // have info
+      turnTo(to, userInfo.permsSet, next)
     } else {
       try {
-        let a = window.localStorage.getItem('result')
-        console.log(a)
-        store.dispatch('getUserInfoForRouter').then(user => {
+        if (allUserInfo !== '') {
+          turnTo(to, userInfo.permsSet, next)
+        } else {
+          setToken(userInfo.token)
+          next({
+            name: 'login'
+          })
+        }
+        /* store.dispatch('getUserInfoForRouter').then(user => {
           console.log(user, 'user')
           turnTo(to, user.access, next)
         }).catch(() => {
@@ -71,7 +81,7 @@ router.beforeEach((to, from, next) => {
           next({
             name: 'login'
           })
-        })
+        }) */
       } catch (e) {
         console.log(e)
       }
