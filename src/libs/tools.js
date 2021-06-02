@@ -41,7 +41,7 @@ export const getUnion = (arr1, arr2) => {
 export const hasOneOf = (targetarr, arr) => {
   // console.log(targetarr)
   // console.log(arr)
-  return targetarr.some(_ => arr.indexOf(_) > -1)
+// return targetarr.some(_ => arr.indexOf(_) > -1)
   // if (arr) {
   //   return targetarr.some(_ => arr.indexOf(_) > -1)
   // } else {

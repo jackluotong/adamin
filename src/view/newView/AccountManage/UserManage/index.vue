@@ -214,7 +214,21 @@ export default {
       this.total = total
     },
     translate (data) {
-
+      let result = {}
+      for (const item of data) {
+        let index = Object.keys(result).findIndex(
+          (k) => k === item.userCode
+        )
+        let roleName = item.roles.map((r) => r.roleName).toString()
+        if (index === -1) {
+          result[item.userCode] = roleName
+        } else {
+          result[item.userCode] = `${
+            result[item.userCode]
+          }+${roleName}`
+        }
+      }
+      return result
     },
     getRoleName (data) {
 

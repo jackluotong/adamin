@@ -45,6 +45,8 @@
     "@vue/cli-service": "^3.0.1",
     "@vue/eslint-config-standard": "^3.0.0-beta.10",
     "@vue/test-utils": "^1.0.0-beta.10",
+    "babel-loader": "^8.2.2",
+    "cache-loader": "^2.0.1",
     "chai": "^4.1.2",
     "eslint-plugin-cypress": "^2.0.1",
     "less": "^2.7.3",
@@ -52,6 +54,7 @@
     "lint-staged": "^6.0.0",
     "mockjs": "^1.0.1-beta3",
     "node-rsa": "^1.1.1",
+    "vue-loader": "^15.9.7",
     "vue-template-compiler": "^2.5.13"
   },
   "browserslist": [
