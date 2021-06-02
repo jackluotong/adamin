@@ -5,13 +5,6 @@ import { forEach, hasOneOf, objEqual } from '@/libs/tools'
 const { title, cookieExpires, useI18n } = config
 
 export const TOKEN_KEY = 'token'
-/*
-    save user info
-*/
-export const storageSave = (name, info) => {
-  const storage = window.localStorage
-  storage.setItem(name, info)
-}
 export const setToken = (token) => {
   Cookies.set(TOKEN_KEY, token, { expires: cookieExpires || 1 })
 }
@@ -44,10 +37,11 @@ const showThisMenuEle = (item, access) => {
  * @returns {Array}
  */
 export const getMenuByRouter = (list, access) => {
-  // console.log('-----')
-  // console.log(list)
-  // console.log(access)
-  // console.log('-----')
+  debugger
+  console.log('-----')
+  console.log(list)
+  console.log(access)
+  console.log('-----')
   let res = []
   forEach(list, item => {
     if (!item.meta || (item.meta && !item.meta.hideInMenu)) {
@@ -60,7 +54,8 @@ export const getMenuByRouter = (list, access) => {
         obj.children = getMenuByRouter(item.children, access)
       }
       if (item.meta && item.meta.href) obj.href = item.meta.href
-      if (showThisMenuEle(item, access)) res.push(obj)
+      //   if (showThisMenuEle(item, access)) res.push(obj)
+      res.push(obj)
     }
   })
   return res

@@ -91,8 +91,8 @@ export default {
           commit('setAccess', userAccess)
           commit('setToken', userInfo.token) // get token from this interface return data.
           commit('setHasGetInfo', true)
-          window.localStorage.setItem('userInfo', JSON.stringify(res.data))
-          window.localStorage.setItem('HasGetInfo', 'true')
+          window.localStorage.setItem('allUserInfo', JSON.stringify(res.data.data))
+          window.localStorage.setItem('hasGetInfo', true)
           resolve()
         }).catch(err => {
           reject(err)
