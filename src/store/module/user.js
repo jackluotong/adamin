@@ -86,13 +86,15 @@ export default {
           const userInfo = res.data.data.userInfo
           const userAccess = res.data.data.permsSet
           console.log(userAccess, res)
+          window.sessionStorage.setItem('allUserInfo', JSON.stringify(res.data.data))
+          window.sessionStorage.setItem('hasGetInfo', true)
+          sessionStorage.setItem('access', userAccess)
           commit('setUserName', userInfo.userName)
           commit('setUserCode', userInfo.userCode)
           commit('setAccess', userAccess)
           commit('setToken', userInfo.token) // get token from this interface return data.
           commit('setHasGetInfo', true)
-          window.localStorage.setItem('allUserInfo', JSON.stringify(res.data.data))
-          window.localStorage.setItem('hasGetInfo', true)
+          console.log(sessionStorage.getItem('access'), 'access')
           resolve()
         }).catch(err => {
           reject(err)
@@ -121,8 +123,11 @@ export default {
     getUserInfoForRouter ({ state, commit }) {
       return new Promise((resolve, reject) => {
         try {
-          let allInfo = window.localStorage.getItem('result')
-          resolve(allInfo)
+          debugger
+          const allInfo = window.sessionStorage.getItem('allUserInfo')
+          const userInfo = JSON.parse(allInfo)
+          console.log(userInfo)
+          resolve(userInfo)
         } catch (error) {
           reject(error)
         }

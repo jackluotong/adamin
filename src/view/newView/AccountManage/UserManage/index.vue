@@ -3,27 +3,25 @@
     <h1 style="margin:10px 10px 10px 10px">账户管理-用户管理</h1>
     <div class="content-button" >
       <span style="padding:10px">用户code</span>
-      <Input v-model.trim="confKey" />
+      <Input v-model.trim="userCode" @blur="blur"/>
       <Button type="primary" icon="md-search" @click="search()" style="margin:0 10px 0 20px">查询</Button>
     </div>
     <Table highlight-row stripe :columns="columns" :data="confData" style="margin-top: 5px">
        <template slot-scope="{ row, index }" slot="action">
           <div>
-            <Button type="primary" size="small" style="margin-right: 5px" @click="edit(index)">编辑</Button>
-            <Button type="error" size="small" style="margin-right: 5px" @click="del(index)">删除</Button>
+            <Button type="primary" size="small" style="margin-right: 5px" @click="edit(index)">角色关联</Button>
           </div>
         </template>
      </Table>
      <Page :total='total' :page-size='pageSize' :show-total="true" show-sizer style="text-align: center;margin-top: 5px"/>
      <Modal v-model.trim="modalAddOrUpdate" width="600" :mask-closable="false" :closable="false" v-bind:title="detailTitle">
       <Form ref="formInline" :model="formInline" :rules="ruleInline" inline>
-        <FormItem label="用户code" prop="confName" style="width:270px;">
-            <span>test</span>
-          <!-- <Input v-model.trim="formInline.confName"/> -->
+        <FormItem label="用户code" prop="userCode" style="width:270px;">
+            <span>{{formInline.userCode}}</span>
         </FormItem>
         <FormItem>
         <Checkbox-group v-model="social">
-        <Checkbox label="管理员">
+        <Checkbox label="管理员" @on-change='select()'>
             <Icon type="social-twitter"></Icon>
             <span>管理员</span>
         </Checkbox>
@@ -43,20 +41,11 @@
         <Button type="primary" size="large" @click="handleSubmitAddOrUpdate('formInline')">保存</Button>
       </div>
      </Modal>
-    <Modal v-model.trim="modalDelete" width="450" title="删除参数配置提示">
-      <div >
-        <p>确定删除该参数配置吗？</p>
-      </div>
-      <div slot="footer">
-          <Button type="text" @click="cancelDelete" size="large">取消</Button>
-          <Button type="primary" @click="handleSubmitDelete" size="large" >确定</Button>
-      </div>
-    </Modal>
   </div>
 </template>
 
 <script>
-import { confPageList, confDelete, conf } from '@/api/data'
+import { confPageList, conf, getInfoUser } from '@/api/data'
 export default {
   data () {
     function getByteLen (val) {
@@ -71,16 +60,8 @@ export default {
       }
       return len
     }
-    const validateConfName = function (rule, value, callback) {
-      if (!value) {
-        callback(new Error('请输入参数名称'))
-      } else if (getByteLen(value) > 128) {
-        callback(new Error('字符串长度不能超过128'))
-      } else {
-        callback()
-      }
-    }
-    const validateConfKey = (rule, value, callback) => {
+
+    const validateuserCode = (rule, value, callback) => {
       if (!value) {
         callback(new Error('请输入参数键名'))
       } else if (getByteLen(value) > 64) {
@@ -89,67 +70,41 @@ export default {
         callback()
       }
     }
-    const validateConfValue = (rule, value, callback) => {
-      if (!value) {
-        callback(new Error('请输入参数键名'))
-      } else {
-        callback()
-      }
-    }
-    const validateConfDescribtion = (rule, value, callback) => {
-      if (!value) {
-        callback(new Error('请输入配置描述'))
-      } else if (getByteLen(value) > 256) {
-        callback(new Error('字符串长度不能超过256'))
-      } else {
-        callback()
-      }
-    }
+
     return {
       social: ['管理员', '查询员', '服务管理员'],
-      total: 0, // 总数
-      pageNum: 1, // 第几页
-      pageSize: 30, // 每页几条数据
-      confName: '', // 参数名称
-      confKey: '', // 参数键名
+      total: 0,
+      pageNum: 1,
+      pageSize: 30,
+      confName: '',
+      userCode: '',
       modalAddOrUpdate: false, // 是否显示新增弹窗
       detailTitle: '', // 表单标题
       showType: '', // 表单展示类型（edit、add）
       modalDelete: false, // 是否显示删除提示弹窗
       formInline: { // 实体
         confName: '', // 参数名称
-        confKey: '', // 参数键名
+        userCode: '', // 参数键名
         confValue: '', // 参数键值
         confDescribtion: '' // 配置描述
       },
       ruleInline: {
-        confName: [
-          { required: true, validator: validateConfName, trigger: 'blur' }
-        ],
-        confKey: [
-          { required: true, validator: validateConfKey, trigger: 'blur' }
-        ],
-        confValue: [
-          { required: true, validator: validateConfValue, trigger: 'blur' }
-        ],
-        confDescribtion: [
-          { required: true, validator: validateConfDescribtion, trigger: 'blur' }
+        userCode: [
+          { required: true, validator: validateuserCode, trigger: 'blur' }
         ]
       },
-      confData: [ // 参数配置数据
-        { confName: 'jack', confKey: '29' }
-      ],
+      confData: [ ], // {key:value,[{key:value},{}]}...
       columns: [
         {
-          title: '角色名称',
-          key: 'confName',
-          tooltip: true,
+          title: '用户code',
+          key: 'userCode',
           width: 300,
           align: 'center'
         },
         {
-          title: '角色code',
-          key: 'confKey',
+          title: '已有角色',
+          key: 'roleName',
+          tooltip: true,
           width: 300,
           align: 'center'
         },
@@ -163,38 +118,27 @@ export default {
     }
   },
   methods: {
-    search () { // 点击查询按钮
-      const date = {
-        'confName': this.confName,
-        'confKey': this.confKey,
-        'pageNum': this.pageNum,
-        'pageSize': this.pageSize
+    blur () {
+      console.log(blur)
+    },
+    search () {
+      const info = {
+        'userCode': this.userCode
       }
-      confPageList(date).then(res => {
-        // this.$Message['success']({
-        //   background: true,
-        //   content: res.data.data
-        // })
-        this.confData = res.data.data.resultList
-        this.total = res.data.data.totalAmount
+      getInfoUser(info).then(res => {
+        const data = res.data.data.records
+        const total = res.data.data.total
+        this.showPage(data, total)
       }).catch(err => {
         console.log(err)
       })
     },
-    reset () { // 点击重置按钮
-      this.confName = ''
-      this.confKey = ''
-      this.confValue = ''
-      this.confDescribtion = ''
-      this.pageNum = 1
-      this.confPageList()
-    },
-    addSetting () { // 点击新增按钮
+    addSetting () {
       this.showType = 'add'
       this.detailTitle = '新增全局配置信息'
       this.modalAddOrUpdate = true
     },
-    handleSubmitAddOrUpdate (index) { // 点击提交新增按钮
+    handleSubmitAddOrUpdate (index) {
       console.log(index)
       this.$refs[index].validate((valid) => {
         console.log(valid)
@@ -202,7 +146,7 @@ export default {
           if (this.showType === 'add') {
             const date = {
               'confName': this.formInline.confName,
-              'confKey': this.formInline.confKey,
+              'userCode': this.formInline.userCode,
               'confValue': this.formInline.confValue,
               'confDescribtion': this.formInline.confDescribtion
             }
@@ -221,7 +165,7 @@ export default {
             const date = {
               'id': this.id,
               'confName': this.formInline.confName,
-              'confKey': this.formInline.confKey,
+              'userCode': this.formInline.userCode,
               'confValue': this.formInline.confValue,
               'confDescribtion': this.formInline.confDescribtion
             }
@@ -246,34 +190,12 @@ export default {
       this.$refs[name].resetFields()
       this.modalAddOrUpdate = false
     },
-    edit (index) { // 点击修改按钮
+    edit (index) {
       this.id = this.confData[index].id
-      this.formInline.confName = this.confData[index].confName
-      this.formInline.confKey = this.confData[index].confKey
-      this.formInline.confValue = this.confData[index].confValue
-      this.formInline.confDescribtion = this.confData[index].confDescribtion
+      this.formInline.userCode = this.confData[index].userCode
       this.showType = 'edit'
       this.detailTitle = '账户管理-用户管理'
-      this.modalAddOrUpdate = true // 用于展示model框
-    },
-    del (index) { // 提交删除按钮
-      this.modalDelete = true
-      this.id = this.confData[index].id
-    },
-    cancelDelete () { // 取消删除
-      this.modalDelete = false
-    },
-    handleSubmitDelete () { // 确认删除
-      confDelete(this.id).then(res => {
-        this.$Message['success']({
-          background: true,
-          content: res.data.message
-        })
-        this.modalDelete = false
-        this.confPageList()
-      }).catch(err => {
-        console.log(err)
-      })
+      this.modalAddOrUpdate = true
     },
     confPageList () { // 根据条件分页查询全部配置
       const date = {
@@ -286,10 +208,68 @@ export default {
       }).catch(err => {
         console.log(err)
       })
+    },
+    showPage (data, total) {
+      this.confData = data
+      this.total = total
+    },
+    getUserCode (data) {
+
+    },
+    getRoleName (data) {
+
     }
   },
   created () {
-    this.confPageList()
+    console.log(this.social[0])
+    const info = {
+      userCode: this.userCode,
+      pageSize: this.pageSize,
+      currentPage: this.pageNum
+    }
+    getInfoUser(info).then(res => {
+      const data = res.data.data.records
+      const total = res.data.data.total
+      this.showPage(data, total)
+      console.log(data)// data[3].roles[0].roleName
+      const userCode = data.map((item) => {
+        return item.userCode
+      })
+
+      function getRoleName () {
+        const roleNameArray = []
+        const userCode = []
+        const obj = {} // [{},{}]
+        for (let i = 0; i < data.length; i++) {
+          if (data[i].roles.length === 0) {
+            userCode.push(data[i].userCode)
+            obj.userCode = data[i].userCode
+            obj.roleName = ' '
+          }
+          for (let j = 0; j < data[i].roles.length; j++) {
+            roleNameArray.push(data[i].roles[j].roleName)
+            userCode.push(data[i].userCode)
+            obj.userCode = [...obj.userCode, data[i].userCode]
+            obj.roleName = [...obj.roleName, data[i].roles[j].roleName]
+          }
+        }
+        return roleNameArray
+      }
+      console.log(res)
+      console.log(userCode, getRoleName())
+    }).catch(err => { console.log(err) })
+  },
+  watch: {
+    userCode: {
+      handler: function (val, old) {
+        console.log(val, old)
+        if (val === '') {
+          /*
+                to do
+            */
+        }
+      }
+    }
   }
 }
 </script>

@@ -1,19 +1,19 @@
 import Vue from 'vue'
 import Router from 'vue-router'
 import routes from './routers'
-import store from '@/store'
+// import store from '@/store'
 import iView from 'iview'
 import {
-  setToken,
-  getToken,
-  canTurnTo,
+//   setToken,
+//   getToken,
+//   canTurnTo,
   setTitle
 } from '@/libs/util'
-import config from '@/config'
+/* import config from '@/config'
 const {
   homeName
 } = config
-
+ */
 Vue.use(Router)
 // 解决 导航栏中的vue-router在3.0版本以上重复点菜单报错问题
 const originalPush = Router.prototype.push
@@ -25,79 +25,98 @@ const router = new Router({
   routes,
   mode: 'history'
 })
-const LOGIN_PAGE_NAME = 'login'
+/* const LOGIN_PAGE_NAME = 'login'
 
-const turnTo = (to, access, next) => {
-  if (canTurnTo(to.name, access, routes)) next() // 有权限，可访问
+const turnTo = (to, next) => {
+  if (canTurnTo(to.name, routes)) next()
   else {
     next({
       replace: true,
       name: 'error_401'
     })
   } // 无权限，重定向到401页面
-}
+} */
 
-router.beforeEach((to, from, next) => {
-  iView.LoadingBar.start()
-  const token = getToken()
-  if (!token && to.name !== LOGIN_PAGE_NAME) {
-    // 未登录且要跳转的页面不是登录页
-    next({
-      name: LOGIN_PAGE_NAME // 跳转到登录页
-    })
-  } else if (!token && to.name === LOGIN_PAGE_NAME) {
-    // 未登陆且要跳转的页面是登录页
-    next() // 跳转
-  } else if (token && to.name === LOGIN_PAGE_NAME) {
-    // 已登录且要跳转的页面是登录页
-    next({
-      name: homeName // 跳转到homeName页
-    })
-  } else {
-    // 初次登录 没有token 页面跳转
-    const allUserInfo = window.localStorage.getItem('allUserInfo')
-    const hasGetInfo = window.localStorage.getItem('hasGetInfo')
-    const userInfo = JSON.parse(allUserInfo)
-    console.log(userInfo, hasGetInfo, 'hasGetInfo')
-    store.state.user.hasGetInfo = hasGetInfo
-
-    if (store.state.user.hasGetInfo) { // have info
-      turnTo(to, userInfo.permsSet, next)
-    } else {
-      try {
-        if (allUserInfo !== '') {
-          turnTo(to, userInfo.permsSet, next)
-        } else {
-          setToken(userInfo.token)
-          next({
-            name: 'login'
-          })
-        }
-        /* store.dispatch('getUserInfoForRouter').then(user => {
-          console.log(user, 'user')
-          turnTo(to, user.access, next)
-        }).catch(() => {
-          setToken(store.state.user.token)
-          next({
-            name: 'login'
-          })
-        }) */
-      } catch (e) {
-        console.log(e)
-      }
-
-      /* store.dispatch('getUserInfo').then(user => {
-        // 拉取用户信息，通过用户权限和跳转的页面的name来判断是否有权限访问;access必须是一个数组，如：['super_admin'] ['super_admin', 'admin']
-        turnTo(to, user.access, next)
-      }).catch(() => {
-        setToken('')
-        next({
-          name: 'login'
-        })
-      }) */
-    }
-  }
-})
+// router.beforeEach((to, from, next) => {
+//   iView.LoadingBar.start()
+//   const token = getToken()
+//   debugger
+//   if (!token && to.name !== LOGIN_PAGE_NAME) {
+//     // 未登录且要跳转的页面不是登录页
+//     next({
+//       name: LOGIN_PAGE_NAME // 跳转到登录页
+//     })
+//   } else if (!token && to.name === LOGIN_PAGE_NAME) {
+//     // 未登陆且要跳转的页面是登录页
+//     next() // 跳转
+//   } else if (token && to.name === LOGIN_PAGE_NAME) {
+//     // 已登录且要跳转的页面是登录页
+//     next({
+//       name: homeName // 跳转到homeName页
+//     })
+//   } else {
+//     // have token but not login
+//     if (token && to.name !== LOGIN_PAGE_NAME) {
+//       router.push({ name: homeName })
+//       next()
+//     } else if (token && to.name === homeName) {
+//       next()
+//     }
+//     // // 初次登录 没有token 页面跳转
+//     // const allUserInfo = window.sessionStorage.getItem('allUserInfo')
+//     // const hasGetInfo = window.sessionStorage.getItem('hasGetInfo')
+//     // const userInfo = JSON.parse(allUserInfo)
+//     // console.log(userInfo, hasGetInfo, 'hasGetInfo')
+//     // store.state.user.hasGetInfo = hasGetInfo
+//     // if (hasGetInfo) { // have info
+//     //   turnTo(to, userInfo.permsSet, next)
+//     // } else {
+//     //   /*
+//     //         登录成功刷新
+//     //     */
+//     //   try {
+//     //     debugger
+//     //     store.dispatch('getUserInfoForRouter').then(user => {
+//     //       console.log(user, 'user')
+//     //       turnTo(to, user.access, next)
+//     //     }).catch(() => {
+//     //       setToken(store.state.user.token)
+//     //       next({
+//     //         name: 'login'
+//     //       })
+//     //     })
+//     //     /*  if (userInfo !== null) {
+//     //       turnTo(to, userInfo.permsSet, next)
+//     //     } else {
+//     //     //   setToken(userInfo.token)
+//     //       next({
+//     //         name: 'login'
+//     //       })
+//     //     } */
+//     //   } catch (e) {
+//     //     console.log(e)
+//     //   }
+//     //   /* store.dispatch('getUserInfoForRouter').then(user => {
+//     //       console.log(user, 'user')
+//     //       turnTo(to, user.access, next)
+//     //     }).catch(() => {
+//     //       setToken(store.state.user.token)
+//     //       next({
+//     //         name: 'login'
+//     //       })
+//     //     }) */
+//     //   /* store.dispatch('getUserInfo').then(user => {
+//     //     // 拉取用户信息，通过用户权限和跳转的页面的name来判断是否有权限访问;access必须是一个数组，如：['super_admin'] ['super_admin', 'admin']
+//     //     turnTo(to, user.access, next)
+//     //   }).catch(() => {
+//     //     setToken('')
+//     //     next({
+//     //       name: 'login'
+//     //     })
+//     //   }) */
+//     // }
+//   }
+// })
 
 router.afterEach(to => {
   setTitle(to, router.app)

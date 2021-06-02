@@ -1,5 +1,25 @@
 import axios from '@/libs/api.request'
 
+/*
+    用户管理获取信息
+*/
+export const getInfoUser = (info) => {
+  return axios.request({
+    url: '/dcenter/userInfo/list',
+    method: 'post',
+    data: info
+  })
+}
+/*
+    角色管理获取信息
+*/
+export const getInfoRole = (info) => {
+  return axios.request({
+    url: '/dcenter/userInfo/list',
+    method: 'post',
+    data: info
+  })
+}
 // 根据条件分页查询全部定时任务配置表
 export const confJobPageList = (info) => {
   return axios.request({
@@ -144,7 +164,7 @@ export const getTreeSelectData = () => {
 // 根据条件分页查询全部参数配置表
 export const confPageList = (info) => {
   return axios.request({
-    url: '/admin/conf/pageList',
+    url: '/decenter/userInfo/list',
     data: info,
     method: 'post'
   })

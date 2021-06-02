@@ -154,7 +154,8 @@ export default {
         ]
       },
       confData: [ // 参数配置数据
-        { confName: 'jack', confKey: '29' }
+        { confName: 'jack', confKey: '29' },
+        { confName: 'jack1', confKey: '09' }
       ],
       columns: [
         {
