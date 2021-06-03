@@ -3,12 +3,11 @@
     <h1 style="margin:10px 10px 10px 10px">账户管理-角色管理</h1>
     <div class="content-button" >
       <span style="padding:10px">角色名称</span>
-      <Input v-model.trim="confName" />
+      <Input v-model.trim="roleName" />
       <span style="padding:10px">角色code</span>
-      <Input v-model.trim="confKey" />
+      <Input v-model.trim="roleCode" />
       <Button type="primary" icon="md-search" @click="search()" style="margin:0 10px 0 20px">查询</Button>
-      <!-- <Button type="primary" icon="md-refresh" @click="reset()">重置</Button> -->
-      <Button type="primary" icon="md-add" @click="addSetting()">新增配置</Button>
+      <Button type="primary" icon="md-add" @click="addSetting()">新增</Button>
     </div>
     <Table highlight-row stripe :columns="columns" :data="confData" style="margin-top: 5px">
        <template slot-scope="{ row, index }" slot="action">
@@ -21,24 +20,14 @@
      <Page :total='total' :page-size='pageSize' :show-total="true" show-sizer style="text-align: center;margin-top: 5px"/>
      <Modal v-model.trim="modalAddOrUpdate" width="600" :mask-closable="false" :closable="false" v-bind:title="detailTitle">
       <Form ref="formInline" :model="formInline" :rules="ruleInline" inline>
-        <FormItem label="角色名称" prop="confName" style="width:270px;">
-          <Input v-model.trim="formInline.confName"/>
+        <FormItem label="角色名称" prop="roleName" style="width:270px;">
+          <Input v-model.trim="formInline.roleName"/>
         </FormItem>
-        <FormItem label="角色code" prop="confKey" style="width:270px;">
-          <Input  v-model.trim="formInline.confKey"/>
+        <FormItem label="角色code" prop="roleCode" style="width:270px;">
+          <Input  v-model.trim="formInline.roleCode"/>
         </FormItem>
         <FormItem>
-<div style="width:300px">
-   <a-tree-select
-    v-model="value"
-    style="width: 100%"
-    :tree-data="treeData"
-    tree-checkable
-    :show-checked-strategy="SHOW_PARENT"
-    search-placeholder="Please select"
-  />
-</div>
-
+        <Tree :data="treeData" show-checkbox></Tree>
         </FormItem>
       </Form>
       <div slot="footer">
@@ -59,10 +48,10 @@
 </template>
 
 <script>
-import { confPageList, confDelete, conf } from '@/api/data'
+import { confPageList, confDelete, conf, getInfoRole, getAuthTree } from '@/api/data'
 import { TreeSelect } from 'ant-design-vue'
 const SHOW_PARENT = TreeSelect.SHOW_PARENT
-const treeData = [
+/* const treeData = [
   {
     title: '账号管理',
     value: '0-0',
@@ -93,7 +82,7 @@ const treeData = [
     ]
   }
 
-]
+] */
 export default {
   data () {
     function getByteLen (val) {
@@ -108,7 +97,7 @@ export default {
       }
       return len
     }
-    const validateConfName = function (rule, value, callback) {
+    const validateroleName = function (rule, value, callback) {
       if (!value) {
         callback(new Error('请输入角色名称'))
       } else if (getByteLen(value) > 128) {
@@ -117,7 +106,7 @@ export default {
         callback()
       }
     }
-    const validateConfKey = (rule, value, callback) => {
+    const validateroleCode = (rule, value, callback) => {
       if (!value) {
         callback(new Error('请输入角色code'))
       } else if (getByteLen(value) > 64) {
@@ -127,83 +116,50 @@ export default {
       }
     }
     return {
-      value: ['0-0-1'],
-      treeData,
+      value: [],
+      treeData: [],
       SHOW_PARENT,
       total: 0, // 总数
       pageNum: 1, // 第几页
       pageSize: 30, // 每页几条数据
-      confName: '', // 参数名称
-      confKey: '', // 参数键名
+      roleName: '', // 参数名称
+      roleCode: '', // 参数键名
       modalAddOrUpdate: false, // 是否显示新增弹窗
       detailTitle: '', // 表单标题
       showType: '', // 表单展示类型（edit、add）
       modalDelete: false, // 是否显示删除提示弹窗
       formInline: { // 实体
-        confName: '', // 参数名称
-        confKey: '', // 参数键名
+        roleName: '', // 参数名称
+        roleCode: '', // 参数键名
         confValue: '', // 参数键值
         confDescribtion: '' // 配置描述
       },
       ruleInline: {
-        confName: [
-          { required: true, validator: validateConfName, trigger: 'blur' }
+        roleName: [
+          { required: true, validator: validateroleName, trigger: 'blur' }
         ],
-        confKey: [
-          { required: true, validator: validateConfKey, trigger: 'blur' }
+        roleCode: [
+          { required: true, validator: validateroleCode, trigger: 'blur' }
         ]
       },
       confData: [ // 参数配置数据
-        { confName: 'jack', confKey: '29' },
-        { confName: 'jack1', confKey: '09' }
+        /*  { roleName: 'jack', roleCode: '29' },
+        { roleName: 'jack1', roleCode: '09' } */
       ],
       columns: [
         {
           title: '角色名称',
-          key: 'confName',
+          key: 'roleName',
           tooltip: true,
           width: 300,
           align: 'center'
         },
         {
           title: '角色code',
-          key: 'confKey',
+          key: 'roleCode',
           width: 300,
           align: 'center'
         },
-        // {
-        //   title: '参数键值',
-        //   key: 'confValue',
-        //   align: 'center',
-        //   render: (h, params) => {
-        //     return h('div', [
-        //       h('span', {
-        //         style: {
-        //           display: 'inline-block',
-        //           width: '100%',
-        //           overflow: 'hidden',
-        //           textOverflow: 'ellipsis',
-        //           whiteSpace: 'nowrap'
-        //         },
-        //         domProps: {
-        //           title: params.row.confValue
-        //         },
-        //         on: {
-        //           click: () => {
-        //             // 识别逗号换行
-        //             var text = params.row.confValue
-        //             var reg = /[,，]/g
-        //             text = text.replace(reg, ',<br>')
-        //             this.$Modal.info({
-        //               title: '参数键值',
-        //               content: text
-        //             })
-        //           }
-        //         }
-        //       }, params.row.confValue)
-        //     ])
-        //   }
-        // },
         {
           title: '操作',
           slot: 'action',
@@ -214,31 +170,17 @@ export default {
     }
   },
   methods: {
-    search () { // 点击查询按钮
-      const date = {
-        'confName': this.confName,
-        'confKey': this.confKey,
-        'pageNum': this.pageNum,
-        'pageSize': this.pageSize
+    search () {
+      const data = {
+        roleName: this.roleName,
+        roleCode: this.roleCode
       }
-      confPageList(date).then(res => {
-        // this.$Message['success']({
-        //   background: true,
-        //   content: res.data.data
-        // })
-        this.confData = res.data.data.resultList
-        this.total = res.data.data.totalAmount
-      }).catch(err => {
-        console.log(err)
-      })
-    },
-    reset () { // 点击重置按钮
-      this.confName = ''
-      this.confKey = ''
-      this.confValue = ''
-      this.confDescribtion = ''
-      this.pageNum = 1
-      this.confPageList()
+      getInfoRole(data).then(res => {
+        const data = res.data.data.records
+        const total = res.data.data.total
+        this.renderPage(data, total)
+        console.log(res)
+      }).catch(err => console.log(err))
     },
     addSetting () { // 点击新增按钮
       this.showType = 'add'
@@ -252,8 +194,8 @@ export default {
         if (valid) {
           if (this.showType === 'add') {
             const date = {
-              'confName': this.formInline.confName,
-              'confKey': this.formInline.confKey,
+              'roleName': this.formInline.roleName,
+              'roleCode': this.formInline.roleCode,
               'confValue': this.formInline.confValue,
               'confDescribtion': this.formInline.confDescribtion
             }
@@ -271,8 +213,8 @@ export default {
           } else if (this.showType === 'edit') {
             const date = {
               'id': this.id,
-              'confName': this.formInline.confName,
-              'confKey': this.formInline.confKey,
+              'roleName': this.formInline.roleName,
+              'roleCode': this.formInline.roleCode,
               'confValue': this.formInline.confValue,
               'confDescribtion': this.formInline.confDescribtion
             }
@@ -299,8 +241,8 @@ export default {
     },
     edit (index) { // 点击修改按钮
       this.id = this.confData[index].id
-      this.formInline.confName = this.confData[index].confName
-      this.formInline.confKey = this.confData[index].confKey
+      this.formInline.roleName = this.confData[index].roleName
+      this.formInline.roleCode = this.confData[index].roleCode
       this.formInline.confValue = this.confData[index].confValue
       this.formInline.confDescribtion = this.confData[index].confDescribtion
       this.showType = 'edit'
@@ -337,10 +279,27 @@ export default {
       }).catch(err => {
         console.log(err)
       })
+    },
+    renderPage (data) {
+      this.confData = data
     }
   },
   created () {
-    this.confPageList()
+    const data = {
+      roleName: this.roleName,
+      roleCode: this.roleCode
+    }
+    getInfoRole(data).then(res => {
+      const data = res.data.data
+      this.renderPage(data)
+      console.log(res)
+    })
+  },
+  mounted () {
+    getAuthTree().then(res => {
+      this.treeData = res.data.data
+      console.log(res, 'authTree')
+    })
   }
 }
 </script>

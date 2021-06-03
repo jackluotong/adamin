@@ -3,7 +3,7 @@
     <h1 style="margin:10px 10px 10px 10px">账户管理-用户管理</h1>
     <div class="content-button" >
       <span style="padding:10px">用户code</span>
-      <Input v-model.trim="userCode" @blur="blur"/>
+      <Input v-model.trim="userCode"/>
       <Button type="primary" icon="md-search" @click="search()" style="margin:0 10px 0 20px">查询</Button>
     </div>
     <Table highlight-row stripe :columns="columns" :data="confData" style="margin-top: 5px">
@@ -17,25 +17,26 @@
      <Modal v-model.trim="modalAddOrUpdate" width="600" :mask-closable="false" :closable="false" v-bind:title="detailTitle">
       <Form ref="formInline" :model="formInline" :rules="ruleInline" inline>
         <FormItem label="用户code" prop="userCode" style="width:270px;">
-            <span>{{formInline.userCode}}</span>
+            <span label="">{{formInline.userCode}}</span>
         </FormItem>
-        <FormItem>
-        <Checkbox-group v-model="social">
-        <Checkbox label="管理员" @on-change='select()'>
-            <Icon type="social-twitter"></Icon>
-            <span>管理员</span>
-        </Checkbox>
-        <Checkbox label="查询员">
-            <Icon type="social-facebook"></Icon>
-            <span>查询员</span>
-        </Checkbox>
-        <Checkbox label="服务管理员">
-            <Icon type="social-github"></Icon>
-            <span>服务管理员</span>
-        </Checkbox>
-       </Checkbox-group>
-        </FormItem>
+
       </Form>
+         <div>
+            <Checkbox-group
+                v-model="checkAllGroup1"
+                @on-change="selected"
+            >
+                <Checkbox
+                    v-for="(item, index) in checkedList"
+                    :key="index"
+                    :label="item"
+                    v-model="getValue"
+                    size="large"
+                    ref="checkBox"
+                    >{{ item.name }}</Checkbox
+                >
+            </Checkbox-group>
+        </div>
       <div slot="footer">
         <Button type="primary" ghost size="large" @click="cancelAddOrUpdate('formInline')">返回</Button>
         <Button type="primary" size="large" @click="handleSubmitAddOrUpdate('formInline')">保存</Button>
@@ -45,7 +46,7 @@
 </template>
 
 <script>
-import { confPageList, conf, getInfoUser } from '@/api/data'
+import { confPageList, conf, getInfoUser, getInfoRole, roleConnect } from '@/api/data'
 export default {
   data () {
     function getByteLen (val) {
@@ -70,30 +71,31 @@ export default {
         callback()
       }
     }
-
     return {
-      social: ['管理员', '查询员', '服务管理员'],
+      value: [],
+      checkedList: [],
+      selectOptions: [],
+      checked: true,
+      roleName: '',
       total: 0,
       pageNum: 1,
       pageSize: 30,
-      confName: '',
       userCode: '',
-      modalAddOrUpdate: false, // 是否显示新增弹窗
-      detailTitle: '', // 表单标题
+      modalAddOrUpdate: false,
+      detailTitle: '',
       showType: '', // 表单展示类型（edit、add）
-      modalDelete: false, // 是否显示删除提示弹窗
+      modalDelete: false,
       formInline: { // 实体
-        confName: '', // 参数名称
-        userCode: '', // 参数键名
-        confValue: '', // 参数键值
-        confDescribtion: '' // 配置描述
+        userCode: '',
+        checkedList: '',
+        roleName: ''
       },
       ruleInline: {
         userCode: [
           { required: true, validator: validateuserCode, trigger: 'blur' }
         ]
       },
-      confData: [ ], // {key:value,[{key:value},{}]}...
+      confData: [ ],
       columns: [
         {
           title: '用户code',
@@ -118,8 +120,12 @@ export default {
     }
   },
   methods: {
-    blur () {
-      console.log(blur)
+    onChange (data) {
+      console.log(data)
+      this.selectOptions = data
+    },
+    select (data) {
+      console.log(data)
     },
     search () {
       const info = {
@@ -128,18 +134,24 @@ export default {
       getInfoUser(info).then(res => {
         const data = res.data.data.records
         const total = res.data.data.total
-        this.showPage(data, total)
+        this.renderPage(data, total)
       }).catch(err => {
         console.log(err)
       })
     },
-    addSetting () {
-      this.showType = 'add'
-      this.detailTitle = '新增全局配置信息'
-      this.modalAddOrUpdate = true
-    },
     handleSubmitAddOrUpdate (index) {
+      console.log(this.value, 'value')
+      console.log(this.selectOptions)
       console.log(index)
+      const info = {
+        'userCode': this.formInline.userCode,
+        'roles': [
+          { 'roleCode': this.selectOptions }
+        ]
+
+      }
+      console.log(info)
+      roleConnect(info).then(res => { console.log(res) })
       this.$refs[index].validate((valid) => {
         console.log(valid)
         if (valid) {
@@ -187,13 +199,14 @@ export default {
       })
     },
     cancelAddOrUpdate (name) { // 取消新增
+      this.checked = false
       this.$refs[name].resetFields()
       this.modalAddOrUpdate = false
     },
     edit (index) {
       this.id = this.confData[index].id
+      console.log(this.confData[index])
       this.formInline.userCode = this.confData[index].userCode
-      this.showType = 'edit'
       this.detailTitle = '账户管理-用户管理'
       this.modalAddOrUpdate = true
     },
@@ -209,11 +222,12 @@ export default {
         console.log(err)
       })
     },
-    showPage (data, total) {
+    renderPage (data, total) {
       this.confData = data
       this.total = total
     },
     translate (data) {
+      let arr = []
       let result = {}
       for (const item of data) {
         let index = Object.keys(result).findIndex(
@@ -227,15 +241,36 @@ export default {
             result[item.userCode]
           }+${roleName}`
         }
+        arr.push(result)
       }
+      console.log(arr)
+      console.log(result)
       return result
-    },
-    getRoleName (data) {
-
     }
+
+  },
+  mounted () {
+    /*
+            get all roleName
+        */
+    const data = {
+      roleName: this.roleName,
+      roleCode: this.roleCode
+    }
+    getInfoRole(data).then(res => {
+      const data = res.data.data
+      /*    let allRoleName = data.map((item) => {
+        return item.roleName
+      }) */
+      this.checkedList = data
+      console.log(data)
+    //   this.plainOptions = allRoleName
+      /*
+         defalut  checkedList get from api
+        */
+    })
   },
   created () {
-    console.log(this.social[0])
     const info = {
       userCode: this.userCode,
       pageSize: this.pageSize,
@@ -244,33 +279,8 @@ export default {
     getInfoUser(info).then(res => {
       const data = res.data.data.records
       const total = res.data.data.total
-      this.showPage(data, total)
-      console.log(data)// data[3].roles[0].roleName
-      const userCode = data.map((item) => {
-        return item.userCode
-      })
-
-      function getRoleName () {
-        const roleNameArray = []
-        const userCode = []
-        const obj = {} // [{},{}]
-        for (let i = 0; i < data.length; i++) {
-          if (data[i].roles.length === 0) {
-            userCode.push(data[i].userCode)
-            obj.userCode = data[i].userCode
-            obj.roleName = ' '
-          }
-          for (let j = 0; j < data[i].roles.length; j++) {
-            roleNameArray.push(data[i].roles[j].roleName)
-            userCode.push(data[i].userCode)
-            obj.userCode = [...obj.userCode, data[i].userCode]
-            obj.roleName = [...obj.roleName, data[i].roles[j].roleName]
-          }
-        }
-        return roleNameArray
-      }
-      console.log(res)
-      console.log(userCode, getRoleName())
+      this.translate(data)
+      this.renderPage(data, total)
     }).catch(err => { console.log(err) })
   },
   watch: {

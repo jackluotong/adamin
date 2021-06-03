@@ -1,8 +1,9 @@
 import axios from '@/libs/api.request'
 
 /*
-    用户管理获取信息
+    user mange get info
 */
+// #region
 export const getInfoUser = (info) => {
   return axios.request({
     url: '/dcenter/userInfo/list',
@@ -11,13 +12,34 @@ export const getInfoUser = (info) => {
   })
 }
 /*
-    角色管理获取信息
+    role connect
+*/
+export const roleConnect = (info) => {
+  return axios.request({
+    url: '/dcenter/userRoleRelation/bind ',
+    method: 'post',
+    data: info
+  })
+}
+// #endregion
+/*
+    role manage
+    get info
 */
 export const getInfoRole = (info) => {
   return axios.request({
-    url: '/dcenter/userInfo/list',
+    url: '/dcenter/roleInfo/query',
     method: 'post',
     data: info
+  })
+}
+/*
+    get author
+*/
+export const getAuthTree = () => {
+  return axios.request({
+    url: '/dcenter/authInfo/query',
+    method: 'get'
   })
 }
 // 根据条件分页查询全部定时任务配置表
