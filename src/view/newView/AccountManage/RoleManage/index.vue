@@ -27,7 +27,18 @@
           <Input  v-model.trim="formInline.roleCode"/>
         </FormItem>
         <FormItem>
-        <Tree :data="treeData" show-checkbox></Tree>
+        <a-tree-select
+            v-model="value"
+            style="width: 100%"
+            :tree-data="treeData"
+            tree-checkable
+            :show-checked-strategy="SHOW_PARENT"
+            search-placeholder="Please select"
+            :replaceFields='replaceFields'
+            :dropdown-style="{ maxHeight: '1400px', overflow: 'auto' }"
+            placeholder="Please select"
+            @select="selected"
+        />
         </FormItem>
       </Form>
       <div slot="footer">
@@ -51,38 +62,6 @@
 import { confPageList, confDelete, conf, getInfoRole, getAuthTree } from '@/api/data'
 import { TreeSelect } from 'ant-design-vue'
 const SHOW_PARENT = TreeSelect.SHOW_PARENT
-/* const treeData = [
-  {
-    title: '账号管理',
-    value: '0-0',
-    key: '0-0',
-    children: [
-      {
-        title: '角色管理',
-        value: '0-0-0',
-        key: '0-0-0',
-        children: [
-          {
-            title: '添加',
-            value: '0-0-1',
-            key: '0-0-1'
-          },
-          {
-            title: '编辑',
-            value: '0-0-2',
-            key: '0-0-2'
-          }
-        ]
-      },
-      {
-        title: '权限管理',
-        value: '0-1-0',
-        key: '0-1-0'
-      }
-    ]
-  }
-
-] */
 export default {
   data () {
     function getByteLen (val) {
@@ -165,11 +144,19 @@ export default {
           slot: 'action',
           align: 'center'
         }
-      ]
+      ],
+      replaceFields: {
+        children: 'children',
+        title: 'authName',
+        key: 'id',
+        value: 'authCode' }
 
     }
   },
   methods: {
+    selected (e) {
+      console.log(e)
+    },
     search () {
       const data = {
         roleName: this.roleName,
@@ -298,7 +285,7 @@ export default {
   mounted () {
     getAuthTree().then(res => {
       this.treeData = res.data.data
-      console.log(res, 'authTree')
+      console.log(res.data.data, 'authTree')
     })
   }
 }

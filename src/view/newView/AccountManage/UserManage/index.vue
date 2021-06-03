@@ -23,17 +23,16 @@
       </Form>
          <div>
             <Checkbox-group
-                v-model="checkAllGroup1"
+                v-model="checkData"
                 @on-change="selected"
             >
                 <Checkbox
                     v-for="(item, index) in checkedList"
                     :key="index"
                     :label="item"
-                    v-model="getValue"
                     size="large"
                     ref="checkBox"
-                    >{{ item.name }}</Checkbox
+                    >{{ item.roleName }}</Checkbox
                 >
             </Checkbox-group>
         </div>
@@ -46,7 +45,7 @@
 </template>
 
 <script>
-import { confPageList, conf, getInfoUser, getInfoRole, roleConnect } from '@/api/data'
+import { getInfoUser, getInfoRole, roleConnect } from '@/api/data'
 export default {
   data () {
     function getByteLen (val) {
@@ -72,6 +71,8 @@ export default {
       }
     }
     return {
+      getCheckBox: [],
+      checkData: [],
       value: [],
       checkedList: [],
       selectOptions: [],
@@ -120,12 +121,17 @@ export default {
     }
   },
   methods: {
+    selected (data) {
+      this.selectOptions = []
+      console.log(data, 'selectedData')
+      for (let i = 0; i < data.length; i++) {
+        this.selectOptions.push({ roleCode: data[i].roleCode, roleName: data[i].roleName })
+      }
+      console.log(this.selectOptions, 'selectOptions')
+    },
     onChange (data) {
       console.log(data)
       this.selectOptions = data
-    },
-    select (data) {
-      console.log(data)
     },
     search () {
       const info = {
@@ -134,7 +140,7 @@ export default {
       getInfoUser(info).then(res => {
         const data = res.data.data.records
         const total = res.data.data.total
-        this.renderPage(data, total)
+        this.renderPage(this.translate(data), total)
       }).catch(err => {
         console.log(err)
       })
@@ -148,55 +154,9 @@ export default {
         'roles': [
           { 'roleCode': this.selectOptions }
         ]
-
       }
-      console.log(info)
-      roleConnect(info).then(res => { console.log(res) })
-      this.$refs[index].validate((valid) => {
-        console.log(valid)
-        if (valid) {
-          if (this.showType === 'add') {
-            const date = {
-              'confName': this.formInline.confName,
-              'userCode': this.formInline.userCode,
-              'confValue': this.formInline.confValue,
-              'confDescribtion': this.formInline.confDescribtion
-            }
-            conf(date).then(res => {
-              this.$Message['success']({
-                background: true,
-                content: res.data.message
-              })
-              this.modalAddOrUpdate = false
-              this.confPageList()
-              this.$refs[index].resetFields()
-            }).catch(err => {
-              console.log(err)
-            })
-          } else if (this.showType === 'edit') {
-            const date = {
-              'id': this.id,
-              'confName': this.formInline.confName,
-              'userCode': this.formInline.userCode,
-              'confValue': this.formInline.confValue,
-              'confDescribtion': this.formInline.confDescribtion
-            }
-            conf(date).then(res => {
-              this.$Message['success']({
-                background: true,
-                content: res.data.message
-              })
-              this.$refs['formInline'].resetFields()
-              this.modalAddOrUpdate = false
-              this.confPageList()
-            }).catch(err => {
-              console.log(err)
-            })
-          }
-        } else {
-          this.$Message.error('请检查参数是否有误!')
-        }
-      })
+      console.log(info, 'info')
+      roleConnect(info).then(res => { console.log(res) }).catch(error => console.log(error))
     },
     cancelAddOrUpdate (name) { // 取消新增
       this.checked = false
@@ -210,42 +170,43 @@ export default {
       this.detailTitle = '账户管理-用户管理'
       this.modalAddOrUpdate = true
     },
-    confPageList () { // 根据条件分页查询全部配置
-      const date = {
-        'pageNum': this.pageNum,
-        'pageSize': this.pageSize
-      }
-      confPageList(date).then(res => {
-        this.confData = res.data.data.resultList
-        this.total = res.data.data.totalAmount
-      }).catch(err => {
-        console.log(err)
-      })
-    },
     renderPage (data, total) {
       this.confData = data
       this.total = total
     },
-    translate (data) {
-      let arr = []
-      let result = {}
-      for (const item of data) {
-        let index = Object.keys(result).findIndex(
-          (k) => k === item.userCode
-        )
-        let roleName = item.roles.map((r) => r.roleName).toString()
-        if (index === -1) {
-          result[item.userCode] = roleName
+    translate (arr) {
+      /*  let array = []
+      arr.map((item) => {
+        let obj = {}
+        if (item.roles.length === 0) {
+          obj[item.userCode] = ''
         } else {
-          result[item.userCode] = `${
-            result[item.userCode]
-          }+${roleName}`
+          let roleName = ''
+          item.roles.map((i, t) => {
+            roleName = roleName + ',' + i.roleName
+          })
+          obj[item.userCode] = roleName
         }
-        arr.push(result)
-      }
+        array.push(obj)
+      })
+      console.log(array)
+ */
       console.log(arr)
-      console.log(result)
-      return result
+      let array = []
+      arr.map((item) => {
+        let roleName = ''
+        if (item.roles.length !== 0) {
+          item.roles.map((i, t) => {
+            roleName = roleName + ',' + i.roleName
+          })
+        }
+        array.push({
+          userCode: item.userCode,
+          roleName
+        })
+      })
+      console.log(array, 'array')
+      return array
     }
 
   },
@@ -263,7 +224,7 @@ export default {
         return item.roleName
       }) */
       this.checkedList = data
-      console.log(data)
+      console.log(data, 'checkedList')
     //   this.plainOptions = allRoleName
       /*
          defalut  checkedList get from api
@@ -280,7 +241,8 @@ export default {
       const data = res.data.data.records
       const total = res.data.data.total
       this.translate(data)
-      this.renderPage(data, total)
+      this.confData = this.translate(data)
+      this.total = total
     }).catch(err => { console.log(err) })
   },
   watch: {

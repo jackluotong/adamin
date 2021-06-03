@@ -42,6 +42,7 @@ export const getAuthTree = () => {
     method: 'get'
   })
 }
+
 // 根据条件分页查询全部定时任务配置表
 export const confJobPageList = (info) => {
   return axios.request({
