@@ -27,7 +27,7 @@
                 @on-change="selected"
             >
                 <Checkbox
-                    v-for="(item, index) in checkedList"
+                    v-for="(item, index) in checkList"
                     :key="index"
                     :label="item"
                     size="large"
@@ -74,7 +74,7 @@ export default {
       getCheckBox: [],
       checkData: [],
       value: [],
-      checkedList: [],
+      checkList: [],
       selectOptions: [],
       checked: true,
       roleName: '',
@@ -88,7 +88,7 @@ export default {
       modalDelete: false,
       formInline: { // 实体
         userCode: '',
-        checkedList: '',
+        checkList: '',
         roleName: ''
       },
       ruleInline: {
@@ -125,7 +125,7 @@ export default {
       this.selectOptions = []
       console.log(data, 'selectedData')
       for (let i = 0; i < data.length; i++) {
-        this.selectOptions.push({ roleCode: data[i].roleCode, roleName: data[i].roleName })
+        this.selectOptions.push(data[i].roleCode)
       }
       console.log(this.selectOptions, 'selectOptions')
     },
@@ -146,17 +146,19 @@ export default {
       })
     },
     handleSubmitAddOrUpdate (index) {
-      console.log(this.value, 'value')
-      console.log(this.selectOptions)
-      console.log(index)
       const info = {
         'userCode': this.formInline.userCode,
-        'roles': [
-          { 'roleCode': this.selectOptions }
-        ]
+        'roles': this.selectOptions
       }
       console.log(info, 'info')
-      roleConnect(info).then(res => { console.log(res) }).catch(error => console.log(error))
+      roleConnect(info).then(res => {
+        this.$Message.success('操作成功')
+        this.modalAddOrUpdate = false
+        this.$router.go(0)
+        this.$nextTick(() => {
+        })
+        console.log(res)
+      }).catch(error => console.log(error))
     },
     cancelAddOrUpdate (name) { // 取消新增
       this.checked = false
@@ -220,14 +222,13 @@ export default {
     }
     getInfoRole(data).then(res => {
       const data = res.data.data
-      /*    let allRoleName = data.map((item) => {
-        return item.roleName
-      }) */
-      this.checkedList = data
-      console.log(data, 'checkedList')
-    //   this.plainOptions = allRoleName
       /*
-         defalut  checkedList get from api
+        get info role set in checkList
+      */
+      this.checkList = data
+      console.log(data, 'checkList')
+      /*
+         defalut  checkList get from api
         */
     })
   },

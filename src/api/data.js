@@ -22,8 +22,14 @@ export const roleConnect = (info) => {
   })
 }
 // #endregion
+
 /*
     role manage
+*/
+
+// #region
+
+/*
     get info
 */
 export const getInfoRole = (info) => {
@@ -42,6 +48,58 @@ export const getAuthTree = () => {
     method: 'get'
   })
 }
+/*
+    edit/add
+*/
+export const editRole = (info) => {
+  return axios.request({
+    url: '/dcenter/roleInfo/createOrUpdate',
+    method: 'post',
+    data: info
+  })
+}
+/*
+    delete
+*/
+export const deleteRole = (info) => {
+  return axios.request({
+    url: `/dcenter/roleInfo/remove/${info}`,
+    method: 'get'
+  })
+}
+// #endregion
+
+/*
+    permission manage
+    -create
+    -get
+*/
+// #region
+export const createParent = (info) => {
+  return axios.request({
+    url: '/dcenter/authInfo/create',
+    data: info,
+    method: 'post'
+  })
+}
+// #endregion
+
+/*
+    manage service type
+*/
+
+// #region
+/*
+        get info for service type
+    */
+export const getServiceTypeInfo = (info) => {
+  return axios.request({
+    url: '/dcenter/type/select/ServiceType',
+    data: info,
+    method: 'post'
+  })
+}
+// #endregion
 
 // 根据条件分页查询全部定时任务配置表
 export const confJobPageList = (info) => {
@@ -51,7 +109,6 @@ export const confJobPageList = (info) => {
     method: 'post'
   })
 }
-
 //  按主键 启动 定时任务
 export const confJobStart = (info) => {
   return axios.request({

@@ -67,7 +67,7 @@
 </template>
 
 <script>
-import { confPageList, confDelete, conf } from '@/api/data'
+import { confPageList, confDelete, conf, getServiceTypeInfo } from '@/api/data'
 
 export default {
   data () {
@@ -117,20 +117,27 @@ export default {
         callback()
       }
     }
+    /* const delay = (function () {
+      let timer = 0
+      return function (callback, ms) {
+        clearTimeout(timer)
+        timer = setTimeout(callback, ms)
+      }
+    })() */
     return {
       out_arr: '',
       inarr: '',
-      total: 0, // 总数
-      pageNum: 1, // 第几页
-      pageSize: 30, // 每页几条数据
-      serviceModule: '', // 参数名称
-      serviceType: '', // 参数键名
-      serviceAddress: '', // 服务地址
-      modalAddOrUpdate: false, // 是否显示新增弹窗
+      total: 0,
+      pageNum: 1,
+      pageSize: 10,
+      serviceModule: '',
+      serviceType: '',
+      serviceUrl: '',
+      modalAddOrUpdate: false,
       modalAddOrUpdateType: false,
-      detailTitle: '', // 表单标题
-      showType: '', // 表单展示类型（edit、add）
-      modalDelete: false, // 是否显示删除提示弹窗
+      detailTitle: '',
+      showType: '',
+      modalDelete: false,
       formInline: {
         serviceModule: '',
         serviceType: '',
@@ -150,10 +157,7 @@ export default {
           { required: true, validator: validateConfDescribtion, trigger: 'blur' }
         ]
       },
-      confData: [ // 参数配置数据
-        { serviceModule: 'OCR', serviceType: '29', serviceAddress: 'SHANGHAI' },
-        { serviceModule: '人脸识别', serviceType: '30', serviceAddress: 'BEIJING' }
-      ],
+      confData: [],
       columns: [
         {
           title: '服务模块',
@@ -170,7 +174,7 @@ export default {
         },
         {
           title: '统一对外服务地址',
-          key: 'serviceAddress',
+          key: 'serviceUrl',
           width: 300,
           align: 'center'
         },
@@ -184,7 +188,7 @@ export default {
     }
   },
   methods: {
-    search () { // 点击查询按钮
+    search () {
       const date = {
         'serviceModule': this.serviceModule,
         'serviceType': this.serviceType,
@@ -202,18 +206,18 @@ export default {
         console.log(err)
       })
     },
-    reset () { // 点击重置按钮
+    reset () {
       this.serviceModule = null
       this.serviceType = null
       this.serviceAddress = null
     },
-    addSetting () { // 点击新增按钮
+    addSetting () {
       this.reset()
       this.showType = 'add'
       this.detailTitle = '新增模块'
       this.modalAddOrUpdate = true
     },
-    addSettingType () { // 点击新增按钮
+    addSettingType () {
       this.reset()
       this.showType = 'add'
       this.detailTitle = '新增服务类型'
@@ -326,10 +330,36 @@ export default {
       }).catch(err => {
         console.log(err)
       })
+    },
+    getServiceTypeInfo () {
+      const info = {
+        pageSize: this.pageSize,
+        currentPage: this.pageNum
+      }
+      getServiceTypeInfo(info).then(res => {
+        this.renderPage(res.data.data.records, res.data.data.total)
+        console.log(res)
+      }
+
+      ).catch(err => this.$Message.info(err))
+    },
+    renderPage (data, total) {
+      this.confData = data
+      this.total = total
+    },
+    async fetchData () {
+
     }
   },
   created () {
-    this.confPageList()
+    this.getServiceTypeInfo()
+  },
+  watch: {
+    serviceModule () {
+      delay(() => {
+        this.fetchData()
+      }, 300)
+    }
   }
 }
 </script>

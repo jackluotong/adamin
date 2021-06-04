@@ -1,48 +1,61 @@
 <template>
   <div class="user-content">
-    <h1 style="margin:10px 10px 10px 10px">账户管理-角色管理</h1>
+    <h1 style="margin:10px 10px 10px 10px">账户管理-权限管理</h1>
     <div class="content-button" >
       <Button type="primary" icon="md-add" @click="addSetting()">添加一级菜单</Button>
     </div>
-    <div>
-        <!-- use element ui tree
-        v-if="treeData.length==0?true:false"
-         -->
-         <el-tree
+   <div class="block">
+            <el-tree
                 :data="treeData"
                 show-checkbox
                 node-key="id"
                 default-expand-all
                 :expand-on-click-node="false"
+                :props="defaultProps"
+                @node-click="handleNodeClick"
             >
-                <span class="custom-tree-node" slot-scope="{ node, treeData }">
+                <span class="custom-tree-node" slot-scope="{ node, data }">
                     <span>{{ node.label }}</span>
                     <span>
                         <el-button
                             type="text"
                             size="mini"
-                            @click="() => append(treeData)"
+                            icon="el-icon-circle-plus"
+                            @click="() => append(data)"
                         >
                             新增子级菜单
                         </el-button>
                         <el-button
                             type="text"
                             size="mini"
-                            @click="() => remove(node, treeData)"
+                            icon="el-icon-delete-solid"
+                            @click="() => remove(node, data)"
                         >
                             删除
                         </el-button>
                         <el-button
                             type="text"
                             size="mini"
-                            @click="() => edit(node, treeData)"
+                            icon="el-icon-s-tools"
+                            @click="() => editNode(node, data)"
                         >
                             编辑
                         </el-button>
                     </span>
                 </span>
             </el-tree>
-    </div>
+        </div>
+    <Modal v-model.trim="modalEdit" :closable="false" :title="editInfoTitle">
+    <Form ref="formInline" :model="formInline" :rules="ruleInline" inline>
+        <FormItem label="AuthCode" prop="AuthCode" style="width:270px;">
+          <Input v-model.trim="formInline.AuthCode"/>
+        </FormItem>
+    </Form>
+    <div slot="footer">
+        <Button type="primary" ghost size="large" @click="editCancel('formInline')">返回</Button>
+        <Button type="primary" size="large" @click="editSave('formInline')">保存</Button>
+      </div>
+    </Modal>
      <Modal v-model.trim="modalAddOrUpdate" width="600" :mask-closable="false" :closable="false" v-bind:title="detailTitle">
       <Form ref="formInline" :model="formInline" :rules="ruleInline" inline>
         <FormItem label="AuthCode" prop="AuthCode" style="width:270px;">
@@ -58,7 +71,7 @@
           <Input  v-model.trim="formInline.AuthLevel"/>
         </FormItem>
         <FormItem label="AuthParentCode" prop="AuthParentCode" style="width:270px;">
-          <Input  v-model.trim="formInline.AuthParentCode"/>
+          <Input  v-model.trim="formInline.AuthParentCode" readonly/>
         </FormItem>
         <FormItem>
         </FormItem>
@@ -72,36 +85,10 @@
 </template>
 
 <script>
-import { confPageList, confDelete, conf } from '@/api/data'
+import { confPageList, confDelete, conf, getAuthTree, createParent } from '@/api/data'
+let id = 1000
 export default {
   data () {
-    const data = [
-      {
-        id: 1,
-        label: '账户管理',
-        children: [
-          {
-            id: 4,
-            label: '角色管理',
-            children: [
-              {
-                id: 9,
-                label: '添加'
-              },
-              {
-                id: 10,
-                label: '编辑'
-              }
-            ]
-          },
-          {
-            id: 2,
-            label: '权限管理'
-          }
-        ]
-      }
-    ]
-
     function getByteLen (val) {
       var len = 0
       for (var i = 0, len1 = val.length; i < len1; i++) {
@@ -160,12 +147,17 @@ export default {
       }
     }
     return {
-      treeData: JSON.parse(JSON.stringify(data)),
+      editInfoTitle: '',
+      modalEdit: false,
+      defaultProps: {
+        label: 'authName'
+      },
+      treeData: [], //  JSON.parse(JSON.stringify(data)),
       AuthCode: '',
       AuthName: '',
       AuthSeq: '',
       AuthLevel: '',
-      AuthParentCode: '',
+      AuthParentCode: 0,
       modalAddOrUpdate: false,
       detailTitle: '',
       showType: '',
@@ -174,7 +166,7 @@ export default {
         AuthName: '',
         AuthSeq: '',
         AuthLevel: '',
-        AuthParentCode: ''
+        AuthParentCode: 0
       },
       ruleInline: {
         AuthCode: [
@@ -196,6 +188,44 @@ export default {
     }
   },
   methods: {
+    /*
+        for edit modal functions
+      */
+    // #region
+    editCancel () {
+      this.modalEdit = false
+    },
+    editSave () {
+      console.log()
+    },
+    handleNodeClick (e) {
+      console.log(e)
+    },
+    toTree (data) {
+      debugger
+      let treeData = []
+      if (!Array.isArray(data)) return treeData
+
+      data.forEach(item => {
+        delete item.children // 删除item下的children，以防多次调用
+      })
+
+      let map = {}
+      data.forEach(item => {
+        map[item.id] = item
+      })
+
+      data.forEach(item => {
+        let parent = map[item.pid] // 判断item的pid是否是否存在map中
+        if (parent) { // 如果存在则表示item不是最顶层的数据
+          (parent.children || (parent.children = [])).push(item)
+        } else {
+          treeData.push(item) // 如果不存在 则是顶层数据
+        }
+      })
+      return treeData
+    },
+
     append (data) {
       const newChild = { id: id++, label: 'testtest', children: [] }
       if (!data.children) {
@@ -210,6 +240,12 @@ export default {
       const index = children.findIndex((d) => d.id === data.id)
       children.splice(index, 1)
     },
+    editNode (node, data) {
+      this.modalEdit = true
+      this.editInfoTitle = '编辑信息'
+      console.log(node.childNodes.length, data.label)
+    },
+    // #endregion
     search () {
       const date = {
         'confName': this.confName,
@@ -228,7 +264,7 @@ export default {
         console.log(err)
       })
     },
-    reset () { // 点击重置按钮
+    reset () {
       this.confName = ''
       this.confKey = ''
       this.confValue = ''
@@ -236,13 +272,28 @@ export default {
       this.pageNum = 1
       this.confPageList()
     },
-    addSetting () { // 点击新增按钮
+    addSetting () {
       this.showType = 'add'
       this.detailTitle = '新增全局配置信息'
       this.modalAddOrUpdate = true
     },
-    handleSubmitAddOrUpdate (index) { // 点击提交新增按钮
-      console.log(index)
+    handleSubmitAddOrUpdate (index) {
+      /*
+            save add info for tree
+        */
+      const info = {
+        'authCode': this.AuthCode,
+        'authName': this.AuthName,
+        'authSeq': this.AuthSeq,
+        'authLevel': this.AuthLevel,
+        'authParentCode': '0'
+      }
+      console.log(info)
+      createParent(info).then(res => console.log(res))
+      const data = [
+        { AuthCode: this.formInline.AuthCode, AuthName: this.formInline.AuthName, AuthSeq: this.formInline.AuthSeq, AuthLevel: this.formInline.AuthLevel, AuthParentCode: this.formInline.AuthParentCode }
+      ]
+      console.log(this.toTree(data))
       this.$refs[index].validate((valid) => {
         console.log(valid)
         if (valid) {
@@ -289,7 +340,7 @@ export default {
         }
       })
     },
-    cancelAddOrUpdate (name) { // 取消新增
+    cancelAddOrUpdate (name) {
       this.$refs[name].resetFields()
       this.modalAddOrUpdate = false
     },
@@ -336,11 +387,22 @@ export default {
     }
   },
   created () {
-    this.confPageList()
+    getAuthTree().then(res => {
+      console.log(res)
+      this.treeData = JSON.parse(JSON.stringify(res.data.data))
+    })
   }
 }
 </script>
 <style lang="less" scoped>
+.custom-tree-node {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    // justify-content:flex-start;
+    font-size: 14px;
+    padding-left: 18px;
+  }
 .user-content{
   .content-button {
     padding: 5px;
