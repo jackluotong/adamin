@@ -39,7 +39,7 @@ export const addConnect = (info) => {
 
 export const cancelConnect = (info) => {
   return axios.request({
-    url: '/dcenter/application/relevance/system',
+    url: '/dcenter/application/disassociation/system',
     method: 'post',
     data: info
   })
