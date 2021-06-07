@@ -1,7 +1,7 @@
 import axios from '@/libs/api.request'
-export const getInfoUser = (info) => {
+export const getInfo = (info) => {
   return axios.request({
-    url: '/dcenter/userInfo/list',
+    url: '/dcenter/application/select/system',
     method: 'post',
     data: info
   })

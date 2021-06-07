@@ -22,7 +22,7 @@
             type="primary"
             size="small"
             style="margin-right: 5px"
-            @click="lookConfig()"
+            @click="lookConfig(index)"
           >查看配置</Button>
         </div>
       </template>
