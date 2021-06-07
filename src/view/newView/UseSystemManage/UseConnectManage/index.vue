@@ -3,12 +3,12 @@
         <h1 style="margin:10px 10px 10px 10px">应用系统管理-应用系统管理</h1>
         <div class="content-button">
             <span style="padding:10px">应用名称</span>
-            <Input v-model.trim="useName" />
+            <Input v-model.trim="applicationName" />
             <span style="padding:10px">应用简称</span>
-            <Input v-model.trim="useCalled" />
+            <Input v-model.trim="applicationCode" />
             <span style="padding:10px">服务模块</span>
             <Select v-model.trim="formInline" style="width:200px">
-                <Option selected>{{ formInline.confName }}</Option>
+                <Option selected>{{ formInline.serviceModuleCode }}</Option>
             </Select>
             <Button
                 type="primary"
@@ -35,7 +35,7 @@
                         size="small"
                         style="margin-right: 5px"
                         @click="edit(index)"
-                        >编辑</Button
+                        >取消关联</Button
                     >
                 </div>
             </template>
@@ -59,30 +59,30 @@
                 <div style="display:inline-table">
                     <FormItem
                         label="应用名称"
-                        prop="useName"
+                        prop="applicationName"
                         style="width:270px;"
                     >
-                         <Select v-model.trim="formInline" style="width:200px">
-                            <Option selected>{{ formInline.useName }}</Option>
+                         <Select v-model.trim="selectedName" style="width:200px">
+                            <Option v-for="(item,id) in appData" :key="id" >{{ appData.applicationName}}</Option>
                          </Select>
                     </FormItem>
                 </div>
                 <FormItem
                     label="应用简称"
-                    prop="useCalled"
+                    prop="applicationCode"
                     style="width:270px;"
                 >
                     <Select v-model.trim="formInline" style="width:200px">
-                            <Option selected>{{ formInline.useCalled }}</Option>
+                            <Option selected>{{ formInline.applicationCode }}</Option>
                     </Select>
                 </FormItem>
                 <FormItem
                     label="服务模块"
-                    prop="confName"
+                    prop="serviceModuleCode"
                     style="width:270px;"
                 >
                     <Select v-model.trim="formInline" style="width:200px">
-                            <Option selected>{{ formInline.confName }}</Option>
+                            <Option selected>{{ formInline.serviceModuleCode }}</Option>
                     </Select>
                 </FormItem>
             </Form>
@@ -120,6 +120,7 @@
 
 <script>
 import { confPageList, confDelete, conf } from '@/api/data'
+import { getInfoConnect, getInfo } from '@/api/useSystem' // addConnect, cancelConnect,
 
 export default {
   data () {
@@ -135,7 +136,7 @@ export default {
       }
       return len
     }
-    const validateuseName = function (rule, value, callback) {
+    const validateapplicationName = function (rule, value, callback) {
       if (!value) {
         callback(new Error('请输入参数名称'))
       } else if (getByteLen(value) > 128) {
@@ -144,7 +145,7 @@ export default {
         callback()
       }
     }
-    const validateuseCalled = (rule, value, callback) => {
+    const validateapplicationCode = (rule, value, callback) => {
       if (!value) {
         callback(new Error('请输入参数键名'))
       } else if (getByteLen(value) > 64) {
@@ -164,11 +165,11 @@ export default {
     return {
       out_arr: '',
       inarr: '',
-      total: 0, // 总数
-      pageNum: 1, // 第几页
-      pageSize: 30, // 每页几条数据
-      useName: '',
-      useCalled: '',
+      total: 0,
+      pageNum: 1,
+      pageSize: 30,
+      applicationName: '',
+      applicationCode: '',
       contactPhone: '',
       contactEmails: '',
       modalEdit: false,
@@ -176,23 +177,23 @@ export default {
       showType: '',
       modalDelete: false,
       formInline: {
-        useName: '',
-        useCalled: '',
+        applicationName: '',
+        applicationCode: '',
         contactPhone: '',
         contactEmails: ''
       },
       ruleInline: {
-        useName: [
+        applicationName: [
           {
             required: true,
-            validator: validateuseName,
+            validator: validateapplicationName,
             trigger: 'blur'
           }
         ],
-        useCalled: [
+        applicationCode: [
           {
             required: true,
-            validator: validateuseCalled,
+            validator: validateapplicationCode,
             trigger: 'blur'
           }
         ],
@@ -204,28 +205,24 @@ export default {
           }
         ]
       },
-      confData: [
-        // 参数配置数据
-        { useName: 'OCR', useCalled: '29', confName: '1212321321321' },
-        { useName: '人脸识别', useCalled: '30', confName: '983127321' }
-      ],
+      confData: [],
       columns: [
         {
           title: '应用名称',
-          key: 'useName',
+          key: 'applicationName',
           tooltip: true,
           width: 300,
           align: 'center'
         },
         {
           title: '应用简称',
-          key: 'useCalled',
+          key: 'applicationCode',
           width: 300,
           align: 'center'
         },
         {
           title: '服务模块',
-          key: 'confName',
+          key: 'serviceModule',
           width: 300,
           align: 'center'
         },
@@ -242,8 +239,8 @@ export default {
       console.log(this.formInline, 'formInline')
       // 点击查询按钮
       const date = {
-        useName: this.useName,
-        useCalled: this.useCalled,
+        applicationName: this.applicationName,
+        applicationCode: this.applicationCode,
         pageNum: this.pageNum,
         pageSize: this.pageSize
       }
@@ -262,8 +259,8 @@ export default {
     },
     reset () {
       // 点击重置按钮
-      this.useName = null
-      this.useCalled = null
+      this.applicationName = null
+      this.applicationCode = null
       this.contactPhone = null
     },
     addSetting () {
@@ -281,8 +278,8 @@ export default {
         if (valid) {
           if (this.showType === 'add') {
             const date = {
-              useName: this.formInline.useName,
-              useCalled: this.formInline.useCalled,
+              applicationName: this.formInline.applicationName,
+              applicationCode: this.formInline.applicationCode,
               confValue: this.formInline.confValue,
               confDescribtion: this.formInline.confDescribtion
             }
@@ -302,8 +299,8 @@ export default {
           } else if (this.showType === 'edit') {
             const date = {
               id: this.id,
-              useName: this.formInline.useName,
-              useCalled: this.formInline.useCalled,
+              applicationName: this.formInline.applicationName,
+              applicationCode: this.formInline.applicationCode,
               confValue: this.formInline.confValue,
               confDescribtion: this.formInline.confDescribtion
             }
@@ -337,9 +334,9 @@ export default {
     edit (index) {
       // 点击修改按钮
       this.id = this.confData[index].id
-      this.formInline.useName = this.confData[index].useName
-      this.formInline.useCalled = this.confData[index].useCalled
-      this.formInline.confName = this.confData[index].confName
+      this.formInline.applicationName = this.confData[index].applicationName
+      this.formInline.applicationCode = this.confData[index].applicationCode
+      this.formInline.serviceModuleCode = this.confData[index].serviceModuleCode
       this.showType = 'edit'
       this.detailTitle = '编辑模块'
       this.modalEdit = true
@@ -377,10 +374,38 @@ export default {
         .catch(err => {
           console.log(err)
         })
+    },
+    renderPage (data, total) {
+      this.confData = data
+      this.total = total
+    },
+    getInfo () {
+      const info = {
+        applicationCode: '',
+        applicationName: '',
+        currentPage: this.pageNum,
+        pageSize: this.pageSize,
+        serviceModuleCode: ''
+      }
+      getInfoConnect(info).then(res => {
+        console.log(res)
+        this.renderPage(res.data.data.records, res.data.data.total)
+      }).catch(error => {
+        console.log(error)
+      })
     }
   },
   created () {
-    this.confPageList()
+    const info = {
+      pageSize: this.pageSize,
+      currentPage: this.pageNum,
+      applicationCode: this.applicationCode,
+      applicationName: this.applicationName
+    }
+    this.getInfo()
+    getInfo(info).then(res => {
+      console.log(res)
+    })
   }
 }
 </script>

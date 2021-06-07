@@ -61,11 +61,11 @@
         </div>
         </div>
         <div v-show="isHavaShow">
-            <FormItem label="AESKEY" prop="aeskey" style="width:270px;">
-          <Input v-model.trim="formInline.aeskey" style="width:auto"/>
+            <FormItem label="AESKEY" prop="aeskey" >
+          <Input v-model.trim="formInline.aeskey" />
         </FormItem>
-        <FormItem label="AESLV" prop="aesiv" style="width:270px;">
-          <Input v-model.trim="formInline.aesiv" style="width:auto" />
+        <FormItem label="AESLV" prop="aesiv" >
+          <Input v-model.trim="formInline.aesiv"  />
         </FormItem>
         </div>
 
@@ -193,8 +193,19 @@ export default {
   },
   methods: {
     search () {
-      console.log(this.formInline, 'formInline')
-      // 点击查询按钮
+      const info = {
+        pageSize: this.pageSize,
+        currentPage: this.pageNum,
+        applicationCode: this.applicationCode,
+        applicationName: this.applicationName
+      }
+      console.log(info)
+      getInfo(info).then(res => {
+        this.renderPage(res.data.data.records, res.data.data.total)
+      }).catch(error => {
+        console.log(error)
+        this.$Message.info(error)
+      })
     },
     reset () {
       this.formInline.applicationName = null
@@ -293,11 +304,9 @@ export default {
       this.modalEdit = true
     },
     cancelDelete () {
-      // 取消删除
       this.modalDelete = false
     },
     handleSubmitDelete () {
-      // 确认删除
       confDelete(this.id)
         .then(res => {
           this.$Message['success']({
