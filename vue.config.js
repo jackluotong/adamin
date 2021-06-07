@@ -51,13 +51,6 @@ module.exports = {
         changeOrigin: true, // 改变源
         pathRewrite: { // '^/bridge': '/bridge' // 路径重写
         }
-      },
-      '/api': {
-        target: '',
-        changeOrigin: true,
-        pathRewrite: {
-          '^/api': 'api'
-        }
       }
     }
   }

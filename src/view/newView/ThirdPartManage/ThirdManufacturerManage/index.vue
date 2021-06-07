@@ -97,7 +97,7 @@
 
 <script>
 import { confPageList, confDelete, conf } from '@/api/data'
-
+import { } from '@/api/thirdPart'
 export default {
   data () {
     function getByteLen (val) {

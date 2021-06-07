@@ -3,12 +3,11 @@
     <h1 style="margin:10px 10px 10px 10px">应用系统管理-应用系统管理</h1>
     <div class="content-button">
       <span style="padding:10px">应用名称</span>
-      <Input v-model.trim="useName" />
+      <Input v-model.trim="applicationName" />
       <span style="padding:10px">应用简称</span>
-      <Input v-model.trim="useCalled" />
+      <Input v-model.trim="applicationCode" />
       <Button type="primary" icon="md-search" @click="search()" style="margin:0 10px 0 20px">查询</Button>
       <Button type="primary" icon="md-add" @click="addSetting()">应用注册</Button>
-      <Button type="primary" icon="md-add" @click="lookConfig()">查看AES配置</Button>
     </div>
     <Table highlight-row stripe :columns="columns" :data="confData" style="margin-top: 5px">
       <template slot-scope="{ row, index }" slot="action">
@@ -19,6 +18,12 @@
             style="margin-right: 5px"
             @click="edit(index)"
           >编辑</Button>
+         <Button
+            type="primary"
+            size="small"
+            style="margin-right: 5px"
+            @click="lookConfig()"
+          >查看配置</Button>
         </div>
       </template>
     </Table>
@@ -39,46 +44,42 @@
     >
       <Form ref="formInline" :model="formInline">
         <div style="display:inline-table">
-          <FormItem label="应用名称" prop="useName" style="width:270px;">
-              <Input v-model.trim="formInline.useName" style="width:auto"/>
+        <div v-show="isHaveKey">
+          <FormItem label="应用名称" prop="applicationName" style="width:270px;">
+              <Input v-model.trim="formInline.applicationName" style="width:auto"/>
           </FormItem>
+
+        <FormItem label="应用简称" prop="applicationCode" style="width:270px;">
+          <Input v-model.trim="formInline.applicationCode" style="width:auto"/>
+        </FormItem>
+        <FormItem label="联系人手机" prop="contactMobile" style="width:270px;">
+          <Input v-model.trim="formInline.contactMobile" style="width:auto" />
+        </FormItem>
+        <FormItem label="联系人邮箱" prop="contactMail" style="width:270px;">
+          <Input v-model.trim="formInline.contactMail" style="width:auto"/>
+        </FormItem>
         </div>
-        <FormItem label="应用简称" prop="useCalled" style="width:270px;">
-          <Input v-model.trim="formInline.useCalled" style="width:auto"/>
+        </div>
+        <div v-show="isHavaShow">
+            <FormItem label="AESKEY" prop="aeskey" style="width:270px;">
+          <Input v-model.trim="formInline.aeskey" style="width:auto"/>
         </FormItem>
-        <FormItem label="联系人手机" prop="contactPhone" style="width:270px;">
-          <Input v-model.trim="formInline.contactPhone" style="width:auto" />
+        <FormItem label="AESLV" prop="aesiv" style="width:270px;">
+          <Input v-model.trim="formInline.aesiv" style="width:auto" />
         </FormItem>
-        <FormItem label="联系人邮箱" prop="contactEmails" style="width:270px;">
-          <Input v-model.trim="formInline.contactEmails" style="width:auto"/>
-        </FormItem>
-         <FormItem label="AESKEY" prop="AESKEY" style="width:270px;">
-          <Input v-model.trim="formInline.AESKEY" style="width:auto"/>
-        </FormItem>
-        <FormItem label="AESLV" prop="AESLV" style="width:270px;">
-          <Input v-model.trim="formInline.AESLV" style="width:auto" />
-        </FormItem>
+        </div>
+
       </Form>
       <div slot="footer">
-        <Button type="primary" ghost size="large" @click="cancelAddOrUpdateType('formInline')">查询</Button>
-        <Button type="primary" size="large" @click="handleSubmitAddOrUpdate('formInline')">新增</Button>
-      </div>
-    </Modal>
-    <Modal v-model.trim="modalDelete" width="450" title="删除参数配置提示">
-      <div>
-        <p>确定删除该参数配置吗？</p>
-      </div>
-      <div slot="footer">
-        <Button type="text" @click="cancelDelete" size="large">取消</Button>
-        <Button type="primary" @click="handleSubmitDelete" size="large">确定</Button>
+        <Button type="primary" ghost size="large" @click="cancelAddOrUpdateType('formInline')">返回</Button>
+        <Button type="primary" size="large" @click="handleSubmitAddOrUpdate('formInline')">保存</Button>
       </div>
     </Modal>
   </div>
 </template>
 
 <script>
-import { confPageList, confDelete, conf } from '@/api/data'
-
+import { editInfo, getInfo } from '@/api/useSystem'
 export default {
   data () {
     function getByteLen (val) {
@@ -93,7 +94,7 @@ export default {
       }
       return len
     }
-    const validateuseName = function (rule, value, callback) {
+    const validateapplicationName = function (rule, value, callback) {
       if (!value) {
         callback(new Error('请输入参数名称'))
       } else if (getByteLen(value) > 128) {
@@ -102,7 +103,7 @@ export default {
         callback()
       }
     }
-    const validateuseCalled = (rule, value, callback) => {
+    const validateapplicationCode = (rule, value, callback) => {
       if (!value) {
         callback(new Error('请输入参数键名'))
       } else if (getByteLen(value) > 64) {
@@ -120,31 +121,34 @@ export default {
     }
 
     return {
-      out_arr: '',
-      inarr: '',
+      isHavaShow: false,
+      isHaveKey: true,
       total: 0, // 总数
       pageNum: 1, // 第几页
       pageSize: 30, // 每页几条数据
-      useName: '',
-      useCalled: '',
-      contactPhone: '',
-      contactEmails: '',
+      applicationName: '',
+      applicationCode: '',
+      contactMobile: '',
+      contactMail: '',
       modalEdit: false,
       detailTitle: '',
       showType: '',
       modalDelete: false,
       formInline: {
-        useName: '',
-        useCalled: '',
-        contactPhone: '',
-        contactEmails: ''
+        applicationName: '',
+        applicationCode: '',
+        contactMobile: '',
+        contactMail: '',
+        aesiv: '',
+        aeskey: '',
+        id: ''
       },
       ruleInline: {
-        useName: [
-          { required: true, validator: validateuseName, trigger: 'blur' }
+        applicationName: [
+          { required: true, validator: validateapplicationName, trigger: 'blur' }
         ],
-        useCalled: [
-          { required: true, validator: validateuseCalled, trigger: 'blur' }
+        applicationCode: [
+          { required: true, validator: validateapplicationCode, trigger: 'blur' }
         ],
         confValue: [
           { required: true, validator: validateConfValue, trigger: 'blur' }
@@ -152,32 +156,30 @@ export default {
       },
       confData: [
         // 参数配置数据
-        { useName: 'OCR', useCalled: '29', contactPhone: '1212321321321', contactEmails: '1111111@outlook.com' },
-        { useName: '人脸识别', useCalled: '30', contactPhone: '983127321', contactEmails: '1111111@outlook.com' }
       ],
       columns: [
         {
           title: '应用名称',
-          key: 'useName',
+          key: 'applicationName',
           tooltip: true,
           width: 300,
           align: 'center'
         },
         {
           title: '应用简称',
-          key: 'useCalled',
+          key: 'applicationCode',
           width: 300,
           align: 'center'
         },
         {
           title: '联系人手机',
-          key: 'contactPhone',
+          key: 'contactMobile',
           width: 300,
           align: 'center'
         },
         {
           title: '联系人邮箱',
-          key: 'contactEmails',
+          key: 'contactMail',
           width: 300,
           align: 'center'
         },
@@ -193,80 +195,43 @@ export default {
     search () {
       console.log(this.formInline, 'formInline')
       // 点击查询按钮
-      const date = {
-        useName: this.useName,
-        useCalled: this.useCalled,
-        pageNum: this.pageNum,
-        pageSize: this.pageSize
-      }
-      confPageList(date)
-        .then(res => {
-          // this.$Message['success']({
-          //   background: true,
-          //   content: res.data.data
-          // })
-          this.confData = res.data.data.resultList
-          this.total = res.data.data.totalAmount
-        })
-        .catch(err => {
-          console.log(err)
-        })
     },
     reset () {
-      // 点击重置按钮
-      this.useName = null
-      this.useCalled = null
-      this.contactPhone = null
+      this.formInline.applicationName = null
+      this.formInline.applicationCode = null
+      this.formInline.contactMobile = null
+      this.formInline.contactMail = null
     },
     addSetting () {
-      // 点击新增按钮
       this.reset()
+      this.isHavaShow = false
       this.showType = 'add'
-      this.detailTitle = '新增模块'
+      this.detailTitle = '应用注册'
       this.modalEdit = true
+      this.isHaveKey = true
     },
-    lookConfig () {
-      // 点击新增按钮
-      this.reset()
-      this.showType = 'add'
-      this.detailTitle = '新增服务类型'
+    lookConfig (index) {
+      this.isHavaShow = true
+      this.detailTitle = '查看配置'
       this.modalEdit = true
+      this.isHaveKey = false
+      this.formInline.aesiv = this.confData[index].aesiv
+      this.formInline.aeskey = this.confData[index].aeskey
     },
     handleSubmitAddOrUpdate (index) {
-      // 点击提交新增按钮
       console.log(index)
       this.$refs[index].validate(valid => {
         console.log(valid)
         if (valid) {
           if (this.showType === 'add') {
-            const date = {
-              useName: this.formInline.useName,
-              useCalled: this.formInline.useCalled,
-              confValue: this.formInline.confValue,
-              confDescribtion: this.formInline.confDescribtion
+            const info = {
+              applicationName: this.formInline.applicationName,
+              applicationCode: this.formInline.applicationCode,
+              contactMobile: this.formInline.contactMobile,
+              contactMail: this.formInline.contactMail
             }
-            conf(date)
-              .then(res => {
-                this.$Message['success']({
-                  background: true,
-                  content: res.data.message
-                })
-                this.modalEdit = false
-                this.confPageList()
-                this.$refs[index].resetFields()
-              })
-              .catch(err => {
-                console.log(err)
-              })
-          } else if (this.showType === 'edit') {
-            const date = {
-              id: this.id,
-              useName: this.formInline.useName,
-              useCalled: this.formInline.useCalled,
-              confValue: this.formInline.confValue,
-              confDescribtion: this.formInline.confDescribtion
-            }
-            conf(date)
+            console.log(info)
+            editInfo(info)
               .then(res => {
                 this.$Message['success']({
                   background: true,
@@ -274,7 +239,28 @@ export default {
                 })
                 this.$refs['formInline'].resetFields()
                 this.modalEdit = false
-                this.confPageList()
+                this.getInfo()
+              })
+              .catch(err => {
+                console.log(err)
+              })
+          } else if (this.showType === 'edit') {
+            const info = {
+              id: this.formInline.id,
+              applicationName: this.formInline.applicationName,
+              applicationCode: this.formInline.applicationCode,
+              contactMobile: this.formInline.contactMobile,
+              contactMail: this.formInline.contactMail
+            }
+            editInfo(info)
+              .then(res => {
+                this.$Message['success']({
+                  background: true,
+                  content: res.data.message
+                })
+                this.$refs['formInline'].resetFields()
+                this.modalEdit = false
+                this.getInfo()
               })
               .catch(err => {
                 console.log(err)
@@ -294,12 +280,14 @@ export default {
       this.modalEdit = false
     },
     edit (index) {
-      // 点击修改按钮
-      this.id = this.confData[index].id
-      this.formInline.useName = this.confData[index].useName
-      this.formInline.useCalled = this.confData[index].useCalled
-      this.formInline.contactPhone = this.confData[index].contactPhone
-      this.formInline.contactEmails = this.confData[index].contactEmails
+      this.isHavaShow = false
+      this.formInline.id = this.confData[index].id
+      this.formInline.applicationName = this.confData[index].applicationName
+      this.formInline.applicationCode = this.confData[index].applicationCode
+      this.formInline.contactMobile = this.confData[index].contactMobile
+      this.formInline.contactMail = this.confData[index].contactMail
+      this.formInline.aesiv = this.confData[index].aesiv
+      this.formInline.aeskey = this.confData[index].aeskey
       this.showType = 'edit'
       this.detailTitle = '编辑模块'
       this.modalEdit = true
@@ -323,24 +311,26 @@ export default {
           console.log(err)
         })
     },
-    confPageList () {
-      // 根据条件分页查询全部配置
-      const date = {
-        pageNum: this.pageNum,
-        pageSize: this.pageSize
+    renderPage (data, total) {
+      this.confData = data
+      this.total = total
+    },
+    getInfo () {
+      const info = {
+        'pageSize': this.pageSize,
+        'currentPage': this.pageNum
       }
-      confPageList(date)
-        .then(res => {
-          this.confData = res.data.data.resultList
-          this.total = res.data.data.totalAmount
-        })
-        .catch(err => {
-          console.log(err)
-        })
+      getInfo(info).then(res => {
+        console.log(res)
+        this.renderPage(res.data.data.records, res.data.data.total)
+      }).catch(error => {
+        console.log(error)
+        this.$Message.info(error)
+      })
     }
   },
   created () {
-    this.confPageList()
+    this.getInfo()
   }
 }
 </script>

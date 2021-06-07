@@ -29,29 +29,79 @@
         </FormItem>
       </Form>
       <div slot="footer">
-        <Button type="primary" ghost size="large" @click="cancelAddOrUpdate('formInline')">查询</Button>
-        <Button type="primary" size="large" @click="handleSubmitAddOrUpdate('formInline')">新增</Button>
+        <Button type="primary" ghost size="large" @click="cancelAddOrUpdate('formInline')">返回</Button>
+        <Button type="primary" size="large" @click="handleSubmitModule('formInline')">保存模块</Button>
       </div>
      </Modal>
+     <!-- 新增模块 -->
+      <Modal v-model.trim="addNewModuleMoal" width="600" :mask-closable="false" :closable="false" v-bind:title="detailTitle">
+      <Form :model="formInline" :rules="ruleInline" inline>
+        <FormItem label="服务模块" style="width:270px;">
+          <Input v-model.trim="addServiceModule"/>
+        </FormItem>
+        <FormItem label="模块code"  style="width:270px;" >
+          <Input v-model.trim="serviceModuleCode"/>
+        </FormItem>
+      </Form>
+      <div slot="footer">
+        <Button type="primary" ghost size="large" @click="cancelAddModule()">返回</Button>
+        <Button type="primary" size="large" @click="addNewModule()">保存模块</Button>
+      </div>
+     </Modal>
+     <!-- 新增服务类型 -->
+     <Modal v-model.trim="addNewServiceType" width="600" :mask-closable="false" :closable="false" v-bind:title="detailTitle">
+      <Form  :model="formInline"  >
+        <div style="display:inline-table">
+        <FormItem label="服务模块" prop="serviceModule" style="width:270px;">
+        <Select v-model.trim="formInline" style="width:200px" @on-change="selectModuleNew">
+            <Option v-for="(item,id) in allModulesOption"
+            :key="id"
+            :value="item.serviceModuleCode"
+            >{{item.serviceModule}}</Option>
+        </Select>
+          </FormItem>
+       </div>
+          <FormItem label="服务类型" prop="serviceType" style="width:270px;">
+                  <Input v-model.trim="addServiceType.serviceType"/>
+          </FormItem>
+           <FormItem label="服务类型code" prop="serviceCode" style="width:270px;">
+                  <Input v-model.trim="addServiceType.serviceCode"/>
+          </FormItem>
+        <FormItem label="服务地址"  style="width:270px;">
+                  <Input v-model.trim="addServiceType.url"/>
+        </FormItem>
+      </Form>
+      <div slot="footer">
+        <Button type="primary" ghost size="large" @click="cancelAddNewService('formInline')">返回</Button>
+        <Button type="primary" size="large" @click="addNewServiceTypeClick()">新增类型</Button>
+      </div>
+     </Modal>
+
     <Modal v-model.trim="modalAddOrUpdateType" width="600" :mask-closable="false" :closable="false" v-bind:title="detailTitle">
       <Form ref="formInline" :model="formInline"  >
         <div style="display:inline-table">
         <FormItem label="服务模块" prop="serviceModule" style="width:270px;">
-        <Select v-model.trim="formInline" style="width:200px" >
-            <Option selected>{{formInline.serviceModule}}</Option>
+        <Select v-model.trim="selectValue" style="width:200px" @on-change="selectModule">
+            <Option v-for="(item,id) in allModulesOption"
+            :key="id"
+            :value="item.serviceModuleCode"
+            >{{item.serviceModule}}</Option>
         </Select>
           </FormItem>
        </div>
           <FormItem label="服务类型" prop="serviceType" style="width:270px;">
                   <Input v-model.trim="formInline.serviceType"/>
           </FormItem>
+           <FormItem label="服务类型code" prop="serviceCode" style="width:270px;">
+                  <Input v-model.trim="formInline.serviceCode"/>
+          </FormItem>
         <FormItem label="服务地址" prop="serviceAddress" style="width:270px;">
                   <Input v-model.trim="formInline.serviceAddress"/>
         </FormItem>
       </Form>
       <div slot="footer">
-        <Button type="primary" ghost size="large" @click="cancelAddOrUpdateType('formInline')">查询</Button>
-        <Button type="primary" size="large" @click="handleSubmitAddOrUpdate('formInline')">新增</Button>
+        <Button type="primary" ghost size="large" @click="cancelAddOrUpdateType('formInline')">返回</Button>
+        <Button type="primary" size="large" @click="handleSubmitType('formInline')">保存类型</Button>
       </div>
      </Modal>
     <Modal v-model.trim="modalDelete" width="450" title="删除参数配置提示">
@@ -67,7 +117,7 @@
 </template>
 
 <script>
-import { confPageList, confDelete, conf, getServiceTypeInfo } from '@/api/data'
+import { getServiceTypeInfo, editServiceModule, editServiceType, inquireServiceModule, deletModule, deleteType } from '@/api/data'
 
 export default {
   data () {
@@ -101,22 +151,7 @@ export default {
         callback()
       }
     }
-    const validateConfValue = (rule, value, callback) => {
-      if (!value) {
-        callback(new Error('请输入参数键名'))
-      } else {
-        callback()
-      }
-    }
-    const validateConfDescribtion = (rule, value, callback) => {
-      if (!value) {
-        callback(new Error('请输入配置描述'))
-      } else if (getByteLen(value) > 256) {
-        callback(new Error('字符串长度不能超过256'))
-      } else {
-        callback()
-      }
-    }
+
     /* const delay = (function () {
       let timer = 0
       return function (callback, ms) {
@@ -125,23 +160,40 @@ export default {
       }
     })() */
     return {
-      out_arr: '',
-      inarr: '',
+      serviceType: '',
+      serviceModule: '',
+      selectValue: [],
+      addServiceType: {
+        serviceModuleCode: '',
+        serviceCode: '',
+        serviceType: '',
+        url: ''
+      },
+      addNewServiceType: false,
+      addServiceModule: '',
+      addNewModuleMoal: false,
+      serviceModuleCode: '',
+      deleteServiceTypeCode: '',
+      deleteTypeId: '',
+      judgeEditType: '',
+      allModulesOption: [],
+      judgedeleteType: '',
+      editModuleId: '',
       total: 0,
       pageNum: 1,
       pageSize: 10,
-      serviceModule: '',
-      serviceType: '',
-      serviceUrl: '',
       modalAddOrUpdate: false,
       modalAddOrUpdateType: false,
       detailTitle: '',
       showType: '',
       modalDelete: false,
       formInline: {
-        serviceModule: '',
+        serviceModule: null,
         serviceType: '',
-        serviceAddress: ''
+        serviceAddress: '',
+        serviceCode: '',
+        editId: ''
+
       },
       ruleInline: {
         serviceModule: [
@@ -149,13 +201,8 @@ export default {
         ],
         serviceType: [
           { required: true, validator: validateserviceType, trigger: 'blur' }
-        ],
-        confValue: [
-          { required: true, validator: validateConfValue, trigger: 'blur' }
-        ],
-        confDescribtion: [
-          { required: true, validator: validateConfDescribtion, trigger: 'blur' }
         ]
+
       },
       confData: [],
       columns: [
@@ -188,22 +235,22 @@ export default {
     }
   },
   methods: {
+    selectModuleNew (e) {
+      console.log(e)
+      this.addServiceType.serviceModuleCode = e
+    },
+    selectModule (e) {
+      this.formInline.serviceModule = e
+      console.log(this.formInline.serviceModule)
+    },
     search () {
-      const date = {
+      const info = {
         'serviceModule': this.serviceModule,
-        'serviceType': this.serviceType,
-        'pageNum': this.pageNum,
-        'pageSize': this.pageSize
+        'serviceType': this.serviceType
       }
-      confPageList(date).then(res => {
-        // this.$Message['success']({
-        //   background: true,
-        //   content: res.data.data
-        // })
-        this.confData = res.data.data.resultList
-        this.total = res.data.data.totalAmount
-      }).catch(err => {
-        console.log(err)
+      getServiceTypeInfo(info).then(res => {
+        console.log(res)
+        this.renderPage(res.data.data.records, res.data.data.total)
       })
     },
     reset () {
@@ -212,124 +259,146 @@ export default {
       this.serviceAddress = null
     },
     addSetting () {
-      this.reset()
-      this.showType = 'add'
       this.detailTitle = '新增模块'
-      this.modalAddOrUpdate = true
+      this.addNewModuleMoal = true
     },
+
     addSettingType () {
-      this.reset()
-      this.showType = 'add'
       this.detailTitle = '新增服务类型'
-      this.modalAddOrUpdateType = true
+      this.addNewServiceType = true
     },
-    handleSubmitAddOrUpdate (index) { // 点击提交新增按钮
-      console.log(index)
-      this.$refs[index].validate((valid) => {
-        console.log(valid)
-        if (valid) {
-          if (this.showType === 'add') {
-            const date = {
-              'serviceModule': this.formInline.serviceModule,
-              'serviceType': this.formInline.serviceType,
-              'confValue': this.formInline.confValue,
-              'confDescribtion': this.formInline.confDescribtion
-            }
-            conf(date).then(res => {
-              this.$Message['success']({
-                background: true,
-                content: res.data.message
-              })
-              this.modalAddOrUpdate = false
-              this.confPageList()
-              this.$refs[index].resetFields()
-            }).catch(err => {
-              console.log(err)
-            })
-          } else if (this.showType === 'edit') {
-            const date = {
-              'id': this.id,
-              'serviceModule': this.formInline.serviceModule,
-              'serviceType': this.formInline.serviceType,
-              'confValue': this.formInline.confValue,
-              'confDescribtion': this.formInline.confDescribtion
-            }
-            conf(date).then(res => {
-              this.$Message['success']({
-                background: true,
-                content: res.data.message
-              })
-              this.$refs['formInline'].resetFields()
-              this.modalAddOrUpdate = false
-              this.confPageList()
-            }).catch(err => {
-              console.log(err)
-            })
-          }
-        } else {
-          this.$Message.error('请检查参数是否有误!')
+    addNewModule () {
+      const info = {
+        'serviceModule': this.addServiceModule,
+        'serviceModuleCode': this.serviceModuleCode
+      }
+      editServiceModule(info).then(res => {
+        console.log(res, '新增模块')
+        this.getServiceTypeInfo()
+      }).catch(error => console.log(error))
+      this.addNewModuleMoal = false
+    },
+    cancelAddModule () {
+      this.addNewModuleMoal = false
+    },
+    handleSubmitModule () {
+      try {
+        const info = {
+          'serviceModule': this.formInline.serviceModule,
+          'serviceModuleCode': this.editModuleId
         }
+        editServiceModule(info).then(res => {
+          console.log(res)
+          this.getServiceTypeInfo()
+        }).catch(error => console.log(error))
+      } catch (error) {
+        this.modalAddOrUpdate = false
+      } finally {
+        this.modalAddOrUpdate = false
+      }
+    },
+    handleSubmitType () {
+      try {
+        const info = {
+          'serviceModuleCode': this.formInline.serviceModule,
+          'serviceType': this.formInline.serviceType,
+          'serviceTypeCode': this.formInline.serviceCode,
+          'serviceUrl': this.formInline.serviceAddress,
+          'id': this.formInline.editId
+        }
+        console.log(info)
+        editServiceModule(info).then(res => {
+          console.log(res)
+          this.getServiceTypeInfo()
+        }).catch(error => console.log(error))
+      } catch (error) {
+        this.modalAddOrUpdateType = false
+      } finally {
+        this.modalAddOrUpdateType = false
+      }
+    },
+    cancelAddNewService () {
+      this.addNewServiceType = false
+    },
+    addNewServiceTypeClick () {
+      const info = {
+        'serviceModuleCode': this.addServiceType.serviceModuleCode,
+        'serviceType': this.addServiceType.serviceType,
+        'serviceTypeCode': this.addServiceType.serviceCode,
+        'serviceUrl': this.addServiceType.url
+      }
+      console.log(info)
+      editServiceType(info).then(res => {
+        this.getServiceTypeInfo()
+        this.addNewServiceType = false
+      }).catch(() => {
+        this.addNewServiceType = false
       })
     },
-    cancelAddOrUpdate (name) { // 取消新增
+    cancelAddOrUpdate (name) {
       this.$refs[name].resetFields()
       this.modalAddOrUpdate = false
     },
     cancelAddOrUpdateType () {
       this.modalAddOrUpdateType = false
     },
-    editModule (index) { // 点击修改按钮
-      this.id = this.confData[index].id
+    editModule (index) {
+      this.editModuleId = this.confData[index].serviceModuleCode
       this.formInline.serviceModule = this.confData[index].serviceModule
       this.formInline.serviceType = this.confData[index].serviceType
-      this.formInline.confValue = this.confData[index].confValue
-      this.formInline.confDescribtion = this.confData[index].confDescribtion
       this.showType = 'edit'
       this.detailTitle = '编辑模块'
       this.modalAddOrUpdate = true
     },
     editType (index) {
+      this.selectValue = this.confData[index].serviceModule
       this.id = this.confData[index].id
-      this.formInline.serviceModule = this.confData[index].serviceModule
+      this.formInline.serviceModule = this.confData[index].serviceModuleCode
       this.formInline.serviceType = this.confData[index].serviceType
-      this.formInline.serviceAddress = this.confData[index].serviceAddress
+      this.formInline.serviceAddress = this.confData[index].serviceUrl
+      this.formInline.serviceCode = this.confData[index].serviceTypeCode
+      this.formInline.editId = this.confData[index].id
       this.detailTitle = '编辑服务类型'
+      this.judgeEditType = 'edit'
       this.modalAddOrUpdateType = true
     },
-    delModule (index) { // 提交删除按钮
+    delModule (index) {
+      this.editModuleId = this.confData[index].serviceModuleCode
       this.modalDelete = true
-      this.id = this.confData[index].id
+      this.judgedeleteType = 'module'
     },
-    delType (index) { // 提交删除按钮
+    delType (index) {
+      this.deleteServiceTypeCode = this.confData[index].serviceTypeCode
+      this.deleteTypeId = this.confData[index].id
       this.modalDelete = true
-      this.id = this.confData[index].id
+      this.judgedeleteType = 'type'
     },
-    cancelDelete () { // 取消删除
+    cancelDelete () {
       this.modalDelete = false
     },
-    handleSubmitDelete () { // 确认删除
-      confDelete(this.id).then(res => {
-        this.$Message['success']({
-          background: true,
-          content: res.data.message
-        })
+    handleSubmitDelete () {
+      if (this.judgedeleteType === 'module') {
+        const info = this.editModuleId
+        deletModule(info).then(res => {
+          console.log(res)
+          this.getServiceTypeInfo()
+          this.modalDelete = false
+        }).catch(error => console.log(error))
         this.modalDelete = false
-        this.confPageList()
-      }).catch(err => {
-        console.log(err)
-      })
-    },
-    confPageList () { // 根据条件分页查询全部配置
-      const date = {
-        'pageNum': this.pageNum,
-        'pageSize': this.pageSize
+      } else if (this.judgedeleteType === 'type') {
+        const code = this.deleteServiceTypeCode
+        const id = this.deleteTypeId
+        deleteType(id, code).then(res => {
+          console.log(res, 'delete type')
+          this.getServiceTypeInfo()
+          this.modalDelete = false
+        }).catch(error => {
+          console.log(error)
+          this.modalDelete = false
+        })
+      } else {
+        this.$Message.info('操作无效')
       }
-      confPageList(date).then(res => {
-        this.confData = res.data.data.resultList
-        this.total = res.data.data.totalAmount
-      }).catch(err => {
-        console.log(err)
-      })
     },
     getServiceTypeInfo () {
       const info = {
@@ -339,9 +408,7 @@ export default {
       getServiceTypeInfo(info).then(res => {
         this.renderPage(res.data.data.records, res.data.data.total)
         console.log(res)
-      }
-
-      ).catch(err => this.$Message.info(err))
+      }).catch(err => this.$Message.info(err))
     },
     renderPage (data, total) {
       this.confData = data
@@ -349,17 +416,27 @@ export default {
     },
     async fetchData () {
 
+    },
+    async getAllModuleOptions () {
+      const info = {}
+      inquireServiceModule(info).then(res => {
+        this.allModulesOption = res.data.data.records
+      })
     }
   },
   created () {
     this.getServiceTypeInfo()
+    this.getAllModuleOptions()
+  },
+  mounted () {
+
   },
   watch: {
-    serviceModule () {
+    /*  serviceModule () {
       delay(() => {
         this.fetchData()
       }, 300)
-    }
+    } */
   }
 }
 </script>

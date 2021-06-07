@@ -99,6 +99,60 @@ export const getServiceTypeInfo = (info) => {
     method: 'post'
   })
 }
+
+/*
+    edit service module
+*/
+
+export const editServiceModule = (info) => {
+  return axios.request({
+    url: '/dcenter/type/edit/ServiceType',
+    data: info,
+    method: 'post'
+  })
+}
+/*
+    edit service type
+*/
+export const editServiceType = (info) => {
+  return axios.request({
+    url: '/dcenter/type/edit/ServiceType',
+    data: info,
+    method: 'post'
+  })
+}
+
+/*
+    inquire service type
+*/
+export const inquireServiceModule = (info) => {
+  return axios.request({
+    url: '/dcenter/type/select/ServiceModule',
+    method: 'post',
+    data: info
+  })
+}
+
+/*
+    delete module
+*/
+export const deletModule = (info) => {
+  return axios.request({
+    url: `/dcenter/type/del/ServiceModule/${info}`,
+    method: 'get'
+  })
+}
+
+/*
+    delete type
+*/
+export const deleteType = (id, code) => {
+  return axios.request({
+    url: `/dcenter/type/del/ServiceType/${id}/${code}`,
+    method: 'get'
+  })
+}
+
 // #endregion
 
 // 根据条件分页查询全部定时任务配置表
