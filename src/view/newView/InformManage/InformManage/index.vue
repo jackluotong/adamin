@@ -41,23 +41,27 @@
             v-bind:title="detailTitle"
         >
             <Form ref="formInline" :model="formInline">
-                <div style="display:inline-table">
+         <!--        <div style="width:200px height:20px">
+                    <select name="21" id="21">
+                        <option value="011">01</option>
+                        <option value="012" selected>02</option>
+                    </select>
+                </div> -->
                     <FormItem
                         label="通知类型"
-                        prop="informType"
+                        prop="noticeType"
                         style="width:270px;"
                     >
-                        <Select v-model.trim="formInline" style="width:200px" >
-                                  <Option selected>{{formInline.informType}}</Option>
+                <Select v-model.trim="noticeSelected" style="width:200px" @on-change='selectedType'>
+                                  <Option v-for="(item,index) in allNotice" :key="index" :value="item.noticeType">{{item.noticeType}}</Option>
                          </Select>
-                    </FormItem>
-                </div>
+                </FormItem>
                 <FormItem
                     label="场景"
-                    prop="scene"
+                    prop="sceneType"
                     style="width:270px;"
                 >
-                     <Input v-model.trim="formInline.scene"/>
+                     <Input v-model.trim="formInline.sceneType"/>
                 </FormItem>
                 <FormItem
                     label="内容"
@@ -68,17 +72,17 @@
                 </FormItem>
                 <FormItem
                     label="短信收件人"
-                    prop="messageReciver"
+                    prop="contactMobile"
                     style="width:270px;"
                 >
-                     <Input v-model.trim="formInline.messageReciver"/>
+                     <Input v-model.trim="formInline.contactMobile"/>
                 </FormItem>
                 <FormItem
                     label="邮件收件人"
-                    prop="emailReciver"
+                    prop="contactMail"
                     style="width:270px;"
                 >
-                     <Input v-model.trim="formInline.emailReciver"/>
+                     <Input v-model.trim="formInline.contactMail"/>
                 </FormItem>
             </Form>
             <div slot="footer">
@@ -101,7 +105,8 @@
 </template>
 
 <script>
-import { confPageList, confDelete, conf } from '@/api/data'
+import { confDelete, conf } from '@/api/data'
+import { getInfoInform } from '@/api/informManage'
 
 export default {
   data () {
@@ -117,7 +122,7 @@ export default {
       }
       return len
     }
-    const validateinformType = function (rule, value, callback) {
+    const validatenoticeType = function (rule, value, callback) {
       if (!value) {
         callback(new Error('请输入参数名称'))
       } else if (getByteLen(value) > 128) {
@@ -126,7 +131,7 @@ export default {
         callback()
       }
     }
-    const validatescene = (rule, value, callback) => {
+    const validatesceneType = (rule, value, callback) => {
       if (!value) {
         callback(new Error('请输入参数键名'))
       } else if (getByteLen(value) > 64) {
@@ -144,12 +149,16 @@ export default {
     }
 
     return {
-      modelThreshld: '',
+      noticeSelected: [],
+      allNotice: [
+        { noticeType: 1, value: '01' },
+        { noticeType: 2, value: '02' }
+      ],
       total: 0, // 总数
       pageNum: 1, // 第几页
       pageSize: 30, // 每页几条数据
-      informType: '',
-      scene: '',
+      noticeType: '',
+      sceneType: '',
       content: '',
       thresholdType: '',
       modalEdit: false,
@@ -157,24 +166,24 @@ export default {
       showType: '',
       modalDelete: false,
       formInline: {
-        informType: '',
-        scene: '',
-        confName: '',
+        noticeType: '',
+        sceneType: '',
+        contactMobile: '',
         content: '',
-        thresholdType: ''
+        contactMail: ''
       },
       ruleInline: {
-        informType: [
+        noticeType: [
           {
             required: true,
-            validator: validateinformType,
+            validator: validatenoticeType,
             trigger: 'blur'
           }
         ],
-        scene: [
+        sceneType: [
           {
             required: true,
-            validator: validatescene,
+            validator: validatesceneType,
             trigger: 'blur'
           }
         ],
@@ -186,36 +195,32 @@ export default {
           }
         ]
       },
-      confData: [
-        // 参数配置数据
-        { informType: 'OCR', scene: '29', confName: '1212321321321', content: 121, thresholdType: 'type1' },
-        { informType: '人脸识别', scene: '30', confName: '983127321', content: 1121, thresholdType: 'type12' }
-      ],
+      confData: [],
       columns: [
         {
-          title: '应用名称',
-          key: 'informType',
+          title: '通知类型',
+          key: 'noticeType',
           tooltip: true,
           align: 'center'
         },
         {
-          title: '应用简称',
-          key: 'scene',
+          title: '场景',
+          key: 'sceneType',
           align: 'center'
         },
         {
-          title: '服务模块',
-          key: 'confName',
-          align: 'center'
-        },
-        {
-          title: '次数阈值（每分钟）',
+          title: '内容',
           key: 'content',
           align: 'center'
         },
         {
-          title: '阈值类型',
-          key: 'thresholdType',
+          title: '短信收件人',
+          key: 'contactMobile',
+          align: 'center'
+        },
+        {
+          title: '邮件收件人',
+          key: 'contactMail',
           align: 'center'
         },
         {
@@ -227,12 +232,15 @@ export default {
     }
   },
   methods: {
+    selectedType (e) {
+      console.log(e, this.noticeSelected)
+    },
     search () {
       console.log(this.formInline, 'formInline')
       // 点击查询按钮
       const date = {
-        informType: this.informType,
-        scene: this.scene,
+        noticeType: this.noticeType,
+        sceneType: this.sceneType,
         pageNum: this.pageNum,
         pageSize: this.pageSize
       }
@@ -251,8 +259,8 @@ export default {
     },
     reset () {
       // 点击重置按钮
-      this.informType = null
-      this.scene = null
+      this.noticeType = null
+      this.sceneType = null
       this.content = null
     },
     addSetting () {
@@ -270,8 +278,8 @@ export default {
         if (valid) {
           if (this.showType === 'add') {
             const date = {
-              informType: this.formInline.informType,
-              scene: this.formInline.scene,
+              noticeType: this.formInline.noticeType,
+              sceneType: this.formInline.sceneType,
               confValue: this.formInline.confValue,
               confDescribtion: this.formInline.confDescribtion
             }
@@ -291,8 +299,8 @@ export default {
           } else if (this.showType === 'edit') {
             const date = {
               id: this.id,
-              informType: this.formInline.informType,
-              scene: this.formInline.scene,
+              noticeType: this.formInline.noticeType,
+              sceneType: this.formInline.sceneType,
               confValue: this.formInline.confValue,
               confDescribtion: this.formInline.confDescribtion
             }
@@ -326,21 +334,19 @@ export default {
     edit (index) {
       // 点击修改按钮
       this.id = this.confData[index].id
-      this.formInline.informType = this.confData[index].informType
-      this.formInline.scene = this.confData[index].scene
-      this.formInline.confName = this.confData[index].confName
+      this.formInline.noticeType = this.confData[index].noticeType
+      this.formInline.sceneType = this.confData[index].sceneType
+      this.formInline.contactMobile = this.confData[index].contactMobile
+      this.formInline.contactMail = this.confData[index].contactMail
       this.formInline.content = this.confData[index].content
-      this.formInline.thresholdType = this.confData[index].thresholdType
       this.showType = 'edit'
       this.detailTitle = '编辑模块'
       this.modalEdit = true
     },
     cancelDelete () {
-      // 取消删除
       this.modalDelete = false
     },
     handleSubmitDelete () {
-      // 确认删除
       confDelete(this.id)
         .then(res => {
           this.$Message['success']({
@@ -355,7 +361,6 @@ export default {
         })
     },
     confPageList () {
-      // 根据条件分页查询全部配置
       const date = {
         pageNum: this.pageNum,
         pageSize: this.pageSize
@@ -368,10 +373,24 @@ export default {
         .catch(err => {
           console.log(err)
         })
+    },
+    renderPage (data, total) {
+      this.confData = data
+      this.total = total
+    },
+    getInfo () {
+      const info = {
+        'pageSize': this.pageSize,
+        'currentPage': this.pageNum
+      }
+      getInfoInform(info).then(res => {
+        this.renderPage(res.data.data.records, res.data.data.total)
+        // this.noticeSelected = res.data.data.records
+      })
     }
   },
   created () {
-    this.confPageList()
+    this.getInfo()
   }
 }
 </script>

@@ -7,8 +7,10 @@
             <span style="padding:10px">应用简称</span>
             <Input v-model.trim="applicationCode" />
             <span style="padding:10px">服务模块</span>
-            <Select v-model.trim="formInline" style="width:200px">
-                <Option selected>{{ formInline.serviceModuleCode }}</Option>
+            <Select v-model.trim="selectedModule" style="width:200px" @on-change='selectedModuleClick'>
+                <Option v-for="(item,index) in moduleOptions"
+                :key="index"
+                :value="item.serviceModuleCode">{{ item.serviceModule}}</Option>
             </Select>
             <Button
                 type="primary"
@@ -59,31 +61,48 @@
                 <div style="display:inline-table">
                     <FormItem
                         label="应用名称"
-                        prop="applicationName"
                         style="width:270px;"
+                        prop="applicationName"
                     >
-                         <Select v-model.trim="selectedName" style="width:200px">
-                            <Option v-for="(item,id) in appData" :key="id" >{{ appData.applicationName}}</Option>
+                         <Select v-model.trim="selectedAppName" style="width:200px" @on-change='selectedAppNameClick'>
+                            <Option v-for="(item,id) in appData" :key="id" :value="item.applicationCode">
+                                {{ item.applicationName}}
+                            </Option>
                          </Select>
                     </FormItem>
                 </div>
                 <FormItem
                     label="应用简称"
-                    prop="applicationCode"
                     style="width:270px;"
+                    prop="applicationCode"
                 >
-                    <Select v-model.trim="formInline" style="width:200px">
-                            <Option selected>{{ formInline.applicationCode }}</Option>
-                    </Select>
+                    <Select v-model.trim="selectedAppName" style="width:200px" @on-change='selectedAppNameClick'>
+                            <Option v-for="(item,id) in appData" :key="id" :value="item.applicationCode">
+                                {{ item.applicationCode}}
+                            </Option>
+                         </Select>
                 </FormItem>
                 <FormItem
                     label="服务模块"
-                    prop="serviceModuleCode"
                     style="width:270px;"
+                    prop="applicationCode"
                 >
-                    <Select v-model.trim="formInline" style="width:200px">
-                            <Option selected>{{ formInline.serviceModuleCode }}</Option>
-                    </Select>
+            <Select v-model.trim="selectedModule" style="width:200px" @on-change='selectedModuleClick'>
+                <Option v-for="(item,index) in moduleOptions"
+                :key="index"
+                :value="item.serviceModuleCode">{{ item.serviceModule}}</Option>
+            </Select>
+                </FormItem>
+                <FormItem
+                    label="服务类型"
+                    style="width:270px;"
+                    prop="applicationCode"
+                >
+             <Select v-model.trim="selectedModule" style="width:200px" @on-change='selectedModuleClick'>
+                <Option v-for="(item,index) in moduleOptions"
+                :key="index"
+                :value="item.serviceTypeCode">{{ item.serviceType}}</Option>
+            </Select>
                 </FormItem>
             </Form>
             <div slot="footer">
@@ -92,7 +111,7 @@
                     ghost
                     size="large"
                     @click="cancelAddOrUpdateType('formInline')"
-                    >查询</Button
+                    >返回</Button
                 >
                 <Button
                     type="primary"
@@ -119,8 +138,8 @@
 </template>
 
 <script>
-import { confPageList, confDelete, conf } from '@/api/data'
-import { getInfoConnect, getInfo } from '@/api/useSystem' // addConnect, cancelConnect,
+import { confPageList, getServiceTypeInfo } from '@/api/data'
+import { getInfoConnect, getInfo, addConnect, cancelConnect } from '@/api/useSystem' // ,
 
 export default {
   data () {
@@ -163,8 +182,11 @@ export default {
     }
 
     return {
-      out_arr: '',
-      inarr: '',
+      deleteId: '',
+      selectedAppName: '',
+      selectedModule: '',
+      moduleOptions: [],
+      appData: [],
       total: 0,
       pageNum: 1,
       pageSize: 30,
@@ -235,36 +257,17 @@ export default {
     }
   },
   methods: {
+    selectedAppNameClick (e) { console.log(e) },
+    selectedModuleClick (e) { console.log(e) },
     search () {
-      console.log(this.formInline, 'formInline')
-      // 点击查询按钮
-      const date = {
-        applicationName: this.applicationName,
-        applicationCode: this.applicationCode,
-        pageNum: this.pageNum,
-        pageSize: this.pageSize
-      }
-      confPageList(date)
-        .then(res => {
-          // this.$Message['success']({
-          //   background: true,
-          //   content: res.data.data
-          // })
-          this.confData = res.data.data.resultList
-          this.total = res.data.data.totalAmount
-        })
-        .catch(err => {
-          console.log(err)
-        })
+      this.getInfo(this.applicationCode, this.applicationName)
     },
     reset () {
-      // 点击重置按钮
       this.applicationName = null
       this.applicationCode = null
       this.contactPhone = null
     },
     addSetting () {
-      // 点击新增按钮
       this.reset()
       this.showType = 'add'
       this.detailTitle = '新增模块'
@@ -276,50 +279,25 @@ export default {
       this.$refs[index].validate(valid => {
         console.log(valid)
         if (valid) {
-          if (this.showType === 'add') {
-            const date = {
-              applicationName: this.formInline.applicationName,
-              applicationCode: this.formInline.applicationCode,
-              confValue: this.formInline.confValue,
-              confDescribtion: this.formInline.confDescribtion
-            }
-            conf(date)
-              .then(res => {
-                this.$Message['success']({
-                  background: true,
-                  content: res.data.message
-                })
-                this.modalEdit = false
-                this.confPageList()
-                this.$refs[index].resetFields()
-              })
-              .catch(err => {
-                console.log(err)
-              })
-          } else if (this.showType === 'edit') {
-            const date = {
-              id: this.id,
-              applicationName: this.formInline.applicationName,
-              applicationCode: this.formInline.applicationCode,
-              confValue: this.formInline.confValue,
-              confDescribtion: this.formInline.confDescribtion
-            }
-            conf(date)
-              .then(res => {
-                this.$Message['success']({
-                  background: true,
-                  content: res.data.message
-                })
-                this.$refs['formInline'].resetFields()
-                this.modalEdit = false
-                this.confPageList()
-              })
-              .catch(err => {
-                console.log(err)
-              })
+          const info = {
+            applicationName: this.formInline.applicationName,
+            applicationCode: this.formInline.applicationCode,
+            confValue: this.formInline.confValue,
+            confDescribtion: this.formInline.confDescribtion
           }
-        } else {
-          this.$Message.error('请检查参数是否有误!')
+          addConnect(info)
+            .then(res => {
+              this.$Message['success']({
+                background: true,
+                content: res.data.message
+              })
+              this.modalEdit = false
+              this.confPageList()
+              this.$refs[index].resetFields()
+            })
+            .catch(err => {
+              console.log(err)
+            })
         }
       })
     },
@@ -332,33 +310,26 @@ export default {
       this.modalEdit = false
     },
     edit (index) {
-      // 点击修改按钮
-      this.id = this.confData[index].id
-      this.formInline.applicationName = this.confData[index].applicationName
-      this.formInline.applicationCode = this.confData[index].applicationCode
-      this.formInline.serviceModuleCode = this.confData[index].serviceModuleCode
-      this.showType = 'edit'
-      this.detailTitle = '编辑模块'
-      this.modalEdit = true
+      this.deleteId = this.confData[index].id
+      this.modalDelete = true
     },
     cancelDelete () {
-      // 取消删除
       this.modalDelete = false
     },
     handleSubmitDelete () {
-      // 确认删除
-      confDelete(this.id)
-        .then(res => {
-          this.$Message['success']({
-            background: true,
-            content: res.data.message
-          })
-          this.modalDelete = false
-          this.confPageList()
+      const info = this.deleteId
+      cancelConnect(info).then(res => {
+        this.$Message.success({
+          content: res.data.message
         })
-        .catch(err => {
-          console.log(err)
+        this.modalDelete = false
+        this.getInfo()
+      }).catch(res => {
+        this.$Message.error({
+          content: res.data.message
         })
+        this.modalDelete = false
+      })
     },
     confPageList () {
       // 根据条件分页查询全部配置
@@ -379,16 +350,16 @@ export default {
       this.confData = data
       this.total = total
     },
-    getInfo () {
+    getInfo (code, name) {
       const info = {
-        applicationCode: '',
-        applicationName: '',
+        applicationCode: code,
+        applicationName: name,
         currentPage: this.pageNum,
         pageSize: this.pageSize,
         serviceModuleCode: ''
       }
       getInfoConnect(info).then(res => {
-        console.log(res)
+        console.log(res, 'getInfoConnect')
         this.renderPage(res.data.data.records, res.data.data.total)
       }).catch(error => {
         console.log(error)
@@ -403,9 +374,15 @@ export default {
       applicationName: this.applicationName
     }
     this.getInfo()
+
     getInfo(info).then(res => {
-      console.log(res)
+      this.appData = res.data.data.records
+      console.log(res, 'getInfo')
     })
+    getServiceTypeInfo(info).then(res => {
+      this.moduleOptions = res.data.data.records
+      console.log(res, 'getServiceTypeInfo')
+    }).catch(err => this.$Message.info(err))
   }
 }
 </script>

@@ -407,7 +407,7 @@ export default {
       }
       getServiceTypeInfo(info).then(res => {
         this.renderPage(res.data.data.records, res.data.data.total)
-        console.log(res)
+        console.log(res, 'getServiceTypeInfo')
       }).catch(err => this.$Message.info(err))
     },
     renderPage (data, total) {
@@ -420,6 +420,7 @@ export default {
     async getAllModuleOptions () {
       const info = {}
       inquireServiceModule(info).then(res => {
+        console.log(res, 'inquireServiceModule')
         this.allModulesOption = res.data.data.records
       })
     }

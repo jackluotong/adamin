@@ -330,7 +330,7 @@ export default {
         'currentPage': this.pageNum
       }
       getInfo(info).then(res => {
-        console.log(res)
+        console.log(res, 'getInfo')
         this.renderPage(res.data.data.records, res.data.data.total)
       }).catch(error => {
         console.log(error)

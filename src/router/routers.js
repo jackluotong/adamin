@@ -278,7 +278,17 @@ export default [{
       title: '提醒通知管理'
     },
     component: () => import('@/view/newView/InformManage/InformManage')
-  }]
+  },
+  {
+    path: '/AlarmManage',
+    name: 'AlarmManage',
+    meta: {
+      icon: 'ios-settings',
+      title: '警示管理'
+    },
+    component: () => import('@/view/newView/InformManage/AlarmManage')
+  }
+  ]
 }, {
   path: '/StatisticalForm',
   name: 'StatisticalForm',
