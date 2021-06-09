@@ -10,7 +10,7 @@ export const getWeight = (info) => {
 
 export const addWeight = (info) => {
   return axios.request({
-    url: '/dcenter /weightInfo/edit/weight',
+    url: '/dcenter/weightInfo/edit/weight',
     method: 'post',
     data: info
   })
@@ -18,7 +18,7 @@ export const addWeight = (info) => {
 
 export const deleteWeight = (info) => {
   return axios.request({
-    url: '/dcenter /weightInfo/edit/weight',
+    url: '/dcenter/weightInfo/edit/weight',
     method: 'post',
     data: info
   })

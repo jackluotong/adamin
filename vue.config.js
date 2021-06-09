@@ -42,12 +42,12 @@ module.exports = {
   // proxy: 'http://localhost:8000'
   // }
   /*
-  http://liangchangwei.cn.utools.club/dcenter/login/login
   */
   devServer: {
     proxy: {
       '/dcenter': {
-        target: 'http://maxwell.cn.utools.club', // 源地址 7799  http://yang.cn.utools.club
+        target: ' http://yang.cn1.utools.club', // http://maxwell.cn.utools.club  http://yang.cn1.utools.club
+
         changeOrigin: true, // 改变源
         pathRewrite: { // '^/bridge': '/bridge' // 路径重写
         }

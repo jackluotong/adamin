@@ -2,9 +2,6 @@
     <div class="user-content">
         <h1 style="margin:10px 10px 10px 10px">提醒通知管理-提醒通知管理</h1>
         <div class="content-button">
-            <Button type="primary" icon="md-add" @click="addSetting()"
-                >新增通知</Button
-            >
         </div>
         <Table
             highlight-row
@@ -20,6 +17,7 @@
                         size="small"
                         style="margin-right: 5px"
                         @click="edit(index)"
+                        v-if="isShow"
                         >编辑</Button
                     >
                 </div>
@@ -41,13 +39,7 @@
             v-bind:title="detailTitle"
         >
             <Form ref="formInline" :model="formInline">
-         <!--        <div style="width:200px height:20px">
-                    <select name="21" id="21">
-                        <option value="011">01</option>
-                        <option value="012" selected>02</option>
-                    </select>
-                </div> -->
-                    <FormItem
+                  <!--   <FormItem
                         label="通知类型"
                         prop="noticeType"
                         style="width:270px;"
@@ -69,7 +61,7 @@
                     style="width:270px;"
                 >
                      <Input v-model.trim="formInline.content"/>
-                </FormItem>
+                </FormItem> -->
                 <FormItem
                     label="短信收件人"
                     prop="contactMobile"
@@ -105,50 +97,13 @@
 </template>
 
 <script>
-import { confDelete, conf } from '@/api/data'
-import { getInfoInform } from '@/api/informManage'
+import { getInfoInform, editInfoInform } from '@/api/informManage'
 
 export default {
   data () {
-    function getByteLen (val) {
-      var len = 0
-      for (var i = 0, len1 = val.length; i < len1; i++) {
-        var length = val.charCodeAt(i)
-        if (length >= 0 && length <= 128) {
-          len += 1
-        } else {
-          len += 3
-        }
-      }
-      return len
-    }
-    const validatenoticeType = function (rule, value, callback) {
-      if (!value) {
-        callback(new Error('请输入参数名称'))
-      } else if (getByteLen(value) > 128) {
-        callback(new Error('字符串长度不能超过128'))
-      } else {
-        callback()
-      }
-    }
-    const validatesceneType = (rule, value, callback) => {
-      if (!value) {
-        callback(new Error('请输入参数键名'))
-      } else if (getByteLen(value) > 64) {
-        callback(new Error('字符串长度不能超过64'))
-      } else {
-        callback()
-      }
-    }
-    const validateConfValue = (rule, value, callback) => {
-      if (!value) {
-        callback(new Error('请输入参数键名'))
-      } else {
-        callback()
-      }
-    }
-
     return {
+      editId: '',
+      isShow: true,
       noticeSelected: [],
       allNotice: [
         { noticeType: 1, value: '01' },
@@ -172,29 +127,7 @@ export default {
         content: '',
         contactMail: ''
       },
-      ruleInline: {
-        noticeType: [
-          {
-            required: true,
-            validator: validatenoticeType,
-            trigger: 'blur'
-          }
-        ],
-        sceneType: [
-          {
-            required: true,
-            validator: validatesceneType,
-            trigger: 'blur'
-          }
-        ],
-        confValue: [
-          {
-            required: true,
-            validator: validateConfValue,
-            trigger: 'blur'
-          }
-        ]
-      },
+      showTypeId: '',
       confData: [],
       columns: [
         {
@@ -223,11 +156,36 @@ export default {
           key: 'contactMail',
           align: 'center'
         },
-        {
+        /*  {
           title: '操作',
           slot: 'action',
           align: 'center'
+        } */
+        {
+          title: '操作',
+          key: 'noticeType',
+          width: 100,
+          render: (h, params) => {
+            if (params.row.noticeType === '服务通知') {
+              return h('Button', {
+                on: {
+                  click: () => {
+                    console.log(params)
+                    this.modalEdit = true
+                    this.editId = params.row.id
+                    this.formInline.contactMobile = params.row.contactMobile
+                    this.formInline.contactMail = params.row.contactMail
+                  }
+                }
+              }, '编辑')
+            } else {
+              return h('span', {
+
+              }, '')
+            }
+          }
         }
+
       ]
     }
   },
@@ -235,105 +193,30 @@ export default {
     selectedType (e) {
       console.log(e, this.noticeSelected)
     },
-    search () {
-      console.log(this.formInline, 'formInline')
-      // 点击查询按钮
-      const date = {
-        noticeType: this.noticeType,
-        sceneType: this.sceneType,
-        pageNum: this.pageNum,
-        pageSize: this.pageSize
-      }
-      confPageList(date)
-        .then(res => {
-          // this.$Message['success']({
-          //   background: true,
-          //   content: res.data.data
-          // })
-          this.confData = res.data.data.resultList
-          this.total = res.data.data.totalAmount
-        })
-        .catch(err => {
-          console.log(err)
-        })
-    },
-    reset () {
-      // 点击重置按钮
-      this.noticeType = null
-      this.sceneType = null
-      this.content = null
-    },
-    addSetting () {
-      // 点击新增按钮
-      this.reset()
-      this.showType = 'add'
-      this.detailTitle = '新增模块'
-      this.modalEdit = true
-    },
     handleSubmitAddOrUpdate (index) {
-      // 点击提交新增按钮
-      console.log(index)
-      this.$refs[index].validate(valid => {
-        console.log(valid)
-        if (valid) {
-          if (this.showType === 'add') {
-            const date = {
-              noticeType: this.formInline.noticeType,
-              sceneType: this.formInline.sceneType,
-              confValue: this.formInline.confValue,
-              confDescribtion: this.formInline.confDescribtion
-            }
-            conf(date)
-              .then(res => {
-                this.$Message['success']({
-                  background: true,
-                  content: res.data.message
-                })
-                this.modalEdit = false
-                this.confPageList()
-                this.$refs[index].resetFields()
-              })
-              .catch(err => {
-                console.log(err)
-              })
-          } else if (this.showType === 'edit') {
-            const date = {
-              id: this.id,
-              noticeType: this.formInline.noticeType,
-              sceneType: this.formInline.sceneType,
-              confValue: this.formInline.confValue,
-              confDescribtion: this.formInline.confDescribtion
-            }
-            conf(date)
-              .then(res => {
-                this.$Message['success']({
-                  background: true,
-                  content: res.data.message
-                })
-                this.$refs['formInline'].resetFields()
-                this.modalEdit = false
-                this.confPageList()
-              })
-              .catch(err => {
-                console.log(err)
-              })
-          }
-        } else {
-          this.$Message.error('请检查参数是否有误!')
-        }
+      const info = {
+        id: this.editId,
+        contactMail: this.formInline.contactMail,
+        contactMobile: this.formInline.contactMobile
+      }
+      console.log(info)
+      editInfoInform(info).then(res => {
+        this.$Message.success({
+          content: res.data.message
+        })
+        this.getInfo()
+      }).catch(() => {
+        this.$Message.error({
+          content: res.data.message
+        })
       })
-    },
-    cancelAddOrUpdate (name) {
-      // 取消新增
-      this.$refs[name].resetFields()
-      this.modalEdit = false
     },
     cancelAddOrUpdateType () {
       this.modalEdit = false
     },
     edit (index) {
-      // 点击修改按钮
-      this.id = this.confData[index].id
+      this.editId = this.confData[index].id
+      this.showTypeId = this.confData[index].noticeType
       this.formInline.noticeType = this.confData[index].noticeType
       this.formInline.sceneType = this.confData[index].sceneType
       this.formInline.contactMobile = this.confData[index].contactMobile
@@ -343,40 +226,13 @@ export default {
       this.detailTitle = '编辑模块'
       this.modalEdit = true
     },
-    cancelDelete () {
-      this.modalDelete = false
-    },
-    handleSubmitDelete () {
-      confDelete(this.id)
-        .then(res => {
-          this.$Message['success']({
-            background: true,
-            content: res.data.message
-          })
-          this.modalDelete = false
-          this.confPageList()
-        })
-        .catch(err => {
-          console.log(err)
-        })
-    },
-    confPageList () {
-      const date = {
-        pageNum: this.pageNum,
-        pageSize: this.pageSize
-      }
-      confPageList(date)
-        .then(res => {
-          this.confData = res.data.data.resultList
-          this.total = res.data.data.totalAmount
-        })
-        .catch(err => {
-          console.log(err)
-        })
-    },
     renderPage (data, total) {
       this.confData = data
       this.total = total
+      this.confData.map((item) => {
+        item.noticeType === '1' ? item.noticeType = '应用通知' : item.noticeType = '服务通知'
+        item.sceneType === '1' ? item.sceneType = '应用阈值触发' : item.sceneType = '服务阈值触发'
+      })
     },
     getInfo () {
       const info = {
@@ -385,12 +241,21 @@ export default {
       }
       getInfoInform(info).then(res => {
         this.renderPage(res.data.data.records, res.data.data.total)
-        // this.noticeSelected = res.data.data.records
       })
+    },
+    judgeShow () {
+      if (this.showTypeId === 1) {
+        this.isShow = true
+      } else {
+        this.isShow = false
+      }
+      console.log(this.showTypeId)
     }
   },
   created () {
     this.getInfo()
+  },
+  mounted () {
   }
 }
 </script>

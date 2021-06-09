@@ -1,10 +1,12 @@
 <template>
     <div class="user-content">
-        <h1 style="margin:10px 10px 10px 10px">应用系统管理-应用系统管理</h1>
+        <h1 style="margin:10px 10px 10px 10px">权重管理-权重管理</h1>
         <div class="content-button">
             <span style="padding:10px">服务模块</span>
-            <Select v-model.trim="formInline" style="width:200px">
-                <Option selected>{{ formInline.confName }}</Option>
+            <Select v-model.trim="selectedModule" style="width:200px" @on-change='selectedModuleClick'>
+                <Option v-for="(item,id) in modulesOption" :key="id" :value="item.serviceModuleCode">
+                    {{ item.serviceModule }}
+                </Option>
             </Select>
             <Button
                 type="primary"
@@ -20,7 +22,7 @@
         <Table
             highlight-row
             stripe
-            :columns="columns"
+            :columns="showWeightNormal"
             :data="confData"
             style="margin-top: 5px"
         >
@@ -37,16 +39,16 @@
                         type="primary"
                         size="small"
                         style="margin-right: 5px"
-                        @click="lookWeight(index)"
+                        @click="lookAbnormalWeight(index)"
                         >查看异常权重</Button
                     >
-                    <Button
+                   <!--  <Button
                         type="primary"
                         size="small"
                         style="margin-right: 5px"
                         @click="weightRecover(index)"
                         >权重恢复</Button
-                    >
+                    > -->
                 </div>
             </template>
         </Table>
@@ -72,17 +74,30 @@
                     prop="confName"
                     style="width:270px;"
                 >
-                    <Select v-model.trim="formInline" style="width:200px">
-                            <Option selected>{{ formInline.confName }}</Option>
-                    </Select>
+                   <Select v-model.trim="selectedModule" style="width:200px" @on-change='selectedModuleClick'>
+                <Option v-for="(item,id) in modulesOption" :key="id" :value="item.serviceModule">
+                    {{ item.serviceModule }}
+                </Option>
+                 </Select>
+                </FormItem>
+                 <FormItem
+                    label="服务类型"
+                    prop="confName"
+                    style="width:270px;"
+                >
+                   <Select v-model.trim="selectedModuleType" style="width:200px" >
+                <Option v-for="(item,id) in typeOption" :key="id" :value="item.serviceTypeCode">
+                    {{ item.serviceType }}
+                </Option>
+                 </Select>
                 </FormItem>
                 <FormItem
                         label="权重类型"
                         prop="useName"
                         style="width:270px;"
                     >
-                         <Select v-model.trim="formInline" style="width:200px">
-                            <Option selected>{{ formInline.useName }}</Option>
+                         <Select v-model.trim="selectedWeight" style="width:200px">
+                            <Option v-for="(item,index) in weightOptions" :key="index" :value='item.id'>{{ item.value }}</Option>
                          </Select>
                 </FormItem>
                 </div>
@@ -91,9 +106,17 @@
                     prop="useCalled"
                     style="width:270px;"
                 >
-                    <Select v-model.trim="formInline" style="width:200px">
-                            <Option selected>{{ formInline.useCalled }}</Option>
+                    <Select v-model.trim="useSelected" style="width:200px">
+                            <Option v-for="(item,index) in useOption" :key="index" :value='item.id'>{{ item.applicationCode }}</Option>
                     </Select>
+                </FormItem>
+                <FormItem
+                label='权重'
+                  prop="weight"
+                >
+                <Input placeholder="输入权重配比">
+
+                </Input>
                 </FormItem>
 
             </Form>
@@ -114,26 +137,15 @@
             </div>
         </Modal>
         <Modal v-model.trim="showWeightAbnormal" width="900"  title="权重异常展示">
-             <Table :columns="columnsShowWeight" :data="showWeightAbnormalData"></Table>
-        </Modal>
-        <Modal v-model.trim="modalDelete" width="450" title="删除参数配置提示">
-            <div>
-                <p>确定删除该参数配置吗？</p>
-            </div>
-            <div slot="footer">
-                <Button type="text" @click="cancelDelete" size="large"
-                    >取消</Button
-                >
-                <Button type="primary" @click="handleSubmitDelete" size="large"
-                    >确定</Button
-                >
-            </div>
+             <Table :columns="columnsShowAbnormalWeight" :data="showWeightAbnormalData"></Table>
         </Modal>
     </div>
 </template>
 
 <script>
-import { confPageList, confDelete, conf } from '@/api/data'
+import { inquireServiceModule, getServiceTypeInfo } from '@/api/data'
+import { getWeight } from '@/api/weightManage'
+import { getInfoConnect } from '@/api/useSystem'
 
 export default {
   data () {
@@ -176,6 +188,14 @@ export default {
     }
 
     return {
+      useOption: [],
+      weightOptions: [{ id: 1, value: '通用权重' }, { id: 2, value: '应用权重' }],
+      modulesOption: [],
+      typeOption: [],
+      selectedModuleType: '',
+      useSelected: '',
+      selectedWeight: '',
+      selectedModule: '',
       showWeightAbnormal: false,
       total: 0, // 总数
       pageNum: 1, // 第几页
@@ -187,7 +207,6 @@ export default {
       modalEdit: false,
       detailTitle: '',
       showType: '',
-      modalDelete: false,
       formInline: {
         useName: '',
         useCalled: '',
@@ -217,145 +236,146 @@ export default {
           }
         ]
       },
-      confData: [
-        // 参数配置数据
-        { useName: 'OCR', useCalled: '29', confName: '1212321321321' },
-        { useName: '人脸识别', useCalled: '30', confName: '983127321' }
-      ],
-      columnsShowWeight: [
+      flag: '',
+      confData: [],
+      showWeightAbnormalData: [],
+      columnsShowAbnormalWeight: [
         { title: '服务模块',
-          key: 'confName',
+          key: 'serviceModule',
           align: 'center'
         },
         { title: '权重',
-          key: 'confName',
-          align: 'center'
+          key: 'weight',
+          align: 'center',
+          render: (h, params) => {
+            return h('sapn', {
+            }, `${params.row.weightRatioName}=${params.row.weightRatioValue}`)
+          }
         },
         { title: '权重类型',
-          key: 'confName',
+          key: 'weightType',
           align: 'center'
         },
         { title: '所属应用',
-          key: 'confName',
+          key: 'applicationCode',
           align: 'center'
         }
       ],
-      columns: [
-        {
-          title: '服务模块',
-          key: 'confName',
-          width: 300,
+      showWeightNormal: [
+        { title: '服务模块',
+          key: 'serviceModule',
           align: 'center'
         },
-        {
-          title: '权重',
-          key: 'confName',
-          width: 300,
-          align: 'center'
+        { title: '权重',
+          key: 'weight',
+          align: 'center',
+          render: (h, params) => {
+            return h('sapn', {
+            }, `${params.row.weightRatioName}=${params.row.weightRatioValue}`)
+          }
         },
-        {
-          title: '权重类型',
-          key: 'confName',
-          width: 300,
-          align: 'center'
+        { title: '权重类型',
+          key: 'weightType',
+          align: 'center',
+          render: (h, params) => {
+            if (params.row.weightType === '1') { return h('span', '应用权重') } else if (params.row.weightType === '2') { return h('span', '应用权重') } else { return h('span', '参数错误') }
+          }
         },
-        {
-          title: '所属应用',
-          key: 'confName',
-          width: 200,
+        { title: '所属应用',
+          key: 'applicationCode',
           align: 'center'
         },
         {
           title: '操作',
           slot: 'action',
           align: 'center'
+        },
+        {
+          title: '权重恢复',
+          key: 'noticeType',
+          width: 100,
+          render: (h, params) => {
+            if (params.row.isAbnormalWeightId === false) {
+              return h('Button', {
+                on: {
+                  click: () => {
+                    alert('等待开发')
+                    console.log(params)
+                  }
+                }
+              }, '权重恢复')
+            } else {
+              return h('span', {
+
+              }, '')
+            }
+          }
         }
       ]
     }
   },
   methods: {
+    selectedModuleClick (e) {
+      console.log(this.selectedModule)
+      const info = {
+        serviceModule: e
+      }
+      getServiceTypeInfo(info).then(res => {
+        this.typeOption = res.data.data.records
+        console.log(res.data.data.records, 'getServiceTypeInfo')
+      }).catch(err => this.$Message.info(err))
+    },
     search () {
-      console.log(this.formInline, 'formInline')
-      // 点击查询按钮
-      const date = {
-        useName: this.useName,
-        useCalled: this.useCalled,
-        pageNum: this.pageNum,
+      const info = {
+        serviceModule: this.selectedModule,
+        currentPage: this.pageNum,
         pageSize: this.pageSize
       }
-      confPageList(date)
-        .then(res => {
-          // this.$Message['success']({
-          //   background: true,
-          //   content: res.data.data
-          // })
-          this.confData = res.data.data.resultList
-          this.total = res.data.data.totalAmount
+      getWeight(info).then(res => {
+        this.confData = res.data.data.records
+        this.total = res.data.data.total
+        this.selectedModule = null
+      }).catch(error => {
+        this.$Message.error({
+          content: error
         })
-        .catch(err => {
-          console.log(err)
-        })
+      })
     },
     reset () {
-      // 点击重置按钮
       this.useName = null
       this.useCalled = null
       this.contactPhone = null
     },
     addSetting () {
-      // 点击新增按钮
       this.reset()
       this.showType = 'add'
       this.detailTitle = '新增模块'
       this.modalEdit = true
     },
     handleSubmitAddOrUpdate (index) {
-      // 点击提交新增按钮
       console.log(index)
       this.$refs[index].validate(valid => {
         console.log(valid)
         if (valid) {
           if (this.showType === 'add') {
-            const date = {
-              useName: this.formInline.useName,
-              useCalled: this.formInline.useCalled,
-              confValue: this.formInline.confValue,
-              confDescribtion: this.formInline.confDescribtion
+            const data = {
+              applicationCode: '',
+              serviceTypeCode: '',
+              weightRatioKey: '',
+              weightRatioValue: '',
+              weightType: ''
             }
-            conf(date)
-              .then(res => {
-                this.$Message['success']({
-                  background: true,
-                  content: res.data.message
-                })
-                this.modalEdit = false
-                this.confPageList()
-                this.$refs[index].resetFields()
-              })
-              .catch(err => {
-                console.log(err)
-              })
+            console.log(data)
           } else if (this.showType === 'edit') {
-            const date = {
-              id: this.id,
-              useName: this.formInline.useName,
-              useCalled: this.formInline.useCalled,
-              confValue: this.formInline.confValue,
-              confDescribtion: this.formInline.confDescribtion
+            const data = {
+              applicationCode: '',
+              serviceTypeCode: '',
+              weightRatioKey: '',
+              weightRatioValue: '',
+              weightType: '',
+              id: ''
             }
-            conf(date)
-              .then(res => {
-                this.$Message['success']({
-                  background: true,
-                  content: res.data.message
-                })
-                this.$refs['formInline'].resetFields()
-                this.modalEdit = false
-                this.confPageList()
-              })
-              .catch(err => {
-                console.log(err)
-              })
+            console.log(data)
           }
         } else {
           this.$Message.error('请检查参数是否有误!')
@@ -363,7 +383,6 @@ export default {
       })
     },
     cancelAddOrUpdate (name) {
-      // 取消新增
       this.$refs[name].resetFields()
       this.modalEdit = false
     },
@@ -371,7 +390,6 @@ export default {
       this.modalEdit = false
     },
     edit (index) {
-      // 点击修改按钮
       this.id = this.confData[index].id
       this.formInline.useName = this.confData[index].useName
       this.formInline.useCalled = this.confData[index].useCalled
@@ -380,50 +398,58 @@ export default {
       this.detailTitle = '编辑模块'
       this.modalEdit = true
     },
-    lookWeight () {
+    lookAbnormalWeight () {
       this.showWeightAbnormal = true
-      this.showWeightAbnormalData = this.confData
+      this.getWeight(2, 2)
     },
     weightRecover () {
 
     },
-    cancelDelete () {
-      // 取消删除
-      this.modalDelete = false
+    renderPage (data, total, flag) {
+      switch (flag) {
+        case 1:
+          this.confData = data
+          this.total = total
+          break
+        case 2:
+          this.showWeightAbnormalData = data
+          break
+        default:
+          this.$Message.info('检查类型')
+      }
     },
-    handleSubmitDelete () {
-      // 确认删除
-      confDelete(this.id)
-        .then(res => {
-          this.$Message['success']({
-            background: true,
-            content: res.data.message
-          })
-          this.modalDelete = false
-          this.confPageList()
-        })
-        .catch(err => {
-          console.log(err)
-        })
-    },
-    confPageList () {
-      // 根据条件分页查询全部配置
-      const date = {
-        pageNum: this.pageNum,
+    getWeight (number, flag) {
+      const info = {
+        abnormalWeightType: number,
+        serviceModule: '',
+        serviceTypeCode: '',
+        applicationCode: '',
+        currentPage: this.pageNum,
         pageSize: this.pageSize
       }
-      confPageList(date)
-        .then(res => {
-          this.confData = res.data.data.resultList
-          this.total = res.data.data.totalAmount
+      getWeight(info).then(res => {
+        this.renderPage(res.data.data.records, res.data.data.total, flag)
+        console.log(res)
+      }).catch(error => {
+        this.$Message.error({
+          content: error
         })
-        .catch(err => {
-          console.log(err)
-        })
+      })
     }
   },
   created () {
-    this.confPageList()
+    this.getWeight(1, 1)
+    const info = {}
+    inquireServiceModule(info).then(res => {
+      this.modulesOption = res.data.data.records
+      console.log(res.data.data.records, 'service module')
+    })
+    getInfoConnect(info).then(res => {
+      console.log(res, 'getInfoConnect')
+      this.useOption = res.data.data.records
+    }).catch(error => {
+      console.log(error)
+    })
   }
 }
 </script>

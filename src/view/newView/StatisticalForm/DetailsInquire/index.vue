@@ -2,24 +2,28 @@
     <div class="user-content">
         <div class="content-button">
             <span style="padding:10px">应用名称</span>
-            <Input v-model.trim="useName" />
+            <Input v-model.trim="applicationName" />
             <span style="padding:10px">应用简称</span>
-            <Input v-model.trim="useCalled" />
+            <Input v-model.trim="applicationCode" />
             <span style="padding:10px 10px 10px 10px ">厂商名称</span>
-            <Select label="" v-model.trim="manufacturerName" style="width:150px; margin-right:20px;" >
-                <Option v-for="item of manufacturerEnum" :key="item.value" :value="item.code">{{item.label}}</Option>
+            <Select label="" v-model.trim="manufactureSelected" style="width:150px; margin-right:20px;" >
+                <Option v-for="item of manufacturerOption" :key="item.value" :value="item.code">{{item.label}}</Option>
             </Select>
             <span style="padding:10px 10px 10px 10px ">服务模块</span>
-            <Select label="" v-model.trim="serviceModule" style="width:150px; margin-right:20px;">
-                <Option v-for="item of serviceModuleEnum" :key="item.value" :value="item.value">{{item.label}}</Option>
+            <Select label="" v-model.trim="serviceModuleSelected" style="width:150px; margin-right:20px;">
+                <Option v-for="(item,id) in serviceModuleOption" :key="id" :value="item.serviceModuleCode">{{item.serviceModule}}</Option>
             </Select>
             <div style="padding:10px 10px 10px 10px ">
                 <span style="padding:10px 10px 10px 0 ">服务类型</span>
-                <Select label="" v-model.trim="serviceType" style="width:150px;margin-right:20px">
-                    <Option v-for="item of serviceTypeEnum" :key="item.value" :value="item.value">{{item.label}}</Option>
+                <Select label="" v-model.trim="serviceTypeSelected" style="width:150px;margin-right:20px">
+                    <Option v-for="(item,id) in serviceTypeOption" :key="id" :value="item.serviceTypeCode">{{item.serviceType}}</Option>
                 </Select>
                 <span style="padding:10px">请求时间</span>
-                 <Input v-model.trim="requestTime" />
+                <Row>
+                <Col span="12">
+                         <Date-picker type="daterange" placement="bottom-end" placeholder="选择日期" style="width: 200px" @on-change='selectTime' v-model="selectedDate"></Date-picker>
+                </Col>
+                </Row>
             </div>
         </div>
         <div style="">
@@ -29,7 +33,7 @@
 
         </div>
 
-        <Table highlight-row="highlight-row" stripe="stripe" :columns="columns" :data="logEmailMessageData" style="margin-top: 5px" >
+        <Table highlight-row="highlight-row" stripe="stripe" :columns="columns" :data="confData" style="margin-top: 5px" >
             <template slot-scope="{ row, index }" slot="action">
                 <div>
                     <Button type="info" size="small" style="margin-right: 5px" @click="edit(index)">编辑</Button>
@@ -42,113 +46,57 @@
 </template>
 
 <script>
-import { logEmailMessagePageList } from '@/api/data'
+import { getInfoDetails } from '@/api/detailsInquire'
+import { getManufacture } from '@/api/thirdPart'
+import { getServiceTypeInfo, inquireServiceModule } from '@/api/data'
 import excel from '@/libs/excel'
 export default {
   data () {
     return {
-      useName: '',
-      requestTime: '',
-      useCalled: '',
+      time: [],
+      selectedDate: '',
+      applicationName: '',
+      reqDate: '',
+      applicationCode: '',
       exportLoading: false,
-      total: 0, // 总数
-      pageNum: 1, // 第几页
-      pageSize: 30, // 每页几条数据
-      manufacturerName: '',
-      serviceModule: '',
-      serviceType: ' ',
-      serviceStatus: '',
-      manufacturerAddress: '',
-      outThreshold: '',
-      outCountThreshold: '',
-      abnormalCountThreshold: '',
+      total: 0,
+      pageNum: 1,
+      pageSize: 30,
+      manufactureSelected: '',
+      serviceModuleSelected: '',
+      serviceTypeSelected: ' ',
       showDetailModal: false,
       showDetailContent: '',
       modalCheck: false,
-      formInline: {
+      /*  formInline: {
         manufacturerName: '',
         serviceModule: '',
         serviceType: '',
         serviceStatus: '',
-        manufacturerAddress: '',
-        outThreshold: '',
-        outCountThreshold: '',
-        abnormalCountThreshold: ''
-      },
-      manufacturerEnum: [
-        {
-          'value': '1',
-          'label': '交通',
-          'code': 'transport'
-        }, {
-          'value': '2',
-          'label': '中化',
-          'code': 'china'
-        }
-      ],
-      serviceModuleEnum: [
-        {
-          'value': '1',
-          'label': 'OCR'
-        }, {
-          'value': '2',
-          'label': '人脸识别'
-        }
-      ],
-      serviceTypeEnum: [
-        {
-          'value': '1',
-          'label': '身份证识别'
-        }, {
-          'value': '2',
-          'label': '户口本识别'
-        }
-      ],
-      serviceStatusEnum: [
-        {
-          'value': '1',
-          'label': '生效'
-        }, {
-          'value': '2',
-          'label': '失效'
-        }
-      ],
-      logEmailMessageData: [
-        {
-          manufacturerName: 'jackl',
-          serviceModule: 'jakcls',
-          serviceType: 'orc',
-          serviceStatus: 'ok',
-          serviceAddress: 'www.baidu.com',
-          manufacturerAddress: 'www.ok.com'
-        }, {
-          manufacturerName: 'jackl',
-          serviceModule: 'jakcls1',
-          serviceType: 'orc1',
-          serviceStatus: 'no',
-          serviceAddress: 'www.okoko.com',
-          manufacturerAddress: 'www.ok1.com'
-        }
-      ], // 邮件日志数据
+      }, */
+      manufacturerOption: [],
+      serviceModuleOption: [],
+      serviceTypeOption: [],
+      confData: [ ],
       operatingTime: [],
       columns: [
         {
           title: '应用名称',
-          key: 'useName',
+          key: 'applicationName',
           width: 100,
           tooltip: true,
           align: 'center'
         },
         {
           title: '应用简称',
-          key: 'useCalled',
+          key: 'applicationCode',
           width: 100,
           align: 'center'
         },
         {
           title: '服务模块',
-          key: 'confName',
-
+          key: 'serviceModule',
+          width: 100,
           align: 'center'
         },
         {
@@ -172,49 +120,49 @@ export default {
         },
         {
           title: '请求参数',
-          key: 'requestParams',
+          key: 'reqParam',
           width: 200,
           align: 'center'
         },
         {
           title: '请求时间',
-          key: 'requestTime',
+          key: 'reqDate',
           width: 150,
           align: 'center'
         },
         {
           title: '返回参数',
-          key: 'returnParams',
+          key: 'resParam',
           width: 150,
           align: 'center'
         },
         {
           title: '返回时间',
-          key: 'returnTime',
+          key: 'resDate',
           width: 150,
           align: 'center'
         },
         {
           title: '请求厂商参数',
-          key: 'requestManufacturerParams',
+          key: 'reqManufacParam',
           width: 150,
           align: 'center'
         },
         {
           title: '请求厂商时间',
-          key: 'requestManufacturerTime',
+          key: 'reqManufacDate',
           width: 150,
           align: 'center'
         },
         {
           title: '厂商返回参数',
-          key: 'returnManufacturerParams',
+          key: 'resManufacParam',
           width: 150,
           align: 'center'
         },
         {
           title: '厂商返回时间',
-          key: 'returnManufacturerTime',
+          key: 'resManufacDate',
           width: 150,
           align: 'center'
         }
@@ -222,26 +170,26 @@ export default {
     }
   },
   methods: {
+    selectTime (e) {
+      console.log(e, this.selectedDate[0])
+      this.time = e
+    },
     search () {
-      console.log(this.manufacturerName, this.formInline.manufacturerName)
-      const date = {
-        'manufacturerName': this.manufacturerName,
-        'emailType': this.emailType,
-        'status': this.status,
-        'pageNum': this.pageNum,
-        'startDate': this.startDate,
-        'endDate': this.endDate,
-        'pageSize': this.pageSize
-      }
-      logEmailMessagePageList(date).then(res => {
-        // this.$Message['success']({
-        // background: true,
-        // content: res.data.data
-        // })
-        this.logEmailMessageData = res.data.data.resultList
-        this.total = res.data.data.totalAmount
-      }).catch(err => {
-        console.log(err)
+      const info =
+       {
+         currentPage: 1,
+         pageSize: 20,
+         applicationCode: this.applicationCode,
+         serviceTypeCode: this.serviceTypeSelected,
+         manufacturerCode: '',
+         applicationName: this.applicationName,
+         serviceModuleCode: this.serviceModuleSelected,
+         startTime: this.time === null ? '' : this.time[0],
+         endTime: this.time === null ? '' : this.time[1]
+       }
+      console.log(info)
+      getInfoDetails(info).then(res => {
+        this.renderPage(res.data.data.records, res.data.data.total)
       })
     },
     handleChange (date) {
@@ -249,7 +197,6 @@ export default {
       this.endDate = date[1]
     },
     reset () {
-      this.logEmailMessagePageList()
     },
     exportExel () {
       const titleArr = []
@@ -264,12 +211,12 @@ export default {
       }
       let newArr = this.columns.map((item, index) => { return Object.assign({}, { '': item.title }) })
       console.log(newArr, titleArr)
-      if (this.logEmailMessageData.length) {
+      if (this.confData.length) {
         this.exportLoading = true
         const params = {
           title: titleArr,
           key: keyArr,
-          data: this.logEmailMessageData,
+          data: this.confData,
           autoWidth: true,
           filename: '分类列表'
         }
@@ -282,25 +229,41 @@ export default {
     cancel () {
       this.modalCheck = false
     },
-    logEmailMessagePageList () { // 根据条件分页查询全部配置
-      const date = {
-        'pageNum': this.pageNum,
-        'pageSize': this.pageSize
+    getInfo () {
+      const info = {
+        currentPage: this.pageNum,
+        pageSize: this.pageSize
       }
-      logEmailMessagePageList(date).then(res => {
-        this.logEmailMessageData = res.data.data.resultList
-        this.total = res.data.data.totalAmount
-      }).catch(err => {
-        console.log(err)
+      getInfoDetails(info).then(res => {
+        this.renderPage(res.data.data.records, res.data.data.total)
+        console.log(res)
+      }).catch(error => {
+        this.$Message.error({
+          content: error
+        })
       })
+    },
+    renderPage (data, total) {
+      this.confData = data
+      this.total = total
     }
   },
   created () {
-    this.logEmailMessagePageList()
+    const info = {}
+    this.getInfo()
+    getManufacture(info).then(res => {
+      console.log(res, 'manufacture')
+    })
+    getServiceTypeInfo(info).then(res => {
+      this.serviceTypeOption = res.data.data.records
+    })
+    inquireServiceModule(info).then(res => {
+      this.serviceModuleOption = res.data.data.records
+    })
   }
 }
 </script>
-                <style lang="less" scoped="scoped">
+ <style lang="less" scoped="scoped">
                     .user-content {
                         .content-button {
                             padding: 5px;
