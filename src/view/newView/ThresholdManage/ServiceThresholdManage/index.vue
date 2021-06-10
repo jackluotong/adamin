@@ -1,5 +1,6 @@
 <template>
     <div class="user-content">
+        <h1 style="margin:10px 10px 10px 10px">阈值管理-服务阈值管理</h1>
         <div class="content-button">
             <span style="padding:10px 10px 10px 10px ">厂商名称</span>
             <Select label="" v-model.trim="manufacturerName" style="width:150px; margin-right:20px;">
@@ -80,6 +81,8 @@
 
 <script>
 import { logEmailMessagePageList } from '@/api/data'
+import { getServiceThreShold, addServiceThreShold, editServiceThreShold, deleteServiceThreShold } from '@/api/thresholdManage'
+
 export default {
   data () {
     return {
@@ -250,25 +253,30 @@ export default {
     cancel () {
       this.modalCheck = false
     },
-    logEmailMessagePageList () { // 根据条件分页查询全部配置
-      const date = {
-        'pageNum': this.pageNum,
-        'pageSize': this.pageSize
+
+    renderPage (data, total) {
+      this.confData = data
+      this.total = total
+    },
+    getServiceThreShold () {
+      const info = {
+        applicationCode: ''
       }
-      logEmailMessagePageList(date).then(res => {
-        this.logEmailMessageData = res.data.data.resultList
-        this.total = res.data.data.totalAmount
-      }).catch(err => {
-        console.log(err)
+      getServiceThreShold(info).then(res => {
+        console.log(res)
+        this.renderPage(res.data.data.records, res.data.data.total)
       })
     }
   },
   created () {
-    this.logEmailMessagePageList()
+    this.getServiceThreShold()
+    addServiceThreShold()
+    editServiceThreShold()
+    deleteServiceThreShold()
   }
 }
 </script>
-                <style lang="less" scoped="scoped">
+<style lang="less" scoped="scoped">
                     .user-content {
                         .content-button {
                             padding: 5px;

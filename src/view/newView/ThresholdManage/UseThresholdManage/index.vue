@@ -1,6 +1,6 @@
 <template>
     <div class="user-content">
-        <h1 style="margin:10px 10px 10px 10px">应用系统管理-应用系统管理</h1>
+        <h1 style="margin:10px 10px 10px 10px">阈值管理-应用阈值管理</h1>
         <div class="content-button">
             <span style="padding:10px">应用名称</span>
             <Input v-model.trim="useName" />
@@ -8,7 +8,7 @@
             <Input v-model.trim="useCalled" />
             <span style="padding:10px">阈值类型</span>
             <Select v-model="modelThreshld" style="width:200px">
-                  <Option v-for="item in threlodList" :value="item.value" :key="item">{{ item.label }}</Option>
+                  <Option v-for="item in threlodList" :value="item.value" :key="item.id">{{ item.label }}</Option>
             </Select>
             <Button
                 type="primary"
@@ -116,8 +116,7 @@
 </template>
 
 <script>
-import { confPageList, confDelete, conf } from '@/api/data'
-
+import { getUseThreShold, editUseThreShold, addUseThreShold, deleteUseThreShold, cancelUseThreShold } from '@/api/thresholdManage'
 export default {
   data () {
     function getByteLen (val) {
@@ -211,11 +210,7 @@ export default {
           }
         ]
       },
-      confData: [
-        // 参数配置数据
-        { useName: 'OCR', useCalled: '29', confName: '1212321321321', thresholdCount: 121, thresholdType: 'type1' },
-        { useName: '人脸识别', useCalled: '30', confName: '983127321', thresholdCount: 1121, thresholdType: 'type12' }
-      ],
+      confData: [],
       columns: [
         {
           title: '应用名称',
@@ -393,10 +388,27 @@ export default {
         .catch(err => {
           console.log(err)
         })
+    },
+    renderPage (data, total) {
+      this.confData = data
+      this.total = total
+    },
+    getUseThreShold () {
+      const info = {
+        applicationCode: ''
+      }
+      getUseThreShold(info).then(res => {
+        console.log(res)
+        this.renderPage(res.data.data.records, res.data.data.total)
+      })
     }
   },
   created () {
-    this.confPageList()
+    this.getUseThreShold()
+    editUseThreShold()
+    addUseThreShold()
+    deleteUseThreShold()
+    cancelUseThreShold()
   }
 }
 </script>

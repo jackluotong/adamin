@@ -21,6 +21,12 @@
                         style="margin-right: 5px"
                         @click="editModule(index)"
                     >编辑模块</Button>
+                     <Button
+                        type="error"
+                        size="small"
+                        style="margin-right: 5px"
+                        @click="deleteClick(index)"
+                    >删除</Button>
                 </div>
             </template>
         </Table>
@@ -39,8 +45,14 @@
             v-bind:title="detailTitle"
         >
             <Form ref="formInline" :model="formInline" :rules="ruleInline" inline>
-                <FormItem label="服务模块" prop="manufacturerName" style="width:270px;">
+                 <FormItem label="厂商名称" prop="manufacturerName" style="width:270px;">
                     <Input v-model.trim="formInline.manufacturerName" />
+                </FormItem>
+                 <FormItem label="联系人" prop="manufacturerContact" style="width:270px;">
+                    <Input v-model.trim="formInline.manufacturerContact" />
+                </FormItem>
+                 <FormItem label="联系方式" prop="manufacturerContactType" style="width:270px;">
+                    <Input v-model.trim="formInline.manufacturerContactType" />
                 </FormItem>
             </Form>
             <div slot="footer">
@@ -57,32 +69,6 @@
                 >返回</Button>
             </div>
         </Modal>
-        <Modal
-            v-model.trim="modalAddOrUpdateType"
-            width="600"
-            :mask-closable="false"
-            :closable="false"
-            v-bind:title="detailTitle"
-        >
-            <Form ref="formInline" :model="formInline">
-                <FormItem label="厂商名称" prop="manufacturerName" style="width:270px;">
-                    <Input v-model.trim="formInline.confKey" />
-                </FormItem>
-            </Form>
-            <div slot="footer">
-                <Button
-                    type="primary"
-                    ghost
-                    size="large"
-                    @click="cancelAddOrUpdateType('formInline')"
-                >返回</Button>
-                <Button
-                    type="primary"
-                    size="large"
-                    @click="handleSubmitAddOrUpdate('formInline')"
-                >保存</Button>
-            </div>
-        </Modal>
         <Modal v-model.trim="modalDelete" width="450" title="删除参数配置提示">
             <div>
                 <p>确定删除该参数配置吗？</p>
@@ -96,8 +82,7 @@
 </template>
 
 <script>
-import { confPageList, confDelete, conf } from '@/api/data'
-import { } from '@/api/thirdPart'
+import { getManufacture, addManufacture, editManufacture, deleteManufacture } from '@/api/thirdPart'
 export default {
   data () {
     function getByteLen (val) {
@@ -121,49 +106,23 @@ export default {
         callback()
       }
     }
-    const validateConfKey = (rule, value, callback) => {
-      if (!value) {
-        callback(new Error('请输入参数键名'))
-      } else if (getByteLen(value) > 64) {
-        callback(new Error('字符串长度不能超过64'))
-      } else {
-        callback()
-      }
-    }
-    const validateConfValue = (rule, value, callback) => {
-      if (!value) {
-        callback(new Error('请输入参数键名'))
-      } else {
-        callback()
-      }
-    }
-    const validateConfDescribtion = (rule, value, callback) => {
-      if (!value) {
-        callback(new Error('请输入配置描述'))
-      } else if (getByteLen(value) > 256) {
-        callback(new Error('字符串长度不能超过256'))
-      } else {
-        callback()
-      }
-    }
+
     return {
-      out_arr: '',
-      inarr: '',
-      total: 0, // 总数
-      pageNum: 1, // 第几页
-      pageSize: 30, // 每页几条数据
-      manufacturerName: '', // 参数名称
-      confKey: '', // 参数键名
-      confAddress: '', // 服务地址
-      modalAddOrUpdate: false, // 是否显示新增弹窗
+      deleteId: '',
+      total: 0,
+      pageNum: 1,
+      pageSize: 30,
+      manufacturerName: '',
+      modalAddOrUpdate: false,
       modalAddOrUpdateType: false,
-      detailTitle: '', // 表单标题
-      showType: '', // 表单展示类型（edit、add）
-      modalDelete: false, // 是否显示删除提示弹窗
+      detailTitle: '',
+      showType: '',
+      modalDelete: false,
       formInline: {
         manufacturerName: '',
-        confKey: '',
-        confAddress: ''
+        manufacturerContact: '',
+        manufacturerContactType: '',
+        id: ''
       },
       ruleInline: {
         manufacturerName: [
@@ -172,38 +131,27 @@ export default {
             validator: validatemanufacturerName,
             trigger: 'blur'
           }
-        ],
-        confKey: [
-          {
-            required: true,
-            validator: validateConfKey,
-            trigger: 'blur'
-          }
-        ],
-        confValue: [
-          {
-            required: true,
-            validator: validateConfValue,
-            trigger: 'blur'
-          }
-        ],
-        confDescribtion: [
-          {
-            required: true,
-            validator: validateConfDescribtion,
-            trigger: 'blur'
-          }
         ]
       },
-      confData: [
-        // 参数配置数据
-        { manufacturerName: 'OCR', confKey: '29', confAddress: 'SHANGHAI' },
-        { manufacturerName: '人脸识别', confKey: '30', confAddress: 'BEIJING' }
-      ],
+      confData: [ ],
       columns: [
         {
           title: '厂商名称',
           key: 'manufacturerName',
+          tooltip: true,
+          width: 300,
+          align: 'center'
+        },
+        {
+          title: '联系人',
+          key: 'manufacturerContact',
+          tooltip: true,
+          width: 300,
+          align: 'center'
+        },
+        {
+          title: '联系方式',
+          key: 'manufacturerContactType',
           tooltip: true,
           width: 300,
           align: 'center'
@@ -217,87 +165,55 @@ export default {
     }
   },
   methods: {
-    search () {
-      // 点击查询按钮
-      const date = {
-        manufacturerName: this.manufacturerName,
-        confKey: this.confKey,
-        pageNum: this.pageNum,
-        pageSize: this.pageSize
-      }
-      confPageList(date)
-        .then((res) => {
-          // this.$Message['success']({
-          //   background: true,
-          //   content: res.data.data
-          // })
-          this.confData = res.data.data.resultList
-          this.total = res.data.data.totalAmount
-        })
-        .catch((err) => {
-          console.log(err)
-        })
+    reset (obj) {
+      obj.manufacturerName = ''
+      obj.manufacturerContact = ''
+      obj.manufacturerContactType = ''
     },
-    reset () {
-      // 点击重置按钮
-      this.manufacturerName = null
-      this.confKey = null
-      this.confAddress = null
+    search () {
+      console.log(this.manufacturerName)
+      this.getManufacture(this.manufacturerName)
     },
     addSetting () {
-      // 点击新增按钮
-      this.reset()
       this.showType = 'add'
       this.detailTitle = '新增厂商'
       this.modalAddOrUpdate = true
     },
     handleSubmitAddOrUpdate (index) {
-      // 点击提交新增按钮
-      console.log(index)
       this.$refs[index].validate((valid) => {
-        console.log(valid)
         if (valid) {
-          if (this.showType === 'add') {
-            const date = {
-              manufacturerName: this.formInline.manufacturerName,
-              confKey: this.formInline.confKey,
-              confValue: this.formInline.confValue,
-              confDescribtion: this.formInline.confDescribtion
-            }
-            conf(date)
-              .then((res) => {
-                this.$Message['success']({
-                  background: true,
+          switch (this.showType) {
+            case 'add':
+              const infoAdd = this.formInline
+              addManufacture(infoAdd).then(res => {
+                this.$Message.success({
                   content: res.data.message
                 })
+                this.getManufacture('')
                 this.modalAddOrUpdate = false
-                this.confPageList()
-                this.$refs[index].resetFields()
+                this.reset(this.formInline)
+              }).catch(error => {
+                this.$Message.info({
+                  content: error
+                })
               })
-              .catch((err) => {
-                console.log(err)
-              })
-          } else if (this.showType === 'edit') {
-            const date = {
-              id: this.id,
-              manufacturerName: this.formInline.manufacturerName,
-              confKey: this.formInline.confKey,
-              confValue: this.formInline.confValue,
-              confDescribtion: this.formInline.confDescribtion
-            }
-            conf(date)
-              .then((res) => {
-                this.$Message['success']({
-                  background: true,
+              break
+            case 'edit':
+              const info = this.formInline
+              editManufacture(info).then(res => {
+                this.$Message.success({
                   content: res.data.message
                 })
-                this.$refs['formInline'].resetFields()
+                this.getManufacture('')
                 this.modalAddOrUpdate = false
-                this.confPageList()
+                this.reset(this.formInline)
+              }).catch(error => {
+                this.$Message.info({
+                  content: error
+                })
               })
-              .catch((err) => {
-                console.log(err)
-              })
+              break
+            default:
           }
         } else {
           this.$Message.error('请检查参数是否有误!')
@@ -305,58 +221,55 @@ export default {
       })
     },
     cancelAddOrUpdate (name) {
-      // 取消新增
       this.$refs[name].resetFields()
       this.modalAddOrUpdate = false
     },
-    cancelAddOrUpdateType () {
-      this.modalAddOrUpdateType = false
-    },
     editModule (index) {
-      // 点击修改按钮
-      this.id = this.confData[index].id
+      this.formInline.id = this.confData[index].id
       this.formInline.manufacturerName = this.confData[index].manufacturerName
+      this.formInline.manufacturerContact = this.confData[index].manufacturerContact
+      this.formInline.manufacturerContactType = this.confData[index].manufacturerContactType
       this.showType = 'edit'
       this.detailTitle = '编辑模块'
       this.modalAddOrUpdate = true
     },
+    deleteClick (index) {
+      this.deleteId = this.confData[index].id
+      this.modalDelete = true
+    },
     cancelDelete () {
-      // 取消删除
       this.modalDelete = false
     },
     handleSubmitDelete () {
-      // 确认删除
-      confDelete(this.id)
+      deleteManufacture(this.deleteId)
         .then((res) => {
           this.$Message['success']({
-            background: true,
             content: res.data.message
           })
+          this.getManufacture('')
           this.modalDelete = false
-          this.confPageList()
         })
         .catch((err) => {
           console.log(err)
         })
     },
-    confPageList () {
-      // 根据条件分页查询全部配置
-      const date = {
-        pageNum: this.pageNum,
-        pageSize: this.pageSize
+    rederPage (data, total) {
+      this.confData = data
+      this.total = total
+    },
+    getManufacture (name) {
+      const info = {
+        currentPage: this.pageNum,
+        pageSize: this.pageSize,
+        manufacturerName: name
       }
-      confPageList(date)
-        .then((res) => {
-          this.confData = res.data.data.resultList
-          this.total = res.data.data.totalAmount
-        })
-        .catch((err) => {
-          console.log(err)
-        })
+      getManufacture(info).then(res => {
+        this.rederPage(res.data.data.records, res.data.data.total)
+      })
     }
   },
   created () {
-    this.confPageList()
+    this.getManufacture()
   }
 }
 </script>

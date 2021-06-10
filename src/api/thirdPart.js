@@ -24,7 +24,49 @@ export const editManufacture = (info) => {
 }
 export const deleteManufacture = (info) => {
   return axios.request({
-    url: '/dcenter/manufacturerInfo/remove',
+    url: `/dcenter/manufacturerInfo/remove/${info}`,
+    method: 'get',
+    data: info
+  })
+}
+
+/*
+    third service manage
+*/
+
+export const getThirdService = (info) => {
+  return axios.request({
+    url: '/dcenter/tripartiteService/query',
+    method: 'post',
+    data: info
+  })
+}
+
+export const addThirdService = (info) => {
+  return axios.request({
+    url: '/dcenter/tripartiteService/create',
+    method: 'post',
+    data: info
+  })
+}
+export const editThirdService = (info) => {
+  return axios.request({
+    url: '/dcenter/tripartiteService/update',
+    method: 'post',
+    data: info
+  })
+}
+export const deleteThirdService = (info) => {
+  return axios.request({
+    url: '/dcenter/tripartiteService/remove',
+    method: 'post',
+    data: info
+  })
+}
+
+export const toggle = (info) => {
+  return axios.request({
+    url: '/dcenter/tripartiteService/updateServiceStatus',
     method: 'post',
     data: info
   })

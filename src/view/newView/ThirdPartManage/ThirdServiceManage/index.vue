@@ -3,20 +3,16 @@
     <div class="content-button">
 <span style="padding:10px 10px 10px 10px ">厂商名称</span>
 <Select label="" v-model.trim="manufacturerName" style="width:150px; margin-right:20px;">
-        <Option v-for="item of statusEnumList" :key="item.value" :value="item.value">{{item.label}}</Option>
+        <Option v-for="(item,id) in manufacturerOption" :key="id" :value="item.manufacturerCode">{{item.manufacturerName}}</Option>
       </Select>
 <span style="padding:10px 10px 10px 10px ">服务模块</span>
  <Select label="" v-model.trim="serviceModule" style="width:150px; margin-right:20px;">
-        <Option v-for="item of emailTypeEnumList" :key="item.value" :value="item.value">{{item.label}}</Option>
+        <Option v-for="(item,id) in moduleOption" :key="id" :value="item.serviceModuleCode">{{item.serviceModule}}</Option>
       </Select>
 <div style="padding:10px 10px 10px 10px ">
 <span style="padding:10px 10px 10px 0 ">服务类型</span>
       <Select label="" v-model.trim="serviceType" style="width:150px;margin-right:20px">
-        <Option v-for="item of serviceTypeEnumList" :key="item.value" :value="item.value">{{item.label}}</Option>
-      </Select>
-<span style="padding:10px 10px 10px 10px ">服务状态</span>
-      <Select label="" v-model.trim="serviceStatus" style="width:150px; margin-right:20px;">
-        <Option v-for="item of serviceStatusEnumList" :key="item.value" :value="item.value">{{item.label}}</Option>
+        <Option v-for="(item,id) of typeOption" :key="id" :value="item.serviceTypeCode">{{item.serviceType}}</Option>
       </Select>
 </div>
 </div>
@@ -26,12 +22,11 @@
 
 </div>
 
-    <Table highlight-row stripe :columns="columns" :data="logEmailMessageData" style="margin-top: 5px">
+    <Table highlight-row stripe :columns="columns" :data="confData" style="margin-top: 5px">
        <template slot-scope="{ row, index }" slot="action">
           <div>
             <Button type="info" size="small" style="margin-right: 5px" @click="edit(index)">编辑</Button>
-            <Button type="info" size="small" style="margin-right: 5px" @click="checkLog(index)">服务生效</Button>
-            <Button type="info" size="small" style="margin-right: 5px" @click="checkLog(index)">服务失效</Button>
+            <Button type="error" size="small" style="margin-right: 5px" @click="deleteService(index)">删除</Button>
           </div>
         </template>
     </Table>
@@ -39,23 +34,22 @@
     <Modal v-model="modalCheck" width="30%" height="40%"  :mask-closable="false" :closable="true" title="详情" >
       <Form :model="formInline"  inline>
         <FormItem  label="厂商名称" style="width:300px;" >
-<Select label="" v-model.trim="manufacturerName" style="width:150px; margin-right:20px;">
-        <Option v-for="item of statusEnumList" :key="item.value" :value="item.value">{{item.label}}</Option>
-      </Select>        </FormItem><br>
+            <Select label="" v-model.trim="formInline.manufacturerCode" style="width:150px; margin-right:20px;">
+              <Option v-for="(item,id) in manufacturerOption" :key="id" :value="item.manufacturerCode">{{item.manufacturerName}}</Option>
+            </Select>
+        </FormItem><br>
         <FormItem label="服务模块" style="width:300px;" >
- <Select label="" v-model.trim="serviceModule" style="width:150px; margin-right:20px;">
-        <Option v-for="item of emailTypeEnumList" :key="item.value" :value="item.value">{{item.label}}</Option>
-      </Select>        </FormItem>
-        <FormItem label="服务类型" style="width:300px;" >
-<Select label="" v-model.trim="serviceType" style="width:150px; margin-right:20px;">
-        <Option v-for="item of serviceTypeEnumList" :key="item.value" :value="item.value">{{item.label}}</Option>
-      </Select>        </FormItem><br>
-        <FormItem label="服务状态" style="width:300px;" >
-<Select label="" v-model.trim="serviceStatus" style="width:150px; margin-right:20px;">
-        <Option >{{formInline.serviceStatus}}</Option>
-      </Select>        </FormItem><br>
+           <Select label="" v-model.trim="formInline.serviceModuleCode" style="width:150px; margin-right:20px;">
+        <Option v-for="(item,id) in moduleOption" :key="id" :value="item.serviceModuleCode">{{item.serviceModule}}</Option>
+         </Select>
+           </FormItem>
+                    <FormItem label="服务类型" style="width:300px;" >
+            <Select label="" v-model.trim="formInline.serviceTypeCode" style="width:150px;margin-right:20px">
+        <Option v-for="(item,id) of typeOption" :key="id" :value="item.serviceTypeCode">{{item.serviceType}}</Option>
+             </Select>
+            </FormItem><br>
         <FormItem label="厂商接口地址" style="width:100%;" >
-        <Input  v-model.trim="formInline.manufacturerAddress" style="width:auto"/>
+        <Input  v-model.trim="formInline.manufacturerUrl" style="width:auto"/>
       </FormItem><br>
       </Form>
       <div slot="footer">
@@ -63,77 +57,53 @@
         <Button type="primary" size="large" @click="handleSubmitAddOrUpdate('formInline')">保存</Button>
       </div>
     </Modal>
+      <Modal v-model.trim="modalDelete" width="450" title="删除参数配置提示">
+            <div>
+                <p>确定删除该参数配置吗？</p>
+            </div>
+            <div slot="footer">
+                <Button type="text" @click="cancelDelete" size="large">取消</Button>
+                <Button type="primary" @click="handleSubmitDelete" size="large">确定</Button>
+            </div>
+        </Modal>
   </div>
 </template>
 
 <script>
-import { logEmailMessagePageList } from '@/api/data'
+import { getThirdService, getManufacture, toggle, addThirdService, deleteThirdService, editThirdService } from '@/api/thirdPart'
+import { getServiceTypeInfo, inquireServiceModule } from '@/api/data'
+
 export default {
   data () {
     return {
-      total: 0, // 总数
-      pageNum: 1, // 第几页
-      pageSize: 30, // 每页几条数据
-      manufacturerName: '', // 厂商名称
-      serviceModule: '', // 服务模块
-      serviceType: ' ',
-      serviceStatus: '',
-      manufacturerAddress: '',
-      showDetailModal: false, // 是否显示邮件详情弹窗
+      deleteServiceTypeCode: '',
+      deleteId: '',
+      modalDelete: false,
+      showType: '',
+      total: 0,
+      pageNum: 1,
+      pageSize: 30,
+      manufacturerName: '',
+      serviceModule: '',
+      serviceType: '',
+      showDetailModal: false,
       showDetailContent: '',
-      modalCheck: false, // 是否显示邮件日志详情弹窗
-      formInline: { // 实体
-        manufacturerName: '',
-        serviceModule: '',
-        serviceType: '',
-        serviceStatus: '',
-        manufacturerAddress: ''
+      modalCheck: false,
+      formInline: {
+        manufacturerCode: '',
+        serviceTypeCode: '',
+        serviceModuleCode: '',
+        manufacturerUrl: '',
+        id: ''
       },
-      statusEnumList: [ // 发送状态类型枚举
-        {
-          'value': '1',
-          'label': '交通'
-        },
-        {
-          'value': '2',
-          'label': '中化'
-        }
+      manufacturerOption: [ ],
+      moduleOption: [ ],
+      typeOption: [ ],
+      statusOption: [
+        { code: 0, value: '生效' },
+        { code: 1, value: '失效' }
       ],
-      emailTypeEnumList: [
-        {
-          'value': '1',
-          'label': 'OCR'
-        },
-        {
-          'value': '2',
-          'label': '人脸识别'
-        }
-      ],
-      serviceTypeEnumList: [
-        {
-          'value': '1',
-          'label': '身份证识别'
-        },
-        {
-          'value': '2',
-          'label': '户口本识别'
-        }
-      ],
-      serviceStatusEnumList: [
-        {
-          'value': '1',
-          'label': '生效'
-        },
-        {
-          'value': '2',
-          'label': '失效'
-        }
-      ],
-      logEmailMessageData: [
-        { manufacturerName: 'jackl', serviceModule: 'jakcls', serviceType: 'orc', serviceStatus: 'ok', serviceAddress: 'www.baidu.com', manufacturerAddress: 'www.ok.com' },
-        { manufacturerName: 'jackl', serviceModule: 'jakcls1', serviceType: 'orc1', serviceStatus: 'no', serviceAddress: 'www.okoko.com', manufacturerAddress: 'www.ok1.com' }
-      ], // 邮件日志数据
-      operatingTime: [],
+      confData: [ ],
       columns: [
         {
           title: '厂商名称',
@@ -142,16 +112,10 @@ export default {
           width: 150,
           align: 'center'
         },
-        // {
-        //   title: '收件人',
-        //   key: 'receiveEmail',
-        //   tooltip: true,
-        //   width: 130,
-        //   align: 'center'
-        // },
         {
           title: '服务模块',
           key: 'serviceModule',
+          width: 150,
           align: 'center'
         },
         {
@@ -164,7 +128,17 @@ export default {
           title: '服务状态',
           key: 'serviceStatus',
           width: 200,
-          align: 'center'
+          align: 'center',
+          render (h, params) {
+            switch (params.row.serviceStatus) {
+              case 0:
+                return h('span', '生效')
+              case 1:
+                return h('span', '失效')
+              default:
+                break
+            }
+          }
         },
         {
           title: '统一对外服务地址',
@@ -174,81 +148,187 @@ export default {
         },
         {
           title: '厂商接口地址',
-          key: 'manufacturerAddress',
+          key: 'manufacturerUrl',
           width: 150,
           align: 'center'
         },
         {
-          title: '操作',
+          title: '编辑',
           slot: 'action',
-          align: 'center'
+          align: 'center',
+          width: 300
+        },
+        {
+          title: '服务生效/失效',
+          key: 'serviceStatus',
+          width: 300,
+          render: (h, params) => {
+            if (params.row.serviceStatus === 0) {
+              return h('Button',
+                // { style: { background: '#ccc' } },
+                {
+                  on: {
+                    click: () => {
+                      const info = {
+                        id: params.row.id,
+                        serviceTypeCode: params.row.serviceTypeCode,
+                        status: 1
+                      }
+                      console.log(info)
+                      toggle(info).then(res => {
+                      /*  this.$Message.success({
+                        content: res.data.message
+                      }).catch(error => {
+                        this.$Message.error(error)
+                      }) */
+                        console.log(res)
+                      })
+                    }
+                  }
+                }, '服务失效')
+            } else if (params.row.serviceStatus === 1) {
+              return h('Button', {
+                on: {
+                  click: () => {
+                    const info = {
+                      id: params.row.id,
+                      serviceTypeCode: params.row.serviceTypeCode,
+                      status: 0
+                    }
+                    toggle(info).then(res => {
+                      /*  this.$Message.success({
+                        content: res.data.message
+                      }).catch(error => {
+                        this.$Message.error(error)
+                      }) */
+                      console.log(res)
+                    })
+                  }
+                }
+              }, '服务生效')
+            }
+          }
         }
       ]
     }
   },
   methods: {
-    search () { // 点击查询按钮
-      const date = {
-        'receiveEmail': this.receiveEmail,
-        'emailType': this.emailType,
-        'status': this.status,
-        'pageNum': this.pageNum,
-        'startDate': this.startDate,
-        'endDate': this.endDate,
-        'pageSize': this.pageSize
-      }
-      logEmailMessagePageList(date).then(res => {
-        // this.$Message['success']({
-        //   background: true,
-        //   content: res.data.data
-        // })
-        this.logEmailMessageData = res.data.data.resultList
-        this.total = res.data.data.totalAmount
-      }).catch(err => {
-        console.log(err)
-      })
+    search () {
+      this.getThirdService(this.manufacturerName, this.serviceType, this.serviceModule)
     },
-    handleChange (date) {
-      this.startDate = date[0]
-      this.endDate = date[1]
-    },
-    reset () { // 点击重置按钮
-      this.receiveEmail = ''
-      this.messageContent = ''
-      this.status = ''
-      this.pageNum = 1
-      this.operatingTime = []
-      this.startDate = ''
-      this.endDate = ''
-      this.logEmailMessagePageList()
+    reset () {
     },
     edit (index) {
-      this.formInline.serviceStatus = this.logEmailMessageData[index].serviceStatus
-      this.formInline.manufacturerAddress = this.logEmailMessageData[index].manufacturerAddress
+      this.formInline.id = this.confData[index].id
+      this.formInline.manufacturerCode = this.confData[index].manufacturerCode
+      this.formInline.serviceTypeCode = this.confData[index].serviceTypeCode
+      this.formInline.serviceModuleCode = this.confData[index].serviceModuleCode
+      this.formInline.manufacturerUrl = this.confData[index].manufacturerUrl
       this.modalCheck = true
+      this.showType = 'edit'
     },
     addNew () {
-      this.formInline.manufacturerAddress = ''
       this.modalCheck = true
+      this.showType = 'add'
     },
     cancel () {
       this.modalCheck = false
     },
-    logEmailMessagePageList () { // 根据条件分页查询全部配置
-      const date = {
-        'pageNum': this.pageNum,
-        'pageSize': this.pageSize
+    deleteService (index) {
+      this.deleteId = this.confData[index].id
+      this.deleteServiceTypeCode = this.confData[index].serviceTypeCode
+      this.modalDelete = true
+      console.log(this.confData[index])
+    },
+    handleSubmitDelete () {
+      const info = {
+        id: this.deleteId,
+        serviceTypeCode: this.deleteServiceTypeCode
       }
-      logEmailMessagePageList(date).then(res => {
-        this.logEmailMessageData = res.data.data.resultList
-        this.total = res.data.data.totalAmount
-      }).catch(err => {
-        console.log(err)
+      deleteThirdService(info).then(res => {
+        this.$Message.success({
+          content: res.data.message
+        })
+        this.getThirdService()
+      }).catch(error => {
+        this.$Message.error({
+          content: error
+        })
       })
+      this.modalDelete = false
+    },
+    cancelDelete () {
+      this.modalDelete = false
+    },
+    handleSubmitAddOrUpdate (index) {
+      switch (this.showType) {
+        case 'add':
+          const infoAdd = this.formInline
+          console.log(infoAdd)
+          addThirdService(infoAdd).then(res => {
+            console.log(res)
+          }).catch(error => {
+            this.$Message.error({
+              content: error
+            })
+            this.modalCheck = false
+          })
+          this.getThirdService()
+          this.modalCheck = false
+          break
+        case 'edit':
+          const info = this.formInline
+          console.log(info)
+          editThirdService(info).then(res => {
+            this.$Message.success({
+              content: res.data.message
+            })
+            this.getThirdService()
+            this.modalCheck = false
+          }).catch((error) => {
+            this.$Message.error({
+              content: error
+            })
+            this.modalCheck = false
+          })
+          break
+        default:
+          this.$Message.error('请检查类型！')
+          break
+      }
+    },
+    getThirdService (manufacturerCode, serviceTypeCode, serviceModuleCode) {
+      const info = {
+        manufacturerCode: manufacturerCode,
+        serviceTypeCode: serviceTypeCode,
+        serviceModuleCode: serviceModuleCode,
+        pageNum: this.pageNum,
+        pageSize: this.pageSize
+      }
+      console.log(info)
+      getThirdService(info).then(res => {
+        console.log(res)
+        this.renderPage(res.data.data.records, res.data.data.total)
+      })
+    },
+    renderPage (data, total) {
+      this.confData = data
+      this.total = total
     }
+
   },
   created () {
-    this.logEmailMessagePageList()
+    const info = {}
+    this.getThirdService()
+    getManufacture(info).then(res => {
+      this.manufacturerOption = res.data.data.records
+    })
+    getServiceTypeInfo(info).then(res => {
+      this.typeOption = res.data.data.records
+    })
+    inquireServiceModule(info).then(res => {
+      this.moduleOption = res.data.data.records
+    })
   }
 }
 </script>
