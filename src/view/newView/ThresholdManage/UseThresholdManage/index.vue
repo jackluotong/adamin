@@ -3,13 +3,9 @@
         <h1 style="margin:10px 10px 10px 10px">阈值管理-应用阈值管理</h1>
         <div class="content-button">
             <span style="padding:10px">应用名称</span>
-            <Input v-model.trim="useName" />
+            <Input v-model.trim="applicationName" />
             <span style="padding:10px">应用简称</span>
-            <Input v-model.trim="useCalled" />
-            <span style="padding:10px">阈值类型</span>
-            <Select v-model="modelThreshld" style="width:200px">
-                  <Option v-for="item in threlodList" :value="item.value" :key="item.id">{{ item.label }}</Option>
-            </Select>
+            <Input v-model.trim="applicationCode" />
             <Button
                 type="primary"
                 icon="md-search"
@@ -37,13 +33,13 @@
                         @click="edit(index)"
                         >编辑</Button
                     >
-                     <!--  <Button
+                    <Button
                         type="primary"
                         size="small"
                         style="margin-right: 5px"
-                        @click="lookWeight(index)"
-                        >查看异常权重</Button
-                    > -->
+                        @click="deleteThreshold(index)"
+                        >删除</Button
+                    >
                 </div>
             </template>
         </Table>
@@ -62,38 +58,36 @@
             :closable="false"
             v-bind:title="detailTitle"
         >
-            <Form ref="formInline" :model="formInline">
-                <div style="display:inline-table">
-                    <FormItem
-                        label="应用名称"
-                        prop="useName"
-                        style="width:270px;"
-                    >
-                        <Input v-model.trim="formInline.useName"/>
-                    </FormItem>
-                </div>
-                <FormItem
-                    label="应用简称"
-                    prop="useCalled"
-                    style="width:270px;"
-                >
-                     <Input v-model.trim="formInline.useCalled"/>
-                </FormItem>
+    <Form ref="formInline" :model="formInline">
+        <FormItem label="服务类型" style="width:300px;" >
+            <Select label="" v-model.trim="formInline.serviceTypeCode" style="width:150px;margin-right:20px">
+                   <Option v-for="(item,id) of typeOption" :key="id" :value="item.serviceTypeCode">{{item.serviceType}}</Option>
+            </Select>
+        </FormItem><br>
+         <FormItem label="应用名称" style="width:300px;" >
+            <Select label="" v-model.trim="formInline.applicationCode" style="width:150px;margin-right:20px">
+                   <Option v-for="(item,index) of appOption" :key="index" :value="item.applicationCode">{{item.applicationName}}</Option>
+            </Select>
+        </FormItem><br>
+         <FormItem label="应用简称" style="width:300px;" >
+            <Select label="" v-model.trim="formInline.applicationCode" style="width:150px;margin-right:20px">
+                   <Option v-for="(item,index) of appOption" :key="index" :value="item.applicationCode">{{item.applicationCode}}</Option>
+            </Select>
+        </FormItem><br>
+
                 <FormItem
                     label="次数阈值（每分钟）"
-                    prop="thresholdCount"
+                    prop="timesThreshold"
                     style="width:270px;"
                 >
-                     <Input v-model.trim="formInline.thresholdCount"/>
+                     <Input v-model.number="formInline.timesThreshold"/>
                 </FormItem>
                  <FormItem
-                    label="阈值类型"
-                    prop="thresholdType"
+                    label="次数阈值（每小时）"
+                    prop="hoursThreshold"
                     style="width:270px;"
                 >
-                <Select v-model.trim="formInline" style="width:200px">
-                        <Option selected>{{ formInline.thresholdType }}</Option>
-                </Select>
+                <Input v-model.number="formInline.hoursThreshold"/>
                 </FormItem>
             </Form>
             <div slot="footer">
@@ -112,11 +106,31 @@
                 >
             </div>
         </Modal>
+         <Modal v-model.trim="modalDelete" width="450" title="删除参数配置提示">
+            <div>
+                <p>确定删除该参数配置吗？</p>
+            </div>
+            <div slot="footer">
+                <Button type="text" @click="cancelDelete" size="large">取消</Button>
+                <Button type="primary" @click="handleSubmitDelete" size="large">确定</Button>
+            </div>
+        </Modal>
+         <Modal v-model.trim="modalFusing" width="450" title="删除参数配置提示">
+            <div>
+                <p>确定删除该参数配置吗？</p>
+            </div>
+            <div slot="footer">
+                <Button type="text" @click="cancelFusing" size="large">取消</Button>
+                <Button type="primary" @click="handleSubmitFusng" size="large">确定</Button>
+            </div>
+        </Modal>
     </div>
 </template>
 
 <script>
-import { getUseThreShold, editUseThreShold, addUseThreShold, deleteUseThreShold, cancelUseThreShold } from '@/api/thresholdManage'
+import { getAllApp, getUseThreShold, editUseThreShold, addUseThreShold, deleteUseThreShold, cancelUseThreShold } from '@/api/thresholdManage'
+import { getServiceTypeInfo } from '@/api/data'
+
 export default {
   data () {
     function getByteLen (val) {
@@ -131,7 +145,7 @@ export default {
       }
       return len
     }
-    const validateuseName = function (rule, value, callback) {
+    const validateapplicationName = function (rule, value, callback) {
       if (!value) {
         callback(new Error('请输入参数名称'))
       } else if (getByteLen(value) > 128) {
@@ -140,7 +154,7 @@ export default {
         callback()
       }
     }
-    const validateuseCalled = (rule, value, callback) => {
+    const validateapplicationCode = (rule, value, callback) => {
       if (!value) {
         callback(new Error('请输入参数键名'))
       } else if (getByteLen(value) > 64) {
@@ -158,6 +172,11 @@ export default {
     }
 
     return {
+      applicationCodeSelected: [],
+      appOption: [],
+      modalFusing: false,
+      typeOption: [],
+      editId: '',
       modelThreshld: '',
       threlodList: [
         {
@@ -172,33 +191,34 @@ export default {
       total: 0, // 总数
       pageNum: 1, // 第几页
       pageSize: 30, // 每页几条数据
-      useName: '',
-      useCalled: '',
-      thresholdCount: '',
+      applicationName: '',
+      applicationCode: '',
+      timesThreshold: '',
       thresholdType: '',
       modalEdit: false,
       detailTitle: '',
       showType: '',
       modalDelete: false,
       formInline: {
-        useName: '',
-        useCalled: '',
-        confName: '',
-        thresholdCount: '',
-        thresholdType: ''
+        applicationName: '',
+        applicationCode: '',
+        hoursThreshold: '',
+        timesThreshold: '',
+        id: '',
+        serviceTypeCode: ''
       },
       ruleInline: {
-        useName: [
+        applicationName: [
           {
             required: true,
-            validator: validateuseName,
+            validator: validateapplicationName,
             trigger: 'blur'
           }
         ],
-        useCalled: [
+        applicationCode: [
           {
             required: true,
-            validator: validateuseCalled,
+            validator: validateapplicationCode,
             trigger: 'blur'
           }
         ],
@@ -214,23 +234,28 @@ export default {
       columns: [
         {
           title: '应用名称',
-          key: 'useName',
+          key: 'applicationName',
           tooltip: true,
           align: 'center'
         },
         {
           title: '应用简称',
-          key: 'useCalled',
+          key: 'applicationCode',
           align: 'center'
         },
-        {
+        /*  {
           title: '服务模块',
-          key: 'confName',
+          key: 'serviceModule',
           align: 'center'
-        },
+        }, */
         {
           title: '次数阈值（每分钟）',
-          key: 'thresholdCount',
+          key: 'timesThreshold',
+          align: 'center'
+        },
+        {
+          title: '次数阈值（每小时）',
+          key: 'hoursThreshold',
           align: 'center'
         },
         {
@@ -242,81 +267,78 @@ export default {
           title: '操作',
           slot: 'action',
           align: 'center'
+        },
+        {
+          title: '熔断',
+          key: 'serviceStatus',
+          width: 300,
+          render: (h, params) => {
+            if (params.row.fused === 1) {
+              return h('Button', {
+                on: {
+                  click: () => {
+                    this.modalFusing = true
+                    this.fusingId = params.row.id
+                  }
+                }
+              }, '熔断')
+            }
+          }
         }
       ]
     }
   },
   methods: {
+    deleteThreshold (index) {
+      this.modalDelete = true
+      this.editId = this.confData[index].id
+    },
     search () {
-      console.log(this.formInline, 'formInline')
-      // 点击查询按钮
-      const date = {
-        useName: this.useName,
-        useCalled: this.useCalled,
-        pageNum: this.pageNum,
-        pageSize: this.pageSize
-      }
-      confPageList(date)
-        .then(res => {
-          // this.$Message['success']({
-          //   background: true,
-          //   content: res.data.data
-          // })
-          this.confData = res.data.data.resultList
-          this.total = res.data.data.totalAmount
-        })
-        .catch(err => {
-          console.log(err)
-        })
+
     },
     reset () {
-      // 点击重置按钮
-      this.useName = null
-      this.useCalled = null
-      this.thresholdCount = null
+
     },
     addSetting () {
-      // 点击新增按钮
       this.reset()
       this.showType = 'add'
       this.detailTitle = '新增模块'
       this.modalEdit = true
     },
     handleSubmitAddOrUpdate (index) {
-      // 点击提交新增按钮
-      console.log(index)
       this.$refs[index].validate(valid => {
-        console.log(valid)
         if (valid) {
           if (this.showType === 'add') {
-            const date = {
-              useName: this.formInline.useName,
-              useCalled: this.formInline.useCalled,
-              confValue: this.formInline.confValue,
-              confDescribtion: this.formInline.confDescribtion
-            }
-            conf(date)
+          /*   const info = {
+              applicationCode: this.formInline.applicationCode,
+              timesThreshold: parseInt(this.formInline.timesThreshold),
+              hoursThreshold: parseInt(this.formInline.hoursThreshold),
+              serviceTypeCode: this.formInline.serviceTypeCode
+            } */
+            console.log(this.formInline)
+            addUseThreShold(this.formInline)
               .then(res => {
                 this.$Message['success']({
                   background: true,
                   content: res.data.message
                 })
                 this.modalEdit = false
-                this.confPageList()
+                this.getUseThreShold()
                 this.$refs[index].resetFields()
               })
               .catch(err => {
                 console.log(err)
               })
           } else if (this.showType === 'edit') {
-            const date = {
-              id: this.id,
-              useName: this.formInline.useName,
-              useCalled: this.formInline.useCalled,
-              confValue: this.formInline.confValue,
-              confDescribtion: this.formInline.confDescribtion
+            const info = {
+              applicationCode: this.formInline.applicationCode,
+              timesThreshold: parseInt(this.formInline.timesThreshold),
+              hoursThreshold: parseInt(this.formInline.hoursThreshold),
+              serviceTypeCode: this.formInline.serviceTypeCode,
+              id: this.editId
             }
-            conf(date)
+            console.log(info, 'edit')
+            editUseThreShold(info)
               .then(res => {
                 this.$Message['success']({
                   background: true,
@@ -324,7 +346,7 @@ export default {
                 })
                 this.$refs['formInline'].resetFields()
                 this.modalEdit = false
-                this.confPageList()
+                this.getUseThreShold()
               })
               .catch(err => {
                 console.log(err)
@@ -336,7 +358,6 @@ export default {
       })
     },
     cancelAddOrUpdate (name) {
-      // 取消新增
       this.$refs[name].resetFields()
       this.modalEdit = false
     },
@@ -344,49 +365,42 @@ export default {
       this.modalEdit = false
     },
     edit (index) {
-      // 点击修改按钮
-      this.id = this.confData[index].id
-      this.formInline.useName = this.confData[index].useName
-      this.formInline.useCalled = this.confData[index].useCalled
-      this.formInline.confName = this.confData[index].confName
-      this.formInline.thresholdCount = this.confData[index].thresholdCount
-      this.formInline.thresholdType = this.confData[index].thresholdType
+      this.editId = this.confData[index].id
+      this.formInline.id = this.confData[index].id
+      this.formInline.applicationName = this.confData[index].applicationName
+      this.formInline.applicationCode = this.confData[index].applicationCode
+      this.formInline.hoursThreshold = this.confData[index].hoursThreshold
+      this.formInline.timesThreshold = this.confData[index].timesThreshold
       this.showType = 'edit'
       this.detailTitle = '编辑模块'
       this.modalEdit = true
     },
+    handleSubmitFusng () {
+      console.log(this.fusingId)
+      cancelUseThreShold(this.fusingId).then(res => {
+        console.log(res)
+      })
+    },
+    cancelFusing () {
+      this.modalFusing = false
+    },
     cancelDelete () {
-      // 取消删除
       this.modalDelete = false
     },
     handleSubmitDelete () {
-      // 确认删除
-      confDelete(this.id)
+      console.log(this.editId)
+      deleteUseThreShold(this.editId)
         .then(res => {
           this.$Message['success']({
             background: true,
             content: res.data.message
           })
           this.modalDelete = false
-          this.confPageList()
+          this.getUseThreShold()
         })
         .catch(err => {
           console.log(err)
-        })
-    },
-    confPageList () {
-      // 根据条件分页查询全部配置
-      const date = {
-        pageNum: this.pageNum,
-        pageSize: this.pageSize
-      }
-      confPageList(date)
-        .then(res => {
-          this.confData = res.data.data.resultList
-          this.total = res.data.data.totalAmount
-        })
-        .catch(err => {
-          console.log(err)
+          this.modalDelete = false
         })
     },
     renderPage (data, total) {
@@ -405,10 +419,18 @@ export default {
   },
   created () {
     this.getUseThreShold()
-    editUseThreShold()
-    addUseThreShold()
-    deleteUseThreShold()
-    cancelUseThreShold()
+    const info = {}
+    getServiceTypeInfo(info).then(res => {
+      this.typeOption = res.data.data.records
+    }).catch(error => {
+      this.$Message.info(error)
+    })
+    getAllApp().then(res => {
+      this.appOption = res.data.data
+      console.log(res)
+    }).catch(error => {
+      console.log(error)
+    })
   }
 }
 </script>

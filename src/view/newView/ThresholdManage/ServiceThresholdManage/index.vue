@@ -1,169 +1,117 @@
 <template>
-    <div class="user-content">
-        <h1 style="margin:10px 10px 10px 10px">阈值管理-服务阈值管理</h1>
-        <div class="content-button">
-            <span style="padding:10px 10px 10px 10px ">厂商名称</span>
-            <Select label="" v-model.trim="manufacturerName" style="width:150px; margin-right:20px;">
-                <Option v-for="item of manufacturerEnum" :key="item.value" :value="item.value">{{item.label}}</Option>
+  <div class="user-content">
+    <div class="content-button">
+<span style="padding:10px 10px 10px 10px ">厂商名称</span>
+<Select label="" v-model.trim="manufacturerName" style="width:150px; margin-right:20px;">
+        <Option v-for="(item,id) in manufacturerOption" :key="id" :value="item.manufacturerCode">{{item.manufacturerName}}</Option>
+      </Select>
+<span style="padding:10px 10px 10px 10px ">服务模块</span>
+ <Select label="" v-model.trim="serviceModule" style="width:150px; margin-right:20px;">
+        <Option v-for="(item,id) in moduleOption" :key="id" :value="item.serviceModuleCode">{{item.serviceModule}}</Option>
+      </Select>
+<div style="padding:10px 10px 10px 10px ">
+<span style="padding:10px 10px 10px 0 ">服务类型</span>
+      <Select label="" v-model.trim="serviceType" style="width:150px;margin-right:20px">
+        <Option v-for="(item,id) of typeOption" :key="id" :value="item.serviceTypeCode">{{item.serviceType}}</Option>
+      </Select>
+</div>
+</div>
+<div style="">
+      <Button type="primary" icon="md-search" @click="search()" style="margin:10px">查询</Button>
+      <Button type="primary" icon="md-refresh" @click="addNew()" style="margin:10px">新增阈值</Button>
+
+</div>
+
+    <Table highlight-row stripe :columns="columns" :data="confData" style="margin-top: 5px">
+       <template slot-scope="{ row, index }" slot="action">
+          <div>
+            <Button type="info" size="small" style="margin-right: 5px" @click="edit(index)">编辑</Button>
+            <!-- <Button type="error" size="small" style="margin-right: 5px" @click="deleteService(index)">删除</Button> -->
+          </div>
+        </template>
+    </Table>
+    <Page :total='total' :page-size='pageSize' :show-total="true" show-sizer style="text-align: center;margin-top: 5px"/>
+    <Modal v-model="modalCheck" width="30%" height="40%"  :mask-closable="false" :closable="true" title="详情" >
+      <Form :model="formInline"  inline>
+          <div v-if="isShow">
+        <FormItem  label="厂商名称" style="width:300px;" >
+            <Select label="" v-model.trim="formInline.manufacturerCode" style="width:150px; margin-right:20px;">
+              <Option v-for="(item,id) in manufacturerOption" :key="id" :value="item.manufacturerCode">{{item.manufacturerName}}</Option>
             </Select>
-            <span style="padding:10px 10px 10px 10px ">服务模块</span>
-            <Select label="" v-model.trim="serviceModule" style="width:150px; margin-right:20px;">
-                <Option v-for="item of serviceModuleEnum" :key="item.value" :value="item.value">{{item.label}}</Option>
-            </Select>
-            <div style="padding:10px 10px 10px 10px ">
-                <span style="padding:10px 10px 10px 0 ">服务类型</span>
-                <Select label="" v-model.trim="serviceType" style="width:150px;margin-right:20px">
-                    <Option v-for="item of serviceTypeEnum" :key="item.value" :value="item.value">{{item.label}}</Option>
-                </Select>
-                <span style="padding:10px 10px 10px 10px ">服务状态</span>
-                <Select label="" v-model.trim="serviceStatus" style="width:150px; margin-right:20px;">
-                    <Option v-for="item of serviceStatusEnum" :key="item.value" :value="item.value">{{item.label}}</Option>
-                </Select>
+        </FormItem><br>
+        <FormItem label="服务模块" style="width:300px;" >
+           <Select label="" v-model.trim="formInline.serviceModuleCode" style="width:150px; margin-right:20px;">
+        <Option v-for="(item,id) in moduleOption" :key="id" :value="item.serviceModuleCode">{{item.serviceModule}}</Option>
+         </Select>
+           </FormItem>
+                    <FormItem label="服务类型" style="width:300px;" >
+            <Select label="" v-model.trim="formInline.serviceTypeCode" style="width:150px;margin-right:20px">
+        <Option v-for="(item,id) of typeOption" :key="id" :value="item.serviceTypeCode">{{item.serviceType}}</Option>
+             </Select>
+            </FormItem><br>
+        </div>
+        <FormItem label="超时阈值" style="width:100%;" >
+        <Input  v-model.number="formInline.timeoutThreshold" style="width:auto"/>
+      </FormItem><br>
+       <FormItem label="超时次数阈值（每小时）" style="width:100%;" >
+        <Input  v-model.number="formInline.timeoutTimesThreshold" style="width:auto"/>
+      </FormItem><br>
+       <FormItem label="异常次数阈值（每小时）" style="width:100%;" >
+        <Input  v-model.number="formInline.abnormalTimesThreshold" style="width:auto"/>
+      </FormItem><br>
+      </Form>
+      <div slot="footer">
+        <Button type="primary" ghost size="large" @click="cancel('formInline')">返回</Button>
+        <Button type="primary" size="large" @click="handleSubmitAddOrUpdate('formInline')">保存</Button>
+      </div>
+    </Modal>
+      <Modal v-model.trim="modalDelete" width="450" title="删除参数配置提示">
+            <div>
+                <p>确定删除该参数配置吗？</p>
             </div>
-        </div>
-        <div style="">
-            <Button type="primary" icon="md-search" @click="search()" style="margin:10px">查询</Button>
-                  <Button type="primary" icon="md-refresh" @click="reset()">重置</Button>
-            <Button type="primary" icon="md-refresh" @click="addNew()" style="margin:10px">新增服务</Button>
-
-        </div>
-
-        <Table highlight-row="highlight-row" stripe="stripe" :columns="columns" :data="logEmailMessageData" style="margin-top: 5px">
-            <template slot-scope="{ row, index }" slot="action">
-                <div>
-                    <Button type="info" size="small" style="margin-right: 5px" @click="edit(index)">编辑</Button>
-                </div>
-            </template>
-        </Table>
-        <Page :total='total' :page-size='pageSize' :show-total="true" show-sizer="show-sizer" style="text-align: center;margin-top: 5px"/>
-        <Modal v-model="modalCheck" width="30%" height="40%" :mask-closable="false" :closable="true" title="详情">
-            <Form :model="formInline" inline="inline">
-                <FormItem label="厂商名称" style="width:300px;">
-                     <Select label="" v-model.trim="manufacturerName" style="width:150px; margin-right:20px;">
-                <Option v-for="item of manufacturerEnum" :key="item.value" :value="item.value">{{manufacturerName}}</Option>
-            </Select>
-                </FormItem>
-                <br>
-                    <FormItem label="服务模块" style="width:300px;">
-                        <Select label="" v-model.trim="formInline" style="width:150px; margin-right:20px;">
-                            <Option >{{formInline.serviceModule}}</Option>
-                        </Select>
-                    </FormItem>
-                    <FormItem label="服务类型" style="width:300px;">
-                        <Select label="" v-model.trim="formInline" style="width:150px; margin-right:20px;">
-                            <Option >{{formInline.serviceType}}</Option>
-                        </Select>
-                    </FormItem>
-                    <br>
-                        <FormItem label="服务状态" style="width:300px;">
-                            <Select label="" v-model.trim="formInline" style="width:150px; margin-right:20px;">
-                                <Option>{{serviceStatus}}</Option>
-                            </Select>
-                        </FormItem>
-                        <br>
-                            <FormItem label="超时阈值" style="width:100%;">
-                                <Input v-model.trim="formInline.outThreshold" style="width:auto"/>
-                            </FormItem>
-                            <FormItem label="超时次数阈值（每小时）" style="width:100%;">
-                                <Input v-model.trim="formInline.outCountThreshold" style="width:auto"/>
-                            </FormItem>
-                            <FormItem label="异常次数阈值（每小时）" style="width:100%;">
-                                <Input v-model.trim="formInline.abnormalCountThreshold" style="width:auto"/>
-                            </FormItem>
-                            <br></Form>
-                            <div slot="footer">
-                                <Button type="primary" ghost="ghost" size="large" @click="cancel('formInline')">返回</Button>
-                                <Button type="primary" size="large" @click="handleSubmitAddOrUpdate('formInline')">保存</Button>
-                            </div>
-                        </Modal>
-                    </div>
-                </template>
+            <div slot="footer">
+                <Button type="text" @click="cancelDelete" size="large">取消</Button>
+                <Button type="primary" @click="handleSubmitDelete" size="large">确定</Button>
+            </div>
+        </Modal>
+  </div>
+</template>
 
 <script>
-import { logEmailMessagePageList } from '@/api/data'
-import { getServiceThreShold, addServiceThreShold, editServiceThreShold, deleteServiceThreShold } from '@/api/thresholdManage'
-
+import { getServiceTypeInfo, inquireServiceModule } from '@/api/data'
+import { getServiceThreShold, addServiceThreShold, editServiceThreShold } from '@/api/thresholdManage'
+import { getManufacture } from '@/api/thirdPart'
 export default {
   data () {
     return {
-      total: 0, // 总数
-      pageNum: 1, // 第几页
-      pageSize: 30, // 每页几条数据
+      isShow: false,
+      deleteServiceTypeCode: '',
+      deleteId: '',
+      modalDelete: false,
+      showType: '',
+      total: 0,
+      pageNum: 1,
+      pageSize: 30,
       manufacturerName: '',
       serviceModule: '',
-      serviceType: ' ',
-      serviceStatus: '',
-      manufacturerAddress: '',
-      outThreshold: '',
-      outCountThreshold: '',
-      abnormalCountThreshold: '',
+      serviceType: '',
       showDetailModal: false,
       showDetailContent: '',
       modalCheck: false,
       formInline: {
-        manufacturerName: '',
-        serviceModule: '',
-        serviceType: '',
-        serviceStatus: '',
-        manufacturerAddress: '',
-        outThreshold: '',
-        outCountThreshold: '',
-        abnormalCountThreshold: ''
+        abnormalTimesThreshold: '',
+        timeoutThreshold: '',
+        manufacturerCode: '',
+        serviceTypeCode: '',
+        serviceModuleCode: '',
+        manufacturerUrl: '',
+        timeoutTimesThreshold: '',
+        id: ''
       },
-      manufacturerEnum: [
-        {
-          'value': '1',
-          'label': '交通'
-        }, {
-          'value': '2',
-          'label': '中化'
-        }
-      ],
-      serviceModuleEnum: [
-        {
-          'value': '1',
-          'label': 'OCR'
-        }, {
-          'value': '2',
-          'label': '人脸识别'
-        }
-      ],
-      serviceTypeEnum: [
-        {
-          'value': '1',
-          'label': '身份证识别'
-        }, {
-          'value': '2',
-          'label': '户口本识别'
-        }
-      ],
-      serviceStatusEnum: [
-        {
-          'value': '1',
-          'label': '生效'
-        }, {
-          'value': '2',
-          'label': '失效'
-        }
-      ],
-      logEmailMessageData: [
-        {
-          manufacturerName: 'jackl',
-          serviceModule: 'jakcls',
-          serviceType: 'orc',
-          serviceStatus: 'ok',
-          serviceAddress: 'www.baidu.com',
-          manufacturerAddress: 'www.ok.com'
-        }, {
-          manufacturerName: 'jackl',
-          serviceModule: 'jakcls1',
-          serviceType: 'orc1',
-          serviceStatus: 'no',
-          serviceAddress: 'www.okoko.com',
-          manufacturerAddress: 'www.ok1.com'
-        }
-      ], // 邮件日志数据
-      operatingTime: [],
+      manufacturerOption: [ ],
+      moduleOption: [ ],
+      typeOption: [ ],
+      confData: [ ],
       columns: [
         {
           title: '厂商名称',
@@ -175,6 +123,7 @@ export default {
         {
           title: '服务模块',
           key: 'serviceModule',
+          width: 150,
           align: 'center'
         },
         {
@@ -187,113 +136,201 @@ export default {
           title: '服务状态',
           key: 'serviceStatus',
           width: 200,
-          align: 'center'
-        }, {
+          align: 'center',
+          render (h, params) {
+            switch (params.row.serviceStatus) {
+              case 0:
+                return h('span', '生效')
+              case 1:
+                return h('span', '失效')
+              default:
+                break
+            }
+          }
+        },
+        {
           title: '统一对外服务地址',
-          key: 'serviceAddress',
+          key: 'serviceUrl',
           width: 150,
           align: 'center'
-        }, {
+        },
+        {
           title: '厂商接口地址',
-          key: 'manufacturerAddress',
+          key: 'manufacturerUrl',
           width: 150,
           align: 'center'
-        }, {
-          title: '操作',
-          slot: 'action',
+        },
+        {
+          title: '超时阈值（单位秒）',
+          key: 'timeoutThreshold',
+          width: 150,
           align: 'center'
+        },
+        {
+          title: '超时次数阈值（每小时）',
+          key: 'timeoutTimesThreshold',
+          width: 150,
+          align: 'center'
+        },
+        {
+          title: '异常次数阈值（每小时）',
+          key: 'abnormalTimesThreshold',
+          width: 150,
+          align: 'center'
+        },
+        {
+          title: '编辑',
+          slot: 'action',
+          align: 'center',
+          width: 300
         }
       ]
     }
   },
   methods: {
-    search () { // 点击查询按钮
-      const date = {
-        'receiveEmail': this.receiveEmail,
-        'emailType': this.emailType,
-        'status': this.status,
-        'pageNum': this.pageNum,
-        'startDate': this.startDate,
-        'endDate': this.endDate,
-        'pageSize': this.pageSize
-      }
-      logEmailMessagePageList(date).then(res => {
-        // this.$Message['success']({
-        // background: true,
-        // content: res.data.data
-        // })
-        this.logEmailMessageData = res.data.data.resultList
-        this.total = res.data.data.totalAmount
-      }).catch(err => {
-        console.log(err)
-      })
-    },
-    handleChange (date) {
-      this.startDate = date[0]
-      this.endDate = date[1]
+    search () {
+      this.getServiceThreShold(this.manufacturerName, this.serviceType, this.serviceModule)
     },
     reset () {
-      this.logEmailMessagePageList()
     },
     edit (index) {
-      this.manufacturerName = this.logEmailMessageData[index].manufacturerName
-      console.log(this.logEmailMessageData[index].manufacturerName, ' this.manufacturerName')
-      this.formInline.serviceStatus = this.logEmailMessageData[index].serviceStatus
-      this.formInline.manufacturerAddress = this.logEmailMessageData[index].manufacturerAddress
-      //   this.formInline.manufacturerName = this.logEmailMessageData[index].manufacturerName
-      this.formInline.serviceModule = this.logEmailMessageData[index].serviceModule
-      this.formInline.serviceType = this.logEmailMessageData[index].serviceType
-
+      this.formInline.id = this.confData[index].id
+      this.formInline.abnormalTimesThreshold = this.confData[index].abnormalTimesThreshold
+      this.formInline.timeoutThreshold = this.confData[index].timeoutThreshold
+      this.formInline.timeoutTimesThreshold = this.confData[index].timeoutTimesThreshold
       this.modalCheck = true
+      this.showType = 'edit'
+      this.isShow = false
     },
     addNew () {
-      this.formInline.manufacturerAddress = ''
+      this.isShow = true
       this.modalCheck = true
+      this.showType = 'add'
     },
     cancel () {
       this.modalCheck = false
     },
-
-    renderPage (data, total) {
-      this.confData = data
-      this.total = total
+    deleteService (index) {
+      this.deleteId = this.confData[index].id
+      this.deleteServiceTypeCode = this.confData[index].serviceTypeCode
+      this.modalDelete = true
+      console.log(this.confData[index])
     },
-    getServiceThreShold () {
+    handleSubmitDelete () {
       const info = {
-        applicationCode: ''
+        id: this.deleteId,
+        serviceTypeCode: this.deleteServiceTypeCode
+      }
+      deleteThirdService(info).then(res => {
+        this.$Message.success({
+          content: res.data.message
+        })
+      }).catch(error => {
+        this.$Message.error({
+          content: error
+        })
+      })
+      this.modalDelete = false
+    },
+    cancelDelete () {
+      this.modalDelete = false
+    },
+    handleSubmitAddOrUpdate (index) {
+      const infoEdit = {
+        id: this.formInline.id,
+        timeoutThreshold: this.formInline.timeoutThreshold,
+        timeoutTimesThreshold: this.formInline.timeoutTimesThreshold,
+        abnormalTimesThreshold: this.formInline.abnormalTimesThreshold
+      }
+      switch (this.showType) {
+        case 'add':
+          console.log(this.formInline, 'infoAdd')
+          addServiceThreShold(this.formInline).then(res => {
+            console.log(res)
+            this.getServiceThreShold()
+          }).catch(error => {
+            this.$Message.error({
+              content: error
+            })
+            this.getServiceThreShold()
+            this.modalCheck = false
+          })
+          this.modalCheck = false
+          break
+        case 'edit':
+          console.log(infoEdit)
+          editServiceThreShold(infoEdit).then(res => {
+            this.$Message.success({
+              content: res.data.message
+            })
+            this.getServiceThreShold()
+            this.modalCheck = false
+          }).catch((error) => {
+            this.$Message.error({
+              content: error
+            })
+            this.modalCheck = false
+          })
+          break
+        default:
+          this.$Message.error('请检查类型！')
+          break
+      }
+    },
+    getServiceThreShold (manufacturerCode, serviceTypeCode, serviceModuleCode) {
+      const info = {
+        pageNum: this.pageNum,
+        pageSize: this.pageSize,
+        manufacturerCode: manufacturerCode,
+        serviceTypeCode: serviceTypeCode,
+        serviceModuleCode: serviceModuleCode
       }
       getServiceThreShold(info).then(res => {
         console.log(res)
         this.renderPage(res.data.data.records, res.data.data.total)
       })
+    },
+    renderPage (data, total) {
+      this.confData = data
+      this.total = total
     }
+
   },
   created () {
     this.getServiceThreShold()
-    addServiceThreShold()
-    editServiceThreShold()
-    deleteServiceThreShold()
+    const info = {}
+    getManufacture(info).then(res => {
+      this.manufacturerOption = res.data.data.records
+    }).catch(error => {
+      this.$Message.info(error)
+    })
+    inquireServiceModule(info).then(res => {
+      this.moduleOption = res.data.data.records
+    })
+    getServiceTypeInfo(info).then(res => {
+      this.typeOption = res.data.data.records
+    })
   }
 }
 </script>
-<style lang="less" scoped="scoped">
-                    .user-content {
-                        .content-button {
-                            padding: 5px;
-                            .ivu-select-single {
-                                width: 150px;
-                            }
-                            .ivu-input-type {
-                                width: 150px;
-                                margin-left: 10px;
-                            }
-                            .ivu-btn {
-                                margin-left: 10px;
-                            }
-                            .ivu-btn-info {
-                                background: #2d8cf0;
-                                border-color: #2d8cf0;
-                            }
-                        }
-                    }
-                </style>
+<style lang="less" scoped>
+.user-content{
+  .content-button {
+    padding: 5px;
+    .ivu-select-single {
+      width: 150px;
+    }
+    .ivu-input-type {
+      width: 150px;
+      margin-left: 10px;
+    }
+    .ivu-btn{
+      margin-left: 10px;
+    }
+    .ivu-btn-info{
+      background: #2d8cf0;
+      border-color: #2d8cf0;
+    }
+  }
+}
+</style>

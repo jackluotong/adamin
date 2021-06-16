@@ -142,7 +142,7 @@ export default {
         },
         {
           title: '统一对外服务地址',
-          key: 'serviceAddress',
+          key: 'serviceUrl',
           width: 150,
           align: 'center'
         },

@@ -26,7 +26,15 @@ export const deleteWeight = (info) => {
 
 export const editWeight = (info) => {
   return axios.request({
-    url: '/dcenter/weightInfo//edit/weight',
+    url: '/dcenter/weightInfo/edit/weight',
+    method: 'post',
+    data: info
+  })
+}
+
+export const searchManufacture = (info) => {
+  return axios.request({
+    url: '/dcenter/tripartiteService/selectManufaName',
     method: 'post',
     data: info
   })

@@ -39,9 +39,6 @@
         <FormItem label="服务模块" style="width:270px;">
           <Input v-model.trim="addServiceModule"/>
         </FormItem>
-        <FormItem label="模块code"  style="width:270px;" >
-          <Input v-model.trim="serviceModuleCode"/>
-        </FormItem>
       </Form>
       <div slot="footer">
         <Button type="primary" ghost size="large" @click="cancelAddModule()">返回</Button>
@@ -53,7 +50,7 @@
       <Form  :model="formInline"  >
         <div style="display:inline-table">
         <FormItem label="服务模块" prop="serviceModule" style="width:270px;">
-        <Select v-model.trim="formInline" style="width:200px" @on-change="selectModuleNew">
+        <Select v-model.trim="selectedModuleAdd" style="width:200px">
             <Option v-for="(item,id) in allModulesOption"
             :key="id"
             :value="item.serviceModuleCode"
@@ -62,10 +59,12 @@
           </FormItem>
        </div>
           <FormItem label="服务类型" prop="serviceType" style="width:270px;">
-                  <Input v-model.trim="addServiceType.serviceType"/>
-          </FormItem>
-           <FormItem label="服务类型code" prop="serviceCode" style="width:270px;">
-                  <Input v-model.trim="addServiceType.serviceCode"/>
+        <Select style="width:200px" @on-change='selectedTypeAdd' :label-in-value="true">
+            <Option v-for="(item,index) in allServiceType"
+            :key="index"
+            :value="item.code"
+            >{{item.name}}</Option>
+        </Select>
           </FormItem>
         <FormItem label="服务地址"  style="width:270px;">
                   <Input v-model.trim="addServiceType.url"/>
@@ -76,12 +75,12 @@
         <Button type="primary" size="large" @click="addNewServiceTypeClick()">新增类型</Button>
       </div>
      </Modal>
-
+<!-- 编辑 -->
     <Modal v-model.trim="modalAddOrUpdateType" width="600" :mask-closable="false" :closable="false" v-bind:title="detailTitle">
       <Form ref="formInline" :model="formInline"  >
         <div style="display:inline-table">
         <FormItem label="服务模块" prop="serviceModule" style="width:270px;">
-        <Select v-model.trim="selectValue" style="width:200px" @on-change="selectModule">
+        <Select v-model.trim="selectValue" style="width:200px">
             <Option v-for="(item,id) in allModulesOption"
             :key="id"
             :value="item.serviceModuleCode"
@@ -89,11 +88,13 @@
         </Select>
           </FormItem>
        </div>
-          <FormItem label="服务类型" prop="serviceType" style="width:270px;">
-                  <Input v-model.trim="formInline.serviceType"/>
-          </FormItem>
-           <FormItem label="服务类型code" prop="serviceCode" style="width:270px;">
-                  <Input v-model.trim="formInline.serviceCode"/>
+           <FormItem label="服务类型" prop="serviceTypeAdd" style="width:270px;">
+        <Select @on-change='selectedTypeEdit' :label-in-value="true" style="width:200px"  >
+            <Option v-for="(item,index) of allServiceType"
+            :key="index"
+            :value="item.code"
+            >{{item.name}}</Option>
+        </Select>
           </FormItem>
         <FormItem label="服务地址" prop="serviceAddress" style="width:270px;">
                   <Input v-model.trim="formInline.serviceAddress"/>
@@ -117,7 +118,7 @@
 </template>
 
 <script>
-import { getServiceTypeInfo, editServiceModule, editServiceType, inquireServiceModule, deletModule, deleteType } from '@/api/data'
+import { getServiceTypeInfo, editServiceModule, editServiceType, inquireServiceModule, deletModule, deleteType, getAllServiceType } from '@/api/data'
 
 export default {
   data () {
@@ -151,21 +152,16 @@ export default {
         callback()
       }
     }
-
-    /* const delay = (function () {
-      let timer = 0
-      return function (callback, ms) {
-        clearTimeout(timer)
-        timer = setTimeout(callback, ms)
-      }
-    })() */
     return {
+      selectedModuleAdd: '',
+      serviceTypeAdd: '',
       serviceType: '',
       serviceModule: '',
       selectValue: [],
+      allServiceType: [],
       addServiceType: {
         serviceModuleCode: '',
-        serviceCode: '',
+        serviceTypeCode: '',
         serviceType: '',
         url: ''
       },
@@ -235,14 +231,16 @@ export default {
     }
   },
   methods: {
-    selectModuleNew (e) {
-      console.log(e)
-      this.addServiceType.serviceModuleCode = e
+    selectedTypeEdit (e) {
+      this.formInline.serviceCode = e.value
+      this.formInline.serviceType = e.label
+      console.log(this.formInline)
     },
-    selectModule (e) {
-      this.formInline.serviceModule = e
-      console.log(this.formInline.serviceModule)
+    selectedTypeAdd (e) {
+      this.addServiceType.serviceTypeCode = e.value
+      this.addServiceType.serviceType = e.label
     },
+
     search () {
       const info = {
         'serviceModule': this.serviceModule,
@@ -266,6 +264,10 @@ export default {
     addSettingType () {
       this.detailTitle = '新增服务类型'
       this.addNewServiceType = true
+      const info = {}
+      inquireServiceModule(info).then(res => {
+        this.allModulesOption = res.data.data.records
+      })
     },
     addNewModule () {
       const info = {
@@ -273,7 +275,6 @@ export default {
         'serviceModuleCode': this.serviceModuleCode
       }
       editServiceModule(info).then(res => {
-        console.log(res, '新增模块')
         this.getServiceTypeInfo()
       }).catch(error => console.log(error))
       this.addNewModuleMoal = false
@@ -284,11 +285,10 @@ export default {
     handleSubmitModule () {
       try {
         const info = {
-          'serviceModule': this.formInline.serviceModule,
-          'serviceModuleCode': this.editModuleId
+          serviceModule: this.formInline.serviceModule,
+          serviceModuleCode: this.editModuleId
         }
         editServiceModule(info).then(res => {
-          console.log(res)
           this.getServiceTypeInfo()
         }).catch(error => console.log(error))
       } catch (error) {
@@ -300,15 +300,13 @@ export default {
     handleSubmitType () {
       try {
         const info = {
-          'serviceModuleCode': this.formInline.serviceModule,
+          'serviceModuleCode': this.selectValue,
           'serviceType': this.formInline.serviceType,
           'serviceTypeCode': this.formInline.serviceCode,
           'serviceUrl': this.formInline.serviceAddress,
           'id': this.formInline.editId
         }
-        console.log(info)
-        editServiceModule(info).then(res => {
-          console.log(res)
+        editServiceType(info).then(res => {
           this.getServiceTypeInfo()
         }).catch(error => console.log(error))
       } catch (error) {
@@ -322,12 +320,11 @@ export default {
     },
     addNewServiceTypeClick () {
       const info = {
-        'serviceModuleCode': this.addServiceType.serviceModuleCode,
-        'serviceType': this.addServiceType.serviceType,
-        'serviceTypeCode': this.addServiceType.serviceCode,
-        'serviceUrl': this.addServiceType.url
+        'serviceModuleCode': this.selectedModuleAdd,
+        'serviceTypeCode': this.addServiceType.serviceTypeCode,
+        'serviceUrl': this.addServiceType.url,
+        'serviceType': this.addServiceType.serviceType
       }
-      console.log(info)
       editServiceType(info).then(res => {
         this.getServiceTypeInfo()
         this.addNewServiceType = false
@@ -380,7 +377,6 @@ export default {
       if (this.judgedeleteType === 'module') {
         const info = this.editModuleId
         deletModule(info).then(res => {
-          console.log(res)
           this.getServiceTypeInfo()
           this.modalDelete = false
         }).catch(error => console.log(error))
@@ -389,7 +385,6 @@ export default {
         const code = this.deleteServiceTypeCode
         const id = this.deleteTypeId
         deleteType(id, code).then(res => {
-          console.log(res, 'delete type')
           this.getServiceTypeInfo()
           this.modalDelete = false
         }).catch(error => {
@@ -407,7 +402,6 @@ export default {
       }
       getServiceTypeInfo(info).then(res => {
         this.renderPage(res.data.data.records, res.data.data.total)
-        console.log(res, 'getServiceTypeInfo')
       }).catch(err => this.$Message.info(err))
     },
     renderPage (data, total) {
@@ -420,7 +414,6 @@ export default {
     async getAllModuleOptions () {
       const info = {}
       inquireServiceModule(info).then(res => {
-        console.log(res, 'inquireServiceModule')
         this.allModulesOption = res.data.data.records
       })
     }
@@ -428,6 +421,9 @@ export default {
   created () {
     this.getServiceTypeInfo()
     this.getAllModuleOptions()
+    getAllServiceType().then(res => {
+      this.allServiceType = res.data.data
+    })
   },
   mounted () {
 

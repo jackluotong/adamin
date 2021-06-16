@@ -91,6 +91,7 @@ export const createParent = (info) => {
 // #region
 /*
         get info for service type
+
     */
 export const getServiceTypeInfo = (info) => {
   return axios.request({
@@ -101,12 +102,24 @@ export const getServiceTypeInfo = (info) => {
 }
 
 /*
+    search type by module code
+*/
+
+export const serarchTypeByModule = (info) => {
+  return axios.request({
+    url: `/dcenter/type/findTypeName/${info}`,
+    data: info,
+    method: 'get'
+  })
+}
+
+/*
     edit service module
 */
 
 export const editServiceModule = (info) => {
   return axios.request({
-    url: '/dcenter/type/edit/ServiceType',
+    url: '/dcenter/type/edit/ServiceModule',
     data: info,
     method: 'post'
   })
@@ -149,6 +162,17 @@ export const deletModule = (info) => {
 export const deleteType = (id, code) => {
   return axios.request({
     url: `/dcenter/type/del/ServiceType/${id}/${code}`,
+    method: 'get'
+  })
+}
+
+/*
+    get all service type
+*/
+
+export const getAllServiceType = () => {
+  return axios.request({
+    url: '/dcenter/type/serviceTypes',
     method: 'get'
   })
 }

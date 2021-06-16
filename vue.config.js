@@ -46,7 +46,7 @@ module.exports = {
   devServer: {
     proxy: {
       '/dcenter': {
-        target: ' http://yang.cn1.utools.club', // http://maxwell.cn.utools.club  http://yang.cn1.utools.club
+        target: ' http://192.168.3.47:7799', // http://maxwell.cn.utools.club  http://yang.cn1.utools.club
 
         changeOrigin: true, // 改变源
         pathRewrite: { // '^/bridge': '/bridge' // 路径重写

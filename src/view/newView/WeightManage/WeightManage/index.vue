@@ -3,7 +3,7 @@
         <h1 style="margin:10px 10px 10px 10px">权重管理-权重管理</h1>
         <div class="content-button">
             <span style="padding:10px">服务模块</span>
-            <Select v-model.trim="selectedModule" style="width:200px" @on-change='selectedModuleClick'>
+            <Select v-model.trim="selectedModule" style="width:200px">
                 <Option v-for="(item,id) in modulesOption" :key="id" :value="item.serviceModuleCode">
                     {{ item.serviceModule }}
                 </Option>
@@ -32,7 +32,7 @@
                         type="primary"
                         size="small"
                         style="margin-right: 5px"
-                        @click="edit(index)"
+                        @click="edit(index,row)"
                         >编辑</Button
                     >
                     <Button
@@ -42,13 +42,13 @@
                         @click="lookAbnormalWeight(index)"
                         >查看异常权重</Button
                     >
-                   <!--  <Button
-                        type="primary"
+                    <Button
+                        type="error"
                         size="small"
                         style="margin-right: 5px"
-                        @click="weightRecover(index)"
-                        >权重恢复</Button
-                    > -->
+                        @click="deleteId(index,row)"
+                        >删除</Button
+                    >
                 </div>
             </template>
         </Table>
@@ -74,8 +74,8 @@
                     prop="confName"
                     style="width:270px;"
                 >
-                   <Select v-model.trim="selectedModule" style="width:200px" @on-change='selectedModuleClick'>
-                <Option v-for="(item,id) in modulesOption" :key="id" :value="item.serviceModule">
+                   <Select v-model.trim="selectedModuleTwo" style="width:200px" @on-change='selectedModuleClick'>
+                <Option v-for="(item,id) in modulesOption" :key="id" :value="item.serviceModuleCode">
                     {{ item.serviceModule }}
                 </Option>
                  </Select>
@@ -85,8 +85,8 @@
                     prop="confName"
                     style="width:270px;"
                 >
-                   <Select v-model.trim="selectedModuleType" style="width:200px" >
-                <Option v-for="(item,id) in typeOption" :key="id" :value="item.serviceTypeCode">
+                   <Select v-model.trim="selectedModuleType" style="width:200px" @on-change='selectedTypeClick'>
+                <Option v-for="(item,id) in typeOption" :key="id" :value="item.serviceTypeCode" >
                     {{ item.serviceType }}
                 </Option>
                  </Select>
@@ -107,20 +107,34 @@
                     style="width:270px;"
                 >
                     <Select v-model.trim="useSelected" style="width:200px">
-                            <Option v-for="(item,index) in useOption" :key="index" :value='item.id'>{{ item.applicationCode }}</Option>
+                            <Option v-for="(item,index) in useOption" :key="index" :value='item.applicationCode'>{{ item.applicationCode }}</Option>
                     </Select>
                 </FormItem>
+                   <div>
+            <Checkbox-group
+                v-model="checkedData"
+                @on-change="selectedCheckBox"
+            >
+                <Checkbox
+                    v-for="(item, index) in checkList"
+                    :key="index"
+                    :label="item.manufacturerCode"
+                    size="large"
+                    ref="checkBox"
+                    >{{ item.manufacturerName }}</Checkbox
+                >
+              </Checkbox-group>
+             </div>
                 <FormItem
                 label='权重'
                   prop="weight"
                 >
-                <Input placeholder="输入权重配比">
-
+                <Input placeholder="输入权重配比按照x:x:x类型（如果有三个其余以此类推）" style="width:200px" v-model="inputValue">
                 </Input>
                 </FormItem>
 
             </Form>
-            <div slot="footer">
+            <div slot="footer" style="display:flex;justify-content: center;align-items:center">
                 <Button
                     type="primary"
                     ghost
@@ -136,17 +150,29 @@
                 >
             </div>
         </Modal>
-        <Modal v-model.trim="showWeightAbnormal" width="900"  title="权重异常展示">
+        <Modal v-model.trim="showWeightAbnormal" width="900" height='600' title="权重异常展示">
              <Table :columns="columnsShowAbnormalWeight" :data="showWeightAbnormalData"></Table>
+        </Modal>
+         <Modal v-model.trim="modalDelete" width="450" title="删除参数配置提示">
+            <div>
+                <p>确定删除该参数配置吗？</p>
+            </div>
+            <div slot="footer">
+                <Button type="text" @click="cancelDelete" size="large"
+                    >取消</Button
+                >
+                <Button type="primary" @click="handleSubmitDelete" size="large"
+                    >确定</Button
+                >
+            </div>
         </Modal>
     </div>
 </template>
 
 <script>
-import { inquireServiceModule, getServiceTypeInfo } from '@/api/data'
-import { getWeight } from '@/api/weightManage'
-import { getInfoConnect } from '@/api/useSystem'
-
+import { inquireServiceModule, serarchTypeByModule } from '@/api/data'
+import { getWeight, searchManufacture, addWeight, deleteWeight, editWeight } from '@/api/weightManage'
+import { getAllApp } from '@/api/thresholdManage'
 export default {
   data () {
     function getByteLen (val) {
@@ -186,8 +212,12 @@ export default {
         callback()
       }
     }
-
     return {
+      modalDelete: false,
+      checkList: [],
+      checkedData: [],
+      inputValue: '',
+      selectedModuleTwo: '',
       useOption: [],
       weightOptions: [{ id: 1, value: '通用权重' }, { id: 2, value: '应用权重' }],
       modulesOption: [],
@@ -207,6 +237,11 @@ export default {
       modalEdit: false,
       detailTitle: '',
       showType: '',
+      deleteOject: {
+        serviceTypeCode: '',
+        applicationCode: '',
+        weightType: ''
+      },
       formInline: {
         useName: '',
         useCalled: '',
@@ -240,6 +275,11 @@ export default {
       confData: [],
       showWeightAbnormalData: [],
       columnsShowAbnormalWeight: [
+        {
+          type: 'index',
+          width: 60,
+          align: 'center'
+        },
         { title: '服务模块',
           key: 'serviceModule',
           align: 'center'
@@ -248,7 +288,7 @@ export default {
           key: 'weight',
           align: 'center',
           render: (h, params) => {
-            return h('sapn', {
+            return h('span', {
             }, `${params.row.weightRatioName}=${params.row.weightRatioValue}`)
           }
         },
@@ -256,12 +296,22 @@ export default {
           key: 'weightType',
           align: 'center'
         },
+        { title: '服务类型',
+          key: 'serviceType',
+          align: 'center',
+          width: 200
+        },
         { title: '所属应用',
           key: 'applicationCode',
           align: 'center'
         }
       ],
       showWeightNormal: [
+        {
+          type: 'index',
+          width: 60,
+          align: 'center'
+        },
         { title: '服务模块',
           key: 'serviceModule',
           align: 'center'
@@ -270,9 +320,14 @@ export default {
           key: 'weight',
           align: 'center',
           render: (h, params) => {
-            return h('sapn', {
+            return h('span', {
             }, `${params.row.weightRatioName}=${params.row.weightRatioValue}`)
           }
+        },
+        { title: '服务类型',
+          key: 'serviceType',
+          align: 'center',
+          width: 200
         },
         { title: '权重类型',
           key: 'weightType',
@@ -288,13 +343,14 @@ export default {
         {
           title: '操作',
           slot: 'action',
-          align: 'center'
+          align: 'center',
+          width: 300
         },
         {
           title: '权重恢复',
           key: 'noticeType',
           width: 100,
-          render: (h, params) => {
+          render: (h, params, column) => {
             if (params.row.isAbnormalWeightId === false) {
               return h('Button', {
                 on: {
@@ -306,8 +362,7 @@ export default {
               }, '权重恢复')
             } else {
               return h('span', {
-
-              }, '')
+              }, '正常权重')
             }
           }
         }
@@ -315,14 +370,27 @@ export default {
     }
   },
   methods: {
-    selectedModuleClick (e) {
-      console.log(this.selectedModule)
+    selectedCheckBox (e) {
+      console.log(e)
+    },
+    selectedTypeClick (e) {
+      console.log(e)
       const info = {
-        serviceModule: e
+        serviceTypeCode: e
       }
-      getServiceTypeInfo(info).then(res => {
-        this.typeOption = res.data.data.records
-        console.log(res.data.data.records, 'getServiceTypeInfo')
+      console.log(info)
+      searchManufacture(info).then(res => {
+        this.checkList = res.data.data
+        console.log(res)
+      })
+    },
+    selectedModuleClick (e) {
+      const info = {
+        serviceModulCode: e
+      }
+      console.log(info)
+      serarchTypeByModule(e).then(res => {
+        this.typeOption = res.data.data
       }).catch(err => this.$Message.info(err))
     },
     search () {
@@ -358,24 +426,51 @@ export default {
         console.log(valid)
         if (valid) {
           if (this.showType === 'add') {
-            const data = {
-              applicationCode: '',
-              serviceTypeCode: '',
-              weightRatioKey: '',
-              weightRatioValue: '',
-              weightType: ''
+            const info = {
+              applicationCode: this.useSelected,
+              serviceTypeCode: this.selectedModuleType,
+              weightRatioKey: this.checkedData.join(':'),
+              weightRatioValue: this.inputValue,
+              weightType: this.selectedWeight,
+              serviceModuleCode: this.selectedModuleTwo
             }
-            console.log(data)
+            console.log(info)
+            addWeight(info).then(res => {
+              console.log(res)
+              this.$Message.success({
+                content: res.data.message
+              })
+              this.getWeight(1, 1)
+              this.modalEdit = false
+            }).catch(error => {
+              this.$Message.error({
+                content: error
+              })
+              this.modalEdit = false
+            })
           } else if (this.showType === 'edit') {
-            const data = {
-              applicationCode: '',
-              serviceTypeCode: '',
-              weightRatioKey: '',
-              weightRatioValue: '',
-              weightType: '',
-              id: ''
+            const info = {
+              applicationCode: this.useSelected,
+              serviceTypeCode: this.selectedModuleType,
+              weightRatioKey: this.checkedData.join(':'),
+              weightRatioValue: this.inputValue,
+              weightType: this.selectedWeight,
+              serviceModuleCode: this.selectedModuleTwo
             }
-            console.log(data)
+            console.log(info)
+            editWeight(info).then(res => {
+              console.log(res)
+              this.$Message.success({
+                content: res.data.message
+              })
+              this.getWeight(1, 1)
+              this.modalEdit = false
+            }).catch(error => {
+              this.$Message.error({
+                content: error
+              })
+              this.modalEdit = false
+            })
           }
         } else {
           this.$Message.error('请检查参数是否有误!')
@@ -389,21 +484,41 @@ export default {
     cancelAddOrUpdateType () {
       this.modalEdit = false
     },
-    edit (index) {
-      this.id = this.confData[index].id
-      this.formInline.useName = this.confData[index].useName
-      this.formInline.useCalled = this.confData[index].useCalled
-      this.formInline.confName = this.confData[index].confName
+    edit (index, row) {
+      console.log(index, row)
+      this.useSelected = row.applicationCode
+      this.inputValue = row.weightRatioValue
+      this.selectedWeight = row.weightType
+      this.selectedModuleTwo = row.serviceModule
+      console.log(row.weightRatioName)
       this.showType = 'edit'
       this.detailTitle = '编辑模块'
       this.modalEdit = true
     },
-    lookAbnormalWeight () {
+    lookAbnormalWeight (index) {
       this.showWeightAbnormal = true
-      this.getWeight(2, 2)
+      this.getWeight(2, 2, this.confData[index].applicationCode, this.confData[index].serviceTypeCode)
     },
-    weightRecover () {
-
+    deleteId (row) {
+      this.deleteOject.applicationCode = row.applicationCode
+      this.deleteOject.weightType = row.weightType
+      this.deleteOject.serviceTypeCode = row.serviceTypeCode
+      this.modalDelete = true
+    },
+    handleSubmitDelete () {
+      console.log(this.deleteOject)
+      deleteWeight(this.deleteOject).then(res => {
+        console.log(res)
+        this.modalDelete = false
+      }).catch(error => {
+        this.$Message.error({
+          content: error
+        })
+      })
+      this.modalDelete = false
+    },
+    cancelDelete () {
+      this.modalDelete = false
     },
     renderPage (data, total, flag) {
       switch (flag) {
@@ -418,18 +533,17 @@ export default {
           this.$Message.info('检查类型')
       }
     },
-    getWeight (number, flag) {
+    getWeight (number, flag, applicationCode, serviceTypeCode) {
       const info = {
+        serviceTypeCode: serviceTypeCode,
+        applicationCode: applicationCode,
         abnormalWeightType: number,
-        serviceModule: '',
-        serviceTypeCode: '',
-        applicationCode: '',
         currentPage: this.pageNum,
         pageSize: this.pageSize
       }
+      console.log(info)
       getWeight(info).then(res => {
         this.renderPage(res.data.data.records, res.data.data.total, flag)
-        console.log(res)
       }).catch(error => {
         this.$Message.error({
           content: error
@@ -442,11 +556,9 @@ export default {
     const info = {}
     inquireServiceModule(info).then(res => {
       this.modulesOption = res.data.data.records
-      console.log(res.data.data.records, 'service module')
     })
-    getInfoConnect(info).then(res => {
-      console.log(res, 'getInfoConnect')
-      this.useOption = res.data.data.records
+    getAllApp().then(res => {
+      this.useOption = res.data.data
     }).catch(error => {
       console.log(error)
     })

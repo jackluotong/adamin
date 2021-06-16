@@ -76,3 +76,14 @@ export const deleteServiceThreShold = (info) => {
     data: info
   })
 }
+
+/*
+    get all app application/queryAppAll
+*/
+
+export const getAllApp = () => {
+  return axios.request({
+    url: '/dcenter/application/queryAppAll',
+    method: 'get'
+  })
+}
