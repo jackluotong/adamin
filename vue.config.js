@@ -1,5 +1,10 @@
 const path = require('path')
 
+switch (process.env.VUE_APP_TITLE) {
+  case 'dev': // 注意这里的名字要和步骤二中设置的环境名字对应起来
+    prefixStr = '/dev/giq/tsam/'
+    break
+}
 const resolve = dir => {
   return path.join(__dirname, dir)
 }
@@ -35,7 +40,7 @@ module.exports = {
   // 设为false打包时不生成.map文件
   productionSourceMap: false,
   // 这里写你调用接口的基础路径，来解决跨域，如果设置了代理，那你本地开发环境的axios的baseUrl要写为 '' ，即空字符串
-  // devServer: {
+  // devServer: { "dev": "vue-cli-service serve --open"
   // proxy: 'localhost:3000'
   // }
   // devServer: {
@@ -45,9 +50,8 @@ module.exports = {
   */
   devServer: {
     proxy: {
-      '/dcenter': {
-        target: ' http://192.168.3.47:7799', // http://maxwell.cn.utools.club  http://yang.cn1.utools.club
-
+      '/dcenter': { // https://wxcs.internal.manulife-sinochem.com/dev/giq
+        target: 'http://192.168.0.60:7799', // http://maxwell.cn.utools.club  http://yang.cn1.utools.club
         changeOrigin: true, // 改变源
         pathRewrite: { // '^/bridge': '/bridge' // 路径重写
         }

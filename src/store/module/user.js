@@ -83,18 +83,17 @@ export default {
           userName,
           password
         }).then(res => {
+          console.log(res)
           const userInfo = res.data.data.userInfo
           const userAccess = res.data.data.permsSet
-          console.log(userAccess, res)
           window.sessionStorage.setItem('allUserInfo', JSON.stringify(res.data.data))
           window.sessionStorage.setItem('hasGetInfo', true)
           sessionStorage.setItem('access', userAccess)
           commit('setUserName', userInfo.userName)
           commit('setUserCode', userInfo.userCode)
           commit('setAccess', userAccess)
-          commit('setToken', userInfo.token) // get token from this interface return data.
+          commit('setToken', userInfo.token)
           commit('setHasGetInfo', true)
-          console.log(sessionStorage.getItem('access'), 'access')
           resolve()
         }).catch(err => {
           reject(err)

@@ -1,8 +1,46 @@
+<style lang="less" scoped>
+.custom-tree-node {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    // justify-content:flex-start;
+    font-size: 14px;
+    padding-left: 18px;
+  }
+.user-content{
+  .content-button {
+    padding: 5px;
+    display: inline;
+    .ivu-select-single {
+      width: 150px;
+    }
+    .ivu-input-type {
+      width: 150px;
+      margin-left: 10px;
+    }
+    .ivu-btn{
+      margin-left: 10px;
+    }
+    .ivu-btn-info{
+      background: #2d8cf0;
+      border-color: #2d8cf0;
+    }
+  }
+}
+.ivu-modal-confirm-body {
+  padding-left: 42px;
+  font-size: 14px;
+  color: #515a6e;
+  position: relative;
+  word-break: break-all;
+}
+</style>
+
 <template>
   <div class="user-content">
     <h1 style="margin:10px 10px 10px 10px">账户管理-权限管理</h1>
     <div class="content-button" >
-      <Button type="primary" icon="md-add" @click="addSetting()">添加一级菜单</Button>
+      <Button type="primary" icon="md-add" @click="addSetting()" >添加一级菜单</Button>
     </div>
    <div class="block">
             <el-tree
@@ -45,48 +83,61 @@
                 </span>
             </el-tree>
         </div>
-    <Modal v-model.trim="modalEdit" :closable="false" :title="editInfoTitle">
-    <Form ref="formInline" :model="formInline" :rules="ruleInline" inline>
-        <FormItem label="AuthCode" prop="AuthCode" style="width:270px;">
-          <Input v-model.trim="formInline.AuthCode"/>
-        </FormItem>
-    </Form>
-    <div slot="footer">
-        <Button type="primary" ghost size="large" @click="editCancel('formInline')">返回</Button>
-        <Button type="primary" size="large" @click="editSave('formInline')">保存</Button>
-      </div>
-    </Modal>
      <Modal v-model.trim="modalAddOrUpdate" width="600" :mask-closable="false" :closable="false" v-bind:title="detailTitle">
       <Form ref="formInline" :model="formInline" :rules="ruleInline" inline>
+          <div v-show="showType==='edit'?false:true">
         <FormItem label="AuthCode" prop="AuthCode" style="width:270px;">
           <Input v-model.trim="formInline.AuthCode"/>
         </FormItem>
-        <FormItem label="AuthName" prop="AuthName" style="width:270px;">
-          <Input  v-model.trim="formInline.AuthName"/>
-        </FormItem>
         <FormItem label="AuthSeq" prop="AuthSeq" style="width:270px;">
-          <Input  v-model.trim="formInline.AuthSeq"/>
+          <Input  v-model.number="formInline.AuthSeq"/>
         </FormItem>
         <FormItem label="AuthLevel" prop="AuthLevel" style="width:270px;">
-          <Input  v-model.trim="formInline.AuthLevel"/>
+          <Input  v-model.number="formInline.AuthLevel"/>
         </FormItem>
-        <FormItem label="AuthParentCode" prop="AuthParentCode" style="width:270px;">
-          <Input  v-model.trim="formInline.AuthParentCode" readonly/>
+         </div>
+          <FormItem label="AuthName" prop="AuthName" style="width:270px;">
+          <Input  v-model.trim="formInline.AuthName"/>
+        </FormItem>
+        <FormItem label="Url" prop="AuthLevel" style="width:270px;">
+          <Input  v-model.number="formInline.Url"/>
+        </FormItem>
+        <FormItem label="Controller" prop="AuthLevel" style="width:270px;">
+          <Input  v-model.number="formInline.Controller"/>
+        </FormItem>
+        <FormItem label="Method" prop="AuthLevel" style="width:270px;">
+          <Input  v-model.number="formInline.Method"/>
+        </FormItem>
+        <FormItem label="AuthParentCode" prop="AuthParentCode" style="width:270px;" v-show="false">
+          <Input  v-model.trim="formInline.AuthParentCode" />
         </FormItem>
         <FormItem>
         </FormItem>
       </Form>
       <div slot="footer">
-        <Button type="primary" ghost size="large" @click="cancelAddOrUpdate('formInline')">返回</Button>
+        <Button type="primary" ghost size="large" @click="()=>{modalAddOrUpdate=false}">返回</Button>
         <Button type="primary" size="large" @click="handleSubmitAddOrUpdate('formInline')">保存</Button>
       </div>
      </Modal>
+     <!-- delete -->
+    <Modal v-model.trim="modalDelete" width="450" title="删除参数配置提示">
+            <div>
+                <p>确定删除该参数配置吗？</p>
+            </div>
+            <div slot="footer">
+                <Button type="text" @click="()=>{modalDelete=false}" size="large"
+                    >取消</Button
+                >
+                <Button type="primary" @click="handleSubmitDelete" size="large"
+                    >确定</Button
+                >
+            </div>
+        </Modal>
   </div>
 </template>
 
 <script>
-import { confPageList, confDelete, conf, getAuthTree, createParent } from '@/api/data'
-let id = 1000
+import { getAuthTree, createParent, deletePermission, editPermission } from '@/api/data'
 export default {
   data () {
     function getByteLen (val) {
@@ -147,12 +198,15 @@ export default {
       }
     }
     return {
+      modalDelete: false,
+      addNewModal: false,
+      isShow: false,
       editInfoTitle: '',
       modalEdit: false,
       defaultProps: {
         label: 'authName'
       },
-      treeData: [], //  JSON.parse(JSON.stringify(data)),
+      treeData: [],
       AuthCode: '',
       AuthName: '',
       AuthSeq: '',
@@ -166,8 +220,14 @@ export default {
         AuthName: '',
         AuthSeq: '',
         AuthLevel: '',
-        AuthParentCode: 0
+        AuthParentCode: '',
+        Url: '',
+        Controller: '',
+        Method: '',
+        id: ''
       },
+      fatherCode: '',
+      deleteId: '',
       ruleInline: {
         AuthCode: [
           { required: true, validator: validAuthCode, trigger: 'blur' }
@@ -188,26 +248,28 @@ export default {
     }
   },
   methods: {
-    /*
-        for edit modal functions
-      */
-    // #region
-    editCancel () {
-      this.modalEdit = false
-    },
     editSave () {
       console.log()
     },
     handleNodeClick (e) {
       console.log(e)
+      this.deleteId = e.authCode
+      this.fatherCode = e.authCode
+      this.formInline.AuthName = e.authName
+      this.formInline.Controller = e.controller
+      this.formInline.Url = e.url
+      this.formInline.Method = e.method
+      this.formInline.AuthCode = e.authCode
+      this.formInline.AuthSeq = e.authSeq
+      this.formInline.AuthLevel = e.authLevel
+      this.formInline.id = e.id
     },
     toTree (data) {
-      debugger
       let treeData = []
       if (!Array.isArray(data)) return treeData
 
       data.forEach(item => {
-        delete item.children // 删除item下的children，以防多次调用
+        delete item.children
       })
 
       let map = {}
@@ -225,126 +287,98 @@ export default {
       })
       return treeData
     },
-
     append (data) {
-      const newChild = { id: id++, label: 'testtest', children: [] }
-      if (!data.children) {
-        this.$set(data, 'children', [])
-      }
-      data.children.push(newChild)
+      this.modalAddOrUpdate = true
+      this.showType = 'add son'
     },
+    handleSubmitAdd () {
 
+    },
     remove (node, data) {
-      const parent = node.parent
+      this.modalDelete = true
+      /* const parent = node.parent
       const children = parent.data.children || parent.data
       const index = children.findIndex((d) => d.id === data.id)
-      children.splice(index, 1)
+      children.splice(index, 1) */
     },
     editNode (node, data) {
-      this.modalEdit = true
-      this.editInfoTitle = '编辑信息'
+      this.modalAddOrUpdate = true
+      this.showType = 'edit'
+      this.detailTitle = '编辑信息'
       console.log(node.childNodes.length, data.label)
-    },
-    // #endregion
-    search () {
-      const date = {
-        'confName': this.confName,
-        'confKey': this.confKey,
-        'pageNum': this.pageNum,
-        'pageSize': this.pageSize
-      }
-      confPageList(date).then(res => {
-        // this.$Message['success']({
-        //   background: true,
-        //   content: res.data.data
-        // })
-        this.confData = res.data.data.resultList
-        this.total = res.data.data.totalAmount
-      }).catch(err => {
-        console.log(err)
-      })
-    },
-    reset () {
-      this.confName = ''
-      this.confKey = ''
-      this.confValue = ''
-      this.confDescribtion = ''
-      this.pageNum = 1
-      this.confPageList()
     },
     addSetting () {
       this.showType = 'add'
       this.detailTitle = '新增全局配置信息'
       this.modalAddOrUpdate = true
     },
-    handleSubmitAddOrUpdate (index) {
-      /*
-            save add info for tree
-        */
-      const info = {
-        'authCode': this.AuthCode,
-        'authName': this.AuthName,
-        'authSeq': this.AuthSeq,
-        'authLevel': this.AuthLevel,
-        'authParentCode': '0'
+    handleSubmitAddOrUpdate () {
+      if (this.showType === 'add') {
+        const info = {
+          authCode: this.formInline.AuthCode,
+          authName: this.formInline.AuthName,
+          authSeq: this.formInline.AuthSeq,
+          authLevel: this.formInline.AuthLevel,
+          authParentCode: '0',
+          url: this.formInline.Url,
+          Controller: this.formInline.Controller,
+          method: this.formInline.Method
+        }
+        createParent(info).then(res => {
+          this.getAuthTree()
+          this.$Message.success({
+            content: res.data.message
+          })
+          this.modalAddOrUpdate = false
+        })
+      } else if (this.showType === 'add son') {
+        const info = {
+          authCode: this.formInline.AuthCode,
+          authName: this.formInline.AuthName,
+          authSeq: this.formInline.AuthSeq,
+          authLevel: this.formInline.AuthLevel,
+          authParentCode: this.fatherCode,
+          url: this.formInline.Url,
+          Controller: this.formInline.Controller,
+          method: this.formInline.Method
+        }
+        createParent(info).then(res => {
+          this.getAuthTree()
+          this.$Message.success({
+            content: res.data.message
+          })
+          this.modalAddOrUpdate = false
+        })
+      } else if (this.showType === 'edit') {
+        const info = {
+          id: this.formInline.id,
+          authParentCode: this.fatherCode,
+          authSeq: this.formInline.AuthSeq,
+          authLevel: this.formInline.AuthLevel,
+          authCode: this.formInline.AuthCode,
+          authName: this.formInline.AuthName,
+          url: this.formInline.Url,
+          Controller: this.formInline.Controller,
+          method: this.formInline.Method
+        }
+        console.log(info, 'info')
+        editPermission(info).then(res => {
+          console.log(res)
+          this.getAuthTree()
+          this.$Message.success({
+            content: res.data.message
+          })
+          this.modalAddOrUpdate = false
+        })
       }
-      console.log(info)
-      createParent(info).then(res => console.log(res))
-      const data = [
+
+      /*  const data = [
         { AuthCode: this.formInline.AuthCode, AuthName: this.formInline.AuthName, AuthSeq: this.formInline.AuthSeq, AuthLevel: this.formInline.AuthLevel, AuthParentCode: this.formInline.AuthParentCode }
       ]
-      console.log(this.toTree(data))
-      this.$refs[index].validate((valid) => {
-        console.log(valid)
-        if (valid) {
-          if (this.showType === 'add') {
-            const date = {
-              'confName': this.formInline.confName,
-              'confKey': this.formInline.confKey,
-              'confValue': this.formInline.confValue,
-              'confDescribtion': this.formInline.confDescribtion
-            }
-            conf(date).then(res => {
-              this.$Message['success']({
-                background: true,
-                content: res.data.message
-              })
-              this.modalAddOrUpdate = false
-              this.confPageList()
-              this.$refs[index].resetFields()
-            }).catch(err => {
-              console.log(err)
-            })
-          } else if (this.showType === 'edit') {
-            const date = {
-              'id': this.id,
-              'confName': this.formInline.confName,
-              'confKey': this.formInline.confKey,
-              'confValue': this.formInline.confValue,
-              'confDescribtion': this.formInline.confDescribtion
-            }
-            conf(date).then(res => {
-              this.$Message['success']({
-                background: true,
-                content: res.data.message
-              })
-              this.$refs['formInline'].resetFields()
-              this.modalAddOrUpdate = false
-              this.confPageList()
-            }).catch(err => {
-              console.log(err)
-            })
-          }
-        } else {
-          this.$Message.error('请检查参数是否有误!')
-        }
-      })
+      console.log(this.toTree(data)) */
     },
-    cancelAddOrUpdate (name) {
-      this.$refs[name].resetFields()
-      this.modalAddOrUpdate = false
-    },
-    edit (index) { // 点击修改按钮
+
+    edit (index) {
       this.id = this.confData[index].id
       this.formInline.confName = this.confData[index].confName
       this.formInline.confKey = this.confData[index].confKey
@@ -354,80 +388,32 @@ export default {
       this.detailTitle = '修改全局配置信息'
       this.modalAddOrUpdate = true
     },
-    del (index) { // 提交删除按钮
+    del (index) {
       this.modalDelete = true
       this.id = this.confData[index].id
     },
-    cancelDelete () { // 取消删除
-      this.modalDelete = false
-    },
-    handleSubmitDelete () { // 确认删除
-      confDelete(this.id).then(res => {
+    handleSubmitDelete () {
+      console.log(this.deleteId)
+      deletePermission(this.deleteId).then(res => {
         this.$Message['success']({
           background: true,
           content: res.data.message
         })
         this.modalDelete = false
-        this.confPageList()
+        this.getAuthTree()
       }).catch(err => {
         console.log(err)
       })
     },
-    confPageList () { // 根据条件分页查询全部配置
-      const date = {
-        'pageNum': this.pageNum,
-        'pageSize': this.pageSize
-      }
-      confPageList(date).then(res => {
-        this.confData = res.data.data.resultList
-        this.total = res.data.data.totalAmount
-      }).catch(err => {
-        console.log(err)
+    getAuthTree () {
+      getAuthTree().then(res => {
+        console.log(res)
+        this.treeData = JSON.parse(JSON.stringify(res.data.data))
       })
     }
   },
   created () {
-    getAuthTree().then(res => {
-      console.log(res)
-      this.treeData = JSON.parse(JSON.stringify(res.data.data))
-    })
+    this.getAuthTree()
   }
 }
 </script>
-<style lang="less" scoped>
-.custom-tree-node {
-    flex: 1;
-    display: flex;
-    align-items: center;
-    // justify-content:flex-start;
-    font-size: 14px;
-    padding-left: 18px;
-  }
-.user-content{
-  .content-button {
-    padding: 5px;
-    display: inline;
-    .ivu-select-single {
-      width: 150px;
-    }
-    .ivu-input-type {
-      width: 150px;
-      margin-left: 10px;
-    }
-    .ivu-btn{
-      margin-left: 10px;
-    }
-    .ivu-btn-info{
-      background: #2d8cf0;
-      border-color: #2d8cf0;
-    }
-  }
-}
-.ivu-modal-confirm-body {
-  padding-left: 42px;
-  font-size: 14px;
-  color: #515a6e;
-  position: relative;
-  word-break: break-all;
-}
-</style>

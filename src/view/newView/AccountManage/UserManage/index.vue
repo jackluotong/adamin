@@ -1,3 +1,33 @@
+<style lang="less" scoped>
+.user-content{
+  .content-button {
+    padding: 5px;
+    display: inline;
+    .ivu-select-single {
+      width: 150px;
+    }
+    .ivu-input-type {
+      width: 150px;
+      margin-left: 10px;
+    }
+    .ivu-btn{
+      margin-left: 10px;
+    }
+    .ivu-btn-info{
+      background: #2d8cf0;
+      border-color: #2d8cf0;
+    }
+  }
+}
+.ivu-modal-confirm-body {
+  padding-left: 42px;
+  font-size: 14px;
+  color: #515a6e;
+  position: relative;
+  word-break: break-all;
+}
+</style>
+
 <template>
   <div class="user-content">
     <h1 style="margin:10px 10px 10px 10px">账户管理-用户管理</h1>
@@ -177,22 +207,6 @@ export default {
       this.total = total
     },
     translate (arr) {
-      /*  let array = []
-      arr.map((item) => {
-        let obj = {}
-        if (item.roles.length === 0) {
-          obj[item.userCode] = ''
-        } else {
-          let roleName = ''
-          item.roles.map((i, t) => {
-            roleName = roleName + ',' + i.roleName
-          })
-          obj[item.userCode] = roleName
-        }
-        array.push(obj)
-      })
-      console.log(array)
- */
       console.log(arr)
       let array = []
       arr.map((item) => {
@@ -260,32 +274,3 @@ export default {
   }
 }
 </script>
-<style lang="less" scoped>
-.user-content{
-  .content-button {
-    padding: 5px;
-    display: inline;
-    .ivu-select-single {
-      width: 150px;
-    }
-    .ivu-input-type {
-      width: 150px;
-      margin-left: 10px;
-    }
-    .ivu-btn{
-      margin-left: 10px;
-    }
-    .ivu-btn-info{
-      background: #2d8cf0;
-      border-color: #2d8cf0;
-    }
-  }
-}
-.ivu-modal-confirm-body {
-  padding-left: 42px;
-  font-size: 14px;
-  color: #515a6e;
-  position: relative;
-  word-break: break-all;
-}
-</style>

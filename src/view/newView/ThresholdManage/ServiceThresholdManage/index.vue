@@ -21,12 +21,15 @@
       <Button type="primary" icon="md-refresh" @click="addNew()" style="margin:10px">新增阈值</Button>
 
 </div>
-
     <Table highlight-row stripe :columns="columns" :data="confData" style="margin-top: 5px">
        <template slot-scope="{ row, index }" slot="action">
           <div>
-            <Button type="info" size="small" style="margin-right: 5px" @click="edit(index)">编辑</Button>
-            <!-- <Button type="error" size="small" style="margin-right: 5px" @click="deleteService(index)">删除</Button> -->
+            <Button type="info"
+            size="small"
+             style="margin-right: 5px"
+             @click="edit(index)"
+             v-show="buttonOption.indexOf('编辑1') > -1"
+             >编辑</Button>
           </div>
         </template>
     </Table>
@@ -84,6 +87,7 @@ import { getManufacture } from '@/api/thirdPart'
 export default {
   data () {
     return {
+      ishow: false,
       isShow: false,
       deleteServiceTypeCode: '',
       deleteId: '',
@@ -184,7 +188,8 @@ export default {
           align: 'center',
           width: 300
         }
-      ]
+      ],
+      buttonOption: ['编辑', '删除']
     }
   },
   methods: {
@@ -294,7 +299,6 @@ export default {
       this.confData = data
       this.total = total
     }
-
   },
   created () {
     this.getServiceThreShold()

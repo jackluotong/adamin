@@ -82,6 +82,22 @@ export const createParent = (info) => {
     method: 'post'
   })
 }
+
+export const editPermission = (info) => {
+  return axios.request({
+    url: '/dcenter/authInfo/update',
+    data: info,
+    method: 'post'
+  })
+}
+
+export const deletePermission = (info) => {
+  return axios.request({
+    url: '/dcenter/authInfo/remove/' + info,
+    method: 'get'
+  })
+}
+
 // #endregion
 
 /*

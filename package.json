@@ -4,7 +4,8 @@
   "author": "Zejia Zj Wu<Zejia_Zj_Wu@manulife-sinochem.com>",
   "private": false,
   "scripts": {
-    "dev": "vue-cli-service serve --open",
+    "serve": "vue-cli-service serve",
+    "dev": "vue-cli-service build --mode dev",
     "build": "vue-cli-service build",
     "lint": "vue-cli-service lint",
     "test:unit": "vue-cli-service test:unit",

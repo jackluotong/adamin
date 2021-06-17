@@ -14,7 +14,6 @@ const addErrorLog = errorInfo => {
   }
   if (!responseURL.includes('save_error_logger')) store.dispatch('addErrorLog', info)
 }
-
 class HttpRequest {
   constructor (baseUrl = baseURL) {
     this.baseUrl = baseUrl
@@ -24,8 +23,7 @@ class HttpRequest {
     const config = {
       baseURL: this.baseUrl,
       headers: {
-        'token': getToken()
-        //
+        'X-Token': getToken()// token
       }
     }
     return config
@@ -41,13 +39,14 @@ class HttpRequest {
     instance.interceptors.request.use(config => {
       // 添加全局的loading...
       if (!Object.keys(this.queue).length) {
-        // Spin.show() // 不建议开启，因为界面不友好
+        // Spin.show()
       }
       this.queue[url] = true
       return config
     }, error => {
       return Promise.reject(error)
     })
+
     // 响应拦截
     instance.interceptors.response.use(res => {
       this.destroy(url)

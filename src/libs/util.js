@@ -2,7 +2,7 @@ import Cookies from 'js-cookie'
 // cookie保存的天数
 import config from '@/config'
 import { forEach, hasOneOf, objEqual } from '@/libs/tools'
-const { title, cookieExpires, useI18n } = config
+const { title, cookieExpires } = config
 
 export const TOKEN_KEY = 'token'
 
@@ -103,13 +103,13 @@ export const getRouteTitleHandled = (route) => {
 }
 
 export const showTitle = (item, vm) => {
-  let { title, __titleIsFunction__ } = item.meta
+  let { title } = item.meta
   if (!title) return
-  if (useI18n) {
+  /* if (useI18n) {  __titleIsFunction__
     if (title.includes('{{') && title.includes('}}') && useI18n) title = title.replace(/({{[\s\S]+?}})/, (m, str) => str.replace(/{{([\s\S]*)}}/, (m, _) => vm.$t(_.trim())))
     else if (__titleIsFunction__) title = item.meta.title
     else title = vm.$t(item.name)
-  } else title = (item.meta && item.meta.title) || item.name
+  }  */else title = (item.meta && item.meta.title) || item.name
   return title
 }
 
@@ -164,10 +164,10 @@ export const getNewTagList = (list, newRoute) => {
  * @param {*} access 用户权限数组，如 ['super_admin', 'admin']
  * @param {*} route 路由列表
  */
-const hasAccess = (access, route) => {
+/* const hasAccess = (access, route) => {
   if (route.meta && route.meta.access) return hasOneOf(access, route.meta.access)
   else return true
-}
+} */
 
 /**
  * 权鉴
@@ -176,13 +176,13 @@ const hasAccess = (access, route) => {
  * @param {*} routes 路由列表
  * @description 用户是否可跳转到该页
  */
-export const canTurnTo = (name, access, routes) => {
+export const canTurnTo = (name, routes) => {
   const routePermissionJudge = (list) => {
     return list.some(item => {
       if (item.children && item.children.length) {
         return routePermissionJudge(item.children)
       } else if (item.name === name) {
-        return hasAccess(access, item)
+        // return hasAccess(access, item)
       }
     })
   }

@@ -499,16 +499,17 @@ export default {
       this.showWeightAbnormal = true
       this.getWeight(2, 2, this.confData[index].applicationCode, this.confData[index].serviceTypeCode)
     },
-    deleteId (row) {
+    deleteId (index, row) {
       this.deleteOject.applicationCode = row.applicationCode
       this.deleteOject.weightType = row.weightType
       this.deleteOject.serviceTypeCode = row.serviceTypeCode
       this.modalDelete = true
+      console.log(this.deleteOject, index, row)
     },
     handleSubmitDelete () {
-      console.log(this.deleteOject)
       deleteWeight(this.deleteOject).then(res => {
         console.log(res)
+        this.getWeight(1, 1)
         this.modalDelete = false
       }).catch(error => {
         this.$Message.error({
@@ -541,7 +542,6 @@ export default {
         currentPage: this.pageNum,
         pageSize: this.pageSize
       }
-      console.log(info)
       getWeight(info).then(res => {
         this.renderPage(res.data.data.records, res.data.data.total, flag)
       }).catch(error => {

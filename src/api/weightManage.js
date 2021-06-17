@@ -18,7 +18,7 @@ export const addWeight = (info) => {
 
 export const deleteWeight = (info) => {
   return axios.request({
-    url: '/dcenter/weightInfo/edit/weight',
+    url: '/dcenter/weightInfo/del/weight',
     method: 'post',
     data: info
   })
@@ -39,3 +39,7 @@ export const searchManufacture = (info) => {
     data: info
   })
 }
+
+/*
+    judge is longin
+*/

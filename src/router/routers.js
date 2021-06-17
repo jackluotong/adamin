@@ -39,7 +39,7 @@ export default [{
     path: '/home',
     name: 'home',
     meta: {
-      hideInMenu: true,
+      hideInMenu: false,
       title: '首页',
       notCache: true,
       icon: 'md-home'
@@ -47,11 +47,11 @@ export default [{
     component: () => import('@/view/single-page/home')
   }]
 },
-{
+/* {
   path: '/argu',
   name: 'argu',
   meta: {
-    hideInMenu: true
+    hideInMenu: false
   },
   component: Main,
   children: [{
@@ -82,24 +82,24 @@ export default [{
   path: '/401',
   name: 'error_401',
   meta: {
-    hideInMenu: true
+    hideInMenu: false
   },
   component: () => import('@/view/error-page/401.vue')
 }, {
   path: '/500',
   name: 'error_500',
   meta: {
-    hideInMenu: true
+    hideInMenu: false
   },
   component: () => import('@/view/error-page/500.vue')
 }, {
   path: '*',
   name: 'error_404',
   meta: {
-    hideInMenu: true
+    hideInMenu: false
   },
   component: () => import('@/view/error-page/404.vue')
-},
+}, */
 
   /*
   新定义的路由配置
@@ -110,7 +110,8 @@ export default [{
   meta: {
     icon: 'ios-construct',
     title: '账户管理',
-    access: ['root']
+    access: 'account',
+    hideInMenu: false
   },
   component: Main,
   children: [
@@ -120,7 +121,9 @@ export default [{
       name: 'RoleManage',
       meta: {
         icon: 'ios-settings',
-        title: '角色管理'
+        title: '角色管理',
+        access: 'account:role',
+        hideInMenu: false
       },
       component: () => import('@/view/newView/AccountManage/RoleManage')
     },
@@ -129,7 +132,9 @@ export default [{
       name: 'PermissionManage',
       meta: {
         icon: 'ios-settings',
-        title: '权限管理'
+        title: '权限管理',
+        access: 'account:auth',
+        hideInMenu: false
       },
       component: () => import('@/view/newView/AccountManage/PermissionManage')
     },
@@ -138,7 +143,9 @@ export default [{
       name: 'UserManage',
       meta: {
         icon: 'ios-settings',
-        title: '用户管理'
+        title: '用户管理',
+        access: 'account:user',
+        hideInMenu: false
       },
       component: () => import('@/view/newView/AccountManage/UserManage')
     }
@@ -151,7 +158,8 @@ export default [{
   meta: {
     icon: 'ios-construct',
     title: ' 服务类型管理',
-    access: ['root']
+    access: 'serviceType',
+    hideInMenu: false
   },
   component: Main,
   children: [{
@@ -159,7 +167,9 @@ export default [{
     name: 'ServiceTypeManage',
     meta: {
       icon: 'ios-folder-open-outline',
-      title: '服务类型管理'
+      title: '服务类型管理',
+      access: 'serviceType:manage',
+      hideInMenu: false
     },
     component: () => import('@/view/newView/ServiceTypeManage/ServiceTypeManage')
   }]
@@ -170,7 +180,8 @@ export default [{
   meta: {
     icon: 'ios-search',
     title: '第三方服务管理',
-    access: ['root']
+    access: 'tripartite',
+    hideInMenu: false
   },
   component: Main,
   children: [{
@@ -178,15 +189,22 @@ export default [{
     name: 'ThirdManufacturerManage',
     meta: {
       icon: 'ios-hand-outline',
-      title: '第三方厂商管理 '
+      title: '第三方厂商管理 ',
+      access: 'tripartite:provider',
+
+      hideInMenu: false
     },
     component: () => import('@/view/newView/ThirdPartManage/ThirdManufacturerManage')
-  }, {
+  },
+  {
     path: '/ThirdServiceManage',
     name: 'ThirdServiceManage',
     meta: {
       icon: 'md-alert',
-      title: '第三方服务管理'
+      title: '第三方服务管理',
+      access: 'tripartite:service',
+
+      hideInMenu: false
     },
     component: () => import('@/view/newView/ThirdPartManage/ThirdServiceManage')
   }]
@@ -196,8 +214,9 @@ export default [{
   name: 'UseSystemManage',
   meta: {
     icon: 'ios-construct',
-    title: 'UseSystemManage',
-    access: ['root']
+    title: '应用系统管理',
+    access: 'root',
+    hideInMenu: false
   },
   component: Main,
   children: [{
@@ -205,7 +224,10 @@ export default [{
     name: 'UseSystemManage',
     meta: {
       icon: 'ios-settings',
-      title: '应用系统管理'
+      title: '应用系统管理',
+      access: 'serviceType:manage',
+
+      hideInMenu: false
     },
     component: () => import('@/view/newView/UseSystemManage/UseSystemManage')
   }, {
@@ -213,7 +235,10 @@ export default [{
     name: 'UseConnectManage',
     meta: {
       icon: 'ios-settings',
-      title: '应用关联服务管理'
+      title: '应用关联服务管理',
+      access: 'serviceType:manage',
+
+      hideInMenu: false
     },
     component: () => import('@/view/newView/UseSystemManage/UseConnectManage')
   }]
@@ -223,7 +248,8 @@ export default [{
   meta: {
     icon: 'ios-construct',
     title: '权重管理',
-    access: ['root']
+    access: 'serviceType:manage',
+    hideInMenu: false
   },
   component: Main,
   children: [{
@@ -231,7 +257,10 @@ export default [{
     name: 'WeightManage',
     meta: {
       icon: 'ios-settings',
-      title: '权重管理'
+      title: '权重管理',
+      access: 'serviceType:manage',
+
+      hideInMenu: false
     },
     component: () => import('@/view/newView/WeightManage/WeightManage')
   }]
@@ -241,7 +270,8 @@ export default [{
   meta: {
     icon: 'ios-construct',
     title: '阈值管理',
-    access: ['root']
+    access: 'serviceType:manage',
+    hideInMenu: false
   },
   component: Main,
   children: [{
@@ -249,7 +279,10 @@ export default [{
     name: 'UseThresholdManage',
     meta: {
       icon: 'ios-settings',
-      title: '应用阈值管理'
+      title: '应用阈值管理',
+      access: 'serviceType:manage',
+
+      hideInMenu: false
     },
     component: () => import('@/view/newView/ThresholdManage/UseThresholdManage')
   }, {
@@ -257,7 +290,10 @@ export default [{
     name: 'ServiceThresholdManage',
     meta: {
       icon: 'ios-settings',
-      title: '服务阈值管理'
+      title: '服务阈值管理',
+      access: 'serviceType:manage',
+
+      hideInMenu: false
     },
     component: () => import('@/view/newView/ThresholdManage/ServiceThresholdManage')
   }]
@@ -267,7 +303,8 @@ export default [{
   meta: {
     icon: 'ios-construct',
     title: '提醒通知管理',
-    access: ['root']
+    access: 'serviceType:manage',
+    hideInMenu: false
   },
   component: Main,
   children: [{
@@ -275,7 +312,10 @@ export default [{
     name: 'InformManage',
     meta: {
       icon: 'ios-settings',
-      title: '提醒通知管理'
+      title: '提醒通知管理',
+      access: 'serviceType:manage',
+
+      hideInMenu: false
     },
     component: () => import('@/view/newView/InformManage/InformManage')
   },
@@ -284,7 +324,10 @@ export default [{
     name: 'AlarmManage',
     meta: {
       icon: 'ios-settings',
-      title: '警示管理'
+      title: '警示管理',
+      access: 'serviceType:manage',
+
+      hideInMenu: false
     },
     component: () => import('@/view/newView/InformManage/AlarmManage')
   }
@@ -295,7 +338,8 @@ export default [{
   meta: {
     icon: 'ios-construct',
     title: '统计报表',
-    access: ['root']
+    access: 'serviceType:manage',
+    hideInMenu: false
   },
   component: Main,
   children: [{
@@ -303,7 +347,10 @@ export default [{
     name: 'DetailsInquire',
     meta: {
       icon: 'ios-settings',
-      title: '明细查询'
+      title: '明细查询',
+      access: 'serviceType:manage',
+
+      hideInMenu: false
     },
     component: () => import('@/view/newView/StatisticalForm/DetailsInquire')
   }]

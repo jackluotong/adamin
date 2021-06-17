@@ -19,9 +19,9 @@ export const getUserInfo = (token) => {
   })
 }
 
-export const logout = (token) => {
+export const logout = () => {
   return axios.request({
-    url: '/dcenter/admin/userInfo/logout/' + token,
+    url: '/dcenter/login/logout/',
     method: 'get'
   })
 }
