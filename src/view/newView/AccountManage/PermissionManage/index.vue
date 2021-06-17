@@ -342,6 +342,7 @@ export default {
           Controller: this.formInline.Controller,
           method: this.formInline.Method
         }
+        console.log(info)
         createParent(info).then(res => {
           this.getAuthTree()
           this.$Message.success({
@@ -352,13 +353,9 @@ export default {
       } else if (this.showType === 'edit') {
         const info = {
           id: this.formInline.id,
-          authParentCode: this.fatherCode,
-          authSeq: this.formInline.AuthSeq,
-          authLevel: this.formInline.AuthLevel,
-          authCode: this.formInline.AuthCode,
           authName: this.formInline.AuthName,
           url: this.formInline.Url,
-          Controller: this.formInline.Controller,
+          controller: this.formInline.Controller,
           method: this.formInline.Method
         }
         console.log(info, 'info')
@@ -371,11 +368,6 @@ export default {
           this.modalAddOrUpdate = false
         })
       }
-
-      /*  const data = [
-        { AuthCode: this.formInline.AuthCode, AuthName: this.formInline.AuthName, AuthSeq: this.formInline.AuthSeq, AuthLevel: this.formInline.AuthLevel, AuthParentCode: this.formInline.AuthParentCode }
-      ]
-      console.log(this.toTree(data)) */
     },
 
     edit (index) {
