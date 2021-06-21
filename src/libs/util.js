@@ -15,6 +15,19 @@ export const getToken = () => {
   if (token) return token
   else return false
 }
+/*
+    set get all permission
+*/
+export const setPermission = (permission) => {
+  sessionStorage.setItem('permission', permission)
+}
+
+export const getPermission = () => {
+  const permission = sessionStorage.getItem('permission')
+  if (permission) return permission
+  else return false
+}
+
 export const setAccess = (access) => {
   Cookies.set('access', access)
 }

@@ -8,11 +8,12 @@ import {
   removeReaded,
   restoreTrash
 } from '@/api/user'
-import { setToken, getToken, setAccess } from '@/libs/util'
+import { setToken, setPermission } from '@/libs/util'
 import encrypt from '@/libs/RSAutil'
 
 export default {
   state: {
+    permission: '',
     userName: '',
     userCode: '',
     avatarImgPath: '',
@@ -34,6 +35,10 @@ export default {
     },
     setUserName (state, name) {
       state.userName = name
+    },
+    setPermission (state, permission) {
+      state.permission = permission
+      setPermission(permission)
     },
     setAccess (state, access) {
       state.access = access
@@ -88,12 +93,14 @@ export default {
           const userAccess = res.data.data.permsSet
           window.sessionStorage.setItem('allUserInfo', JSON.stringify(res.data.data))
           window.sessionStorage.setItem('hasGetInfo', true)
-          sessionStorage.setItem('access', userAccess)
+          sessionStorage.setItem('userName', userInfo.userName)
+          commit('setPermission', userAccess)
           commit('setUserName', userInfo.userName)
           commit('setUserCode', userInfo.userCode)
           commit('setAccess', userAccess)
           commit('setToken', userInfo.token)
           commit('setHasGetInfo', true)
+          console.log(sessionStorage.getItem('permission').split(','))
           resolve()
         }).catch(err => {
           reject(err)
@@ -137,12 +144,13 @@ export default {
         set user info by that interface return data
     */
     getUserInfo ({ state, commit }) {
+      let img = require('@/assets/images/sample.jpg')
       return new Promise((resolve, reject) => {
         try {
           getUserInfo(state.token).then(res => {
             const data = res.data.data
             console.log(data)
-            commit('setAvatar', data.headImg)
+            commit('setAvatar', img)
             commit('setUserName', data.nickName)
             commit('setUserId', data.userId)
             commit('setAccess', data.access)

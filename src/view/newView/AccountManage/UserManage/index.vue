@@ -253,6 +253,7 @@ export default {
       currentPage: this.pageNum
     }
     getInfoUser(info).then(res => {
+      console.log(res)
       const data = res.data.data.records
       const total = res.data.data.total
       this.translate(data)
