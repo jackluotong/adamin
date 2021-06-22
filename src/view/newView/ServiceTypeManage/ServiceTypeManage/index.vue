@@ -8,16 +8,28 @@
       <Input v-model.trim="serviceType" />
       <Button type="primary" icon="md-search" @click="search()" style="margin:0 10px 0 20px">查询</Button>
       <Button type="primary" icon="md-refresh" @click="reset()">重置</Button>
-      <Button type="primary" icon="md-add" @click="addSetting()">新增模块</Button>
-      <Button type="primary" icon="md-add" @click="addSettingType()">新增服务类型</Button>
+      <Button type="primary" icon="md-add" @click="addSetting()"
+      v-show="permission.includes('serviceType:manage: addModule')"
+      >新增模块</Button>
+      <Button type="primary" icon="md-add" @click="addSettingType()"
+            v-show="permission.includes('serviceType:manage: addType')"
+>新增服务类型</Button>
     </div>
     <Table highlight-row stripe :columns="columns" :data="confData" style="margin-top: 5px">
        <template slot-scope="{ row, index }" slot="action">
           <div>
-            <Button type="primary" size="small" style="margin-right: 5px" @click="editModule(index)">编辑模块</Button>
-            <Button type="error" size="small" style="margin-right: 5px" @click="delModule(index)">删除模块</Button>
-            <Button type="primary" size="small" style="margin-right: 5px" @click="editType(index)">编辑类型</Button>
-            <Button type="error" size="small" style="margin-right: 5px" @click="delType(index)">删除类型</Button>
+            <Button type="primary" size="small" style="margin-right: 5px" @click="editModule(index)"
+                  v-show="permission.includes('serviceType:manage: editModule')"
+>编辑模块</Button>
+            <Button type="error" size="small" style="margin-right: 5px" @click="delModule(index)"
+                  v-show="permission.includes('serviceType:manage: deleteModule')"
+>删除模块</Button>
+            <Button type="primary" size="small" style="margin-right: 5px" @click="editType(index)"
+                  v-show="permission.includes('serviceType:manage: editType')"
+>编辑类型</Button>
+            <Button type="error" size="small" style="margin-right: 5px" @click="delType(index)"
+                  v-show="permission.includes('serviceType:manage: deleteType')"
+>删除类型</Button>
           </div>
         </template>
      </Table>
@@ -153,6 +165,7 @@ export default {
       }
     }
     return {
+      permission: sessionStorage.getItem('permission'),
       selectedModuleAdd: '',
       serviceTypeAdd: '',
       serviceType: '',
@@ -234,7 +247,6 @@ export default {
     selectedTypeEdit (e) {
       this.formInline.serviceCode = e.value
       this.formInline.serviceType = e.label
-      console.log(this.formInline)
     },
     selectedTypeAdd (e) {
       this.addServiceType.serviceTypeCode = e.value
@@ -247,7 +259,6 @@ export default {
         'serviceType': this.serviceType
       }
       getServiceTypeInfo(info).then(res => {
-        console.log(res)
         this.renderPage(res.data.data.records, res.data.data.total)
       })
     },

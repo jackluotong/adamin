@@ -15,6 +15,7 @@
                         size="small"
                         style="margin-right: 5px"
                         @click="edit(index)"
+                        v-show="permission.includes('notice:manage:edit')"
                         >编辑</Button
                     >
                 </div>
@@ -36,6 +37,7 @@ import { getInfoWarning } from '@/api/informManage'
 export default {
   data () {
     return {
+      permission: sessionStorage.getItem('permission'),
       deleteId: '',
       total: 0,
       pageNum: 1,
@@ -156,7 +158,6 @@ export default {
         pageSize: this.pageSize
       }
       getInfoWarning(info).then(res => {
-        console.log(res, 'getInfoConnect')
         this.renderPage(res.data.data.records, res.data.data.total)
       }).catch(error => {
         console.log(error)

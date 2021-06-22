@@ -1,13 +1,22 @@
+<style scoped>
+p{
+    color: rgb(224, 218, 230);
+}
+span{
+    font-weight: 900;
+    color: rgb(250, 249, 249);
+}
+</style>
 <template>
     <div>
-        <span :src='userName'></span>
+        <p>欢迎登录：<span>{{user}}</span></p>
     </div>
 </template>
 <script>
 export default {
   name: 'ShowUser',
   props: {
-    userName: {
+    user: {
       type: String,
       default: 'xxxx'
     }

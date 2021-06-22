@@ -7,7 +7,7 @@
       <span style="padding:10px">应用简称</span>
       <Input v-model.trim="applicationCode" />
       <Button type="primary" icon="md-search" @click="search()" style="margin:0 10px 0 20px">查询</Button>
-      <Button type="primary" icon="md-add" @click="addSetting()">应用注册</Button>
+      <Button type="primary" icon="md-add" @click="addSetting()" v-show="permission.includes('application:manage:add')">应用注册</Button>
     </div>
     <Table highlight-row stripe :columns="columns" :data="confData" style="margin-top: 5px">
       <template slot-scope="{ row, index }" slot="action">
@@ -17,12 +17,14 @@
             size="small"
             style="margin-right: 5px"
             @click="edit(index)"
+            v-show="permission.includes('application:manage:edit')"
           >编辑</Button>
          <Button
             type="primary"
             size="small"
             style="margin-right: 5px"
             @click="lookConfig(index)"
+            v-show="permission.includes('application:manage:look')"
           >查看配置</Button>
         </div>
       </template>
@@ -121,6 +123,7 @@ export default {
     }
 
     return {
+      permission: sessionStorage.getItem('permission'),
       isHavaShow: false,
       isHaveKey: true,
       total: 0, // 总数
@@ -155,7 +158,6 @@ export default {
         ]
       },
       confData: [
-        // 参数配置数据
       ],
       columns: [
         {
@@ -185,6 +187,7 @@ export default {
         },
         {
           title: '操作',
+          width: 300,
           slot: 'action',
           align: 'center'
         }
@@ -199,7 +202,6 @@ export default {
         applicationCode: this.applicationCode,
         applicationName: this.applicationName
       }
-      console.log(info)
       getInfo(info).then(res => {
         this.renderPage(res.data.data.records, res.data.data.total)
       }).catch(error => {
@@ -230,9 +232,7 @@ export default {
       this.formInline.aeskey = this.confData[index].aeskey
     },
     handleSubmitAddOrUpdate (index) {
-      console.log(index)
       this.$refs[index].validate(valid => {
-        console.log(valid)
         if (valid) {
           if (this.showType === 'add') {
             const info = {
@@ -241,7 +241,6 @@ export default {
               contactMobile: this.formInline.contactMobile,
               contactMail: this.formInline.contactMail
             }
-            console.log(info)
             editInfo(info)
               .then(res => {
                 this.$Message['success']({
@@ -330,7 +329,6 @@ export default {
         'currentPage': this.pageNum
       }
       getInfo(info).then(res => {
-        console.log(res, 'getInfo')
         this.renderPage(res.data.data.records, res.data.data.total)
       }).catch(error => {
         console.log(error)

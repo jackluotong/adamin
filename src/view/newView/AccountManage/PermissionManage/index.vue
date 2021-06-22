@@ -40,7 +40,9 @@
   <div class="user-content">
     <h1 style="margin:10px 10px 10px 10px">账户管理-权限管理</h1>
     <div class="content-button" >
-      <Button type="primary" icon="md-add" @click="addSetting()" >添加一级菜单</Button>
+      <Button type="primary" icon="md-add" @click="addSetting()"
+            v-show="permission.includes('account:auth:addFather')"
+>添加一级菜单</Button>
     </div>
    <div class="block">
             <el-tree
@@ -60,6 +62,8 @@
                             size="mini"
                             icon="el-icon-circle-plus"
                             @click="() => append(data)"
+                                        v-show="permission.includes('account:auth:addSon')"
+
                         >
                             新增子级菜单
                         </el-button>
@@ -68,6 +72,8 @@
                             size="mini"
                             icon="el-icon-delete-solid"
                             @click="() => remove(node, data)"
+                                        v-show="permission.includes('account:auth:delete')"
+
                         >
                             删除
                         </el-button>
@@ -76,6 +82,8 @@
                             size="mini"
                             icon="el-icon-s-tools"
                             @click="() => editNode(node, data)"
+                                        v-show="permission.includes('account:auth:edit')"
+
                         >
                             编辑
                         </el-button>
@@ -198,6 +206,7 @@ export default {
       }
     }
     return {
+      permission: sessionStorage.getItem('permission'),
       modalDelete: false,
       addNewModal: false,
       isShow: false,
@@ -249,10 +258,8 @@ export default {
   },
   methods: {
     editSave () {
-      console.log()
     },
     handleNodeClick (e) {
-      console.log(e)
       this.deleteId = e.authCode
       this.fatherCode = e.authCode
       this.formInline.AuthName = e.authName
@@ -305,7 +312,6 @@ export default {
       this.modalAddOrUpdate = true
       this.showType = 'edit'
       this.detailTitle = '编辑信息'
-      console.log(node.childNodes.length, data.label)
     },
     addSetting () {
       this.showType = 'add'
@@ -342,7 +348,6 @@ export default {
           Controller: this.formInline.Controller,
           method: this.formInline.Method
         }
-        console.log(info)
         createParent(info).then(res => {
           this.getAuthTree()
           this.$Message.success({
@@ -358,9 +363,7 @@ export default {
           controller: this.formInline.Controller,
           method: this.formInline.Method
         }
-        console.log(info, 'info')
         editPermission(info).then(res => {
-          console.log(res)
           this.getAuthTree()
           this.$Message.success({
             content: res.data.message
@@ -385,7 +388,6 @@ export default {
       this.id = this.confData[index].id
     },
     handleSubmitDelete () {
-      console.log(this.deleteId)
       deletePermission(this.deleteId).then(res => {
         this.$Message['success']({
           background: true,
@@ -399,7 +401,6 @@ export default {
     },
     getAuthTree () {
       getAuthTree().then(res => {
-        console.log(res)
         this.treeData = JSON.parse(JSON.stringify(res.data.data))
       })
     }

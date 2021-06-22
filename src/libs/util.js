@@ -50,22 +50,22 @@ const showThisMenuEle = (item) => {
  * @returns {Array}
  */
 export const getMenuByRouter = (list) => {
-/*   console.log('-----')
-  console.log(list)
-  console.log('-----') */
   let res = []
+  let permission = sessionStorage.getItem('permission').split(',')
   forEach(list, item => {
-    if (!item.meta || (item.meta && !item.meta.hideInMenu)) {
-      let obj = {
-        icon: (item.meta && item.meta.icon) || '',
-        name: item.name,
-        meta: item.meta
+    if (permission.includes(item.meta.access)) {
+      if (!item.meta || (item.meta && !item.meta.hideInMenu)) {
+        let obj = {
+          icon: (item.meta && item.meta.icon) || '',
+          name: item.name,
+          meta: item.meta
+        }
+        if ((hasChild(item) || (item.meta && item.meta.showAlways)) && showThisMenuEle(item)) {
+          obj.children = getMenuByRouter(item.children)
+        }
+        if (item.meta && item.meta.href) obj.href = item.meta.href
+        if (showThisMenuEle(item)) res.push(obj)
       }
-      if ((hasChild(item) || (item.meta && item.meta.showAlways)) && showThisMenuEle(item)) {
-        obj.children = getMenuByRouter(item.children)
-      }
-      if (item.meta && item.meta.href) obj.href = item.meta.href
-      if (showThisMenuEle(item)) res.push(obj)
     }
   })
   return res

@@ -39,7 +39,9 @@
     <Table highlight-row stripe :columns="columns" :data="confData" style="margin-top: 5px">
        <template slot-scope="{ row, index }" slot="action">
           <div>
-            <Button type="primary" size="small" style="margin-right: 5px" @click="edit(index)">角色关联</Button>
+            <Button type="primary" size="small" style="margin-right: 5px" @click="edit(index)"
+                              v-show="permission.includes('account:user:roleConnect')"
+>角色关联</Button>
           </div>
         </template>
      </Table>
@@ -101,6 +103,7 @@ export default {
       }
     }
     return {
+      permission: sessionStorage.getItem('permission'),
       getCheckBox: [],
       checkData: [],
       value: [],
@@ -153,14 +156,11 @@ export default {
   methods: {
     selected (data) {
       this.selectOptions = []
-      console.log(data, 'selectedData')
       for (let i = 0; i < data.length; i++) {
         this.selectOptions.push(data[i].roleCode)
       }
-      console.log(this.selectOptions, 'selectOptions')
     },
     onChange (data) {
-      console.log(data)
       this.selectOptions = data
     },
     search () {
@@ -180,14 +180,12 @@ export default {
         'userCode': this.formInline.userCode,
         'roles': this.selectOptions
       }
-      console.log(info, 'info')
       roleConnect(info).then(res => {
         this.$Message.success('操作成功')
         this.modalAddOrUpdate = false
         this.$router.go(0)
         this.$nextTick(() => {
         })
-        console.log(res)
       }).catch(error => console.log(error))
     },
     cancelAddOrUpdate (name) { // 取消新增
@@ -197,7 +195,6 @@ export default {
     },
     edit (index) {
       this.id = this.confData[index].id
-      console.log(this.confData[index])
       this.formInline.userCode = this.confData[index].userCode
       this.detailTitle = '账户管理-用户管理'
       this.modalAddOrUpdate = true
@@ -207,7 +204,6 @@ export default {
       this.total = total
     },
     translate (arr) {
-      console.log(arr)
       let array = []
       arr.map((item) => {
         let roleName = ''
@@ -221,7 +217,6 @@ export default {
           roleName
         })
       })
-      console.log(array, 'array')
       return array
     }
 
@@ -240,7 +235,6 @@ export default {
         get info role set in checkList
       */
       this.checkList = data
-      console.log(data, 'checkList')
       /*
          defalut  checkList get from api
         */
@@ -253,7 +247,6 @@ export default {
       currentPage: this.pageNum
     }
     getInfoUser(info).then(res => {
-      console.log(res)
       const data = res.data.data.records
       const total = res.data.data.total
       this.translate(data)
@@ -264,7 +257,6 @@ export default {
   watch: {
     userCode: {
       handler: function (val, old) {
-        console.log(val, old)
         if (val === '') {
           /*
                 to do

@@ -13,8 +13,9 @@
       <Header class="header-con">
         <header-bar :collapsed="collapsed" @on-coll-change="handleCollapsedChange">
           <show-user :user='userName'/>
-          <user :message-unread-count="unreadCount" :user-avatar="userAvatar"/>
-          <span>{{userName}}</span>
+          <user />
+         <!-- <user  :user-avatar="userAvatar"/> -->
+
           <!-- <language v-if="$config.useI18n" @on-lang-change="setLocal" style="margin-right: 10px;" :lang="local"/> -->
           <!-- <error-store v-if="$config.plugin['error-store'] && $config.plugin['error-store'].showInHeader" :has-read="hasReadErrorPage" :count="errorCount"></error-store> -->
           <fullscreen v-model="isFullscreen" style="margin-right: 10px;"/>
@@ -67,7 +68,6 @@ export default {
   },
   data () {
     return {
-      userName: sessionStorage.getItem('userName'),
       collapsed: false,
       minLogo,
       maxLogo,
@@ -78,9 +78,9 @@ export default {
     ...mapGetters([
       'errorCount'
     ]),
-    /*  userName () {
+    userName () {
       return sessionStorage.getItem('userName')
-    }, */
+    },
     tagNavList () {
       return this.$store.state.app.tagNavList
     },
@@ -190,7 +190,6 @@ export default {
     }
     // 获取未读消息条数
     this.getUnreadMessageCount()
-    console.log(sessionStorage.getItem('userName'))
   }
 }
 </script>

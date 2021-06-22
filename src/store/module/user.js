@@ -8,7 +8,7 @@ import {
   removeReaded,
   restoreTrash
 } from '@/api/user'
-import { setToken, setPermission } from '@/libs/util'
+import { setToken, setPermission, getToken, setAccess } from '@/libs/util'
 import encrypt from '@/libs/RSAutil'
 
 export default {
@@ -81,6 +81,7 @@ export default {
   actions: {
     // 登录
     handleLogin ({ commit }, { userName, password }) {
+      console.log(sessionStorage.getItem('permission'))
       userName = userName.trim()
       password = encrypt(password)
       return new Promise((resolve, reject) => {
@@ -88,11 +89,8 @@ export default {
           userName,
           password
         }).then(res => {
-          console.log(res)
           const userInfo = res.data.data.userInfo
           const userAccess = res.data.data.permsSet
-          window.sessionStorage.setItem('allUserInfo', JSON.stringify(res.data.data))
-          window.sessionStorage.setItem('hasGetInfo', true)
           sessionStorage.setItem('userName', userInfo.userName)
           commit('setPermission', userAccess)
           commit('setUserName', userInfo.userName)
@@ -117,10 +115,6 @@ export default {
         }).catch(err => {
           reject(err)
         })
-        // 如果你的退出登录无需请求接口，则可以直接使用下面三行代码而无需使用logout调用接口
-        // commit('setToken', '')
-        // commit('setAccess', [])
-        // resolve()
       })
     },
     /*

@@ -10,7 +10,10 @@
                 @click="search()"
                 style="margin:0 10px 0 20px"
             >查询</Button>
-            <Button type="primary" icon="md-add" @click="addSetting()">新增厂商</Button>
+            <Button type="primary" icon="md-add" @click="addSetting()"
+                                  v-show="permission.includes(' tripartite:provider:addProvider')"
+
+            >新增厂商</Button>
         </div>
         <Table highlight-row stripe :columns="columns" :data="confData" style="margin-top: 5px">
             <template slot-scope="{ row, index }" slot="action">
@@ -20,12 +23,16 @@
                         size="small"
                         style="margin-right: 5px"
                         @click="editModule(index)"
+                                                          v-show="permission.includes(' tripartite:provider:edit')"
+
                     >编辑模块</Button>
                      <Button
                         type="error"
                         size="small"
                         style="margin-right: 5px"
                         @click="deleteClick(index)"
+                                                          v-show="permission.includes(' tripartite:provider:delete')"
+
                     >删除</Button>
                 </div>
             </template>
@@ -108,6 +115,7 @@ export default {
     }
 
     return {
+      permission: sessionStorage.getItem('permission'),
       deleteId: '',
       total: 0,
       pageNum: 1,
@@ -171,7 +179,6 @@ export default {
       obj.manufacturerContactType = ''
     },
     search () {
-      console.log(this.manufacturerName)
       this.getManufacture(this.manufacturerName)
     },
     addSetting () {

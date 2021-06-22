@@ -19,7 +19,11 @@
                 style="margin:0 10px 0 20px"
                 >查询</Button
             >
-            <Button type="primary" icon="md-add" @click="addSetting()"
+            <Button
+            type="primary"
+            icon="md-add"
+            @click="addSetting()"
+            v-show="permission.includes('application:service: connect')"
                 >服务关联</Button
             >
         </div>
@@ -37,6 +41,7 @@
                         size="small"
                         style="margin-right: 5px"
                         @click="edit(index)"
+                        v-show="permission.includes('application:service: cancel')"
                         >取消关联</Button
                     >
                 </div>
@@ -182,6 +187,7 @@ export default {
     }
 
     return {
+      permission: sessionStorage.getItem('permission'),
       deleteId: '',
       selectedAppName: '',
       selectedModule: '',
@@ -257,8 +263,8 @@ export default {
     }
   },
   methods: {
-    selectedAppNameClick (e) { console.log(e) },
-    selectedModuleClick (e) { console.log(e) },
+    selectedAppNameClick (e) { },
+    selectedModuleClick (e) { },
     search () {
       this.getInfo(this.applicationCode, this.applicationName)
     },
@@ -275,9 +281,7 @@ export default {
     },
     handleSubmitAddOrUpdate (index) {
       // 点击提交新增按钮
-      console.log(index)
       this.$refs[index].validate(valid => {
-        console.log(valid)
         if (valid) {
           const info = {
             applicationName: this.formInline.applicationName,
@@ -359,7 +363,6 @@ export default {
         serviceModuleCode: ''
       }
       getInfoConnect(info).then(res => {
-        console.log(res, 'getInfoConnect')
         this.renderPage(res.data.data.records, res.data.data.total)
       }).catch(error => {
         console.log(error)
@@ -377,11 +380,9 @@ export default {
 
     getInfo(info).then(res => {
       this.appData = res.data.data.records
-      console.log(res, 'getInfo')
     })
     getServiceTypeInfo(info).then(res => {
       this.moduleOptions = res.data.data.records
-      console.log(res, 'getServiceTypeInfo')
     }).catch(err => this.$Message.info(err))
   }
 }

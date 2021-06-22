@@ -18,7 +18,9 @@
 </div>
 <div style="">
       <Button type="primary" icon="md-search" @click="search()" style="margin:10px">查询</Button>
-      <Button type="primary" icon="md-refresh" @click="addNew()" style="margin:10px">新增阈值</Button>
+      <Button type="primary" icon="md-refresh" @click="addNew()" style="margin:10px"
+                      v-show="permission.includes('threshold:service: add')"
+>新增阈值</Button>
 
 </div>
     <Table highlight-row stripe :columns="columns" :data="confData" style="margin-top: 5px">
@@ -28,7 +30,7 @@
             size="small"
              style="margin-right: 5px"
              @click="edit(index)"
-             v-show="buttonOption.indexOf('编辑1') > -1"
+                      v-show="permission.includes('threshold:service: edit')"
              >编辑</Button>
           </div>
         </template>
@@ -87,6 +89,7 @@ import { getManufacture } from '@/api/thirdPart'
 export default {
   data () {
     return {
+      permission: sessionStorage.getItem('permission'),
       ishow: false,
       isShow: false,
       deleteServiceTypeCode: '',
@@ -219,7 +222,6 @@ export default {
       this.deleteId = this.confData[index].id
       this.deleteServiceTypeCode = this.confData[index].serviceTypeCode
       this.modalDelete = true
-      console.log(this.confData[index])
     },
     handleSubmitDelete () {
       const info = {
@@ -249,9 +251,7 @@ export default {
       }
       switch (this.showType) {
         case 'add':
-          console.log(this.formInline, 'infoAdd')
           addServiceThreShold(this.formInline).then(res => {
-            console.log(res)
             this.getServiceThreShold()
           }).catch(error => {
             this.$Message.error({
@@ -263,7 +263,6 @@ export default {
           this.modalCheck = false
           break
         case 'edit':
-          console.log(infoEdit)
           editServiceThreShold(infoEdit).then(res => {
             this.$Message.success({
               content: res.data.message
@@ -291,7 +290,6 @@ export default {
         serviceModuleCode: serviceModuleCode
       }
       getServiceThreShold(info).then(res => {
-        console.log(res)
         this.renderPage(res.data.data.records, res.data.data.total)
       })
     },

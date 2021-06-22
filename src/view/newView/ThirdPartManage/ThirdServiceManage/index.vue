@@ -18,15 +18,21 @@
 </div>
 <div style="">
       <Button type="primary" icon="md-search" @click="search()" style="margin:10px">查询</Button>
-      <Button type="primary" icon="md-refresh" @click="addNew()" style="margin:10px">新增服务</Button>
+      <Button type="primary" icon="md-refresh" @click="addNew()" style="margin:10px"
+                                        v-show="permission.includes('tripartite:service: add')"
+>新增服务</Button>
 
 </div>
 
     <Table highlight-row stripe :columns="columns" :data="confData" style="margin-top: 5px">
        <template slot-scope="{ row, index }" slot="action">
           <div>
-            <Button type="info" size="small" style="margin-right: 5px" @click="edit(index)">编辑</Button>
-            <Button type="error" size="small" style="margin-right: 5px" @click="deleteService(index)">删除</Button>
+            <Button type="info" size="small" style="margin-right: 5px" @click="edit(index)"
+                                                    v-show="permission.includes('tripartite:service: edit')"
+>编辑</Button>
+            <Button type="error" size="small" style="margin-right: 5px" @click="deleteService(index)"
+                                                    v-show="permission.includes('tripartite:service: delete')"
+>删除</Button>
           </div>
         </template>
     </Table>
@@ -76,6 +82,7 @@ import { getServiceTypeInfo, inquireServiceModule } from '@/api/data'
 export default {
   data () {
     return {
+      permission: sessionStorage.getItem('permission'),
       deleteServiceTypeCode: '',
       deleteId: '',
       modalDelete: false,
@@ -165,7 +172,8 @@ export default {
           render: (h, params) => {
             if (params.row.serviceStatus === 0) {
               return h('Button',
-                // { style: { background: '#ccc' } },
+                // { style: { background: '#ccc' } }, v-show="permission.includes('tripartite:service: switch')"
+
                 {
                   on: {
                     click: () => {
@@ -174,14 +182,12 @@ export default {
                         serviceTypeCode: params.row.serviceTypeCode,
                         status: 1
                       }
-                      console.log(info)
                       toggle(info).then(res => {
                       /*  this.$Message.success({
                         content: res.data.message
                       }).catch(error => {
                         this.$Message.error(error)
                       }) */
-                        console.log(res)
                       })
                     }
                   }
@@ -201,7 +207,6 @@ export default {
                       }).catch(error => {
                         this.$Message.error(error)
                       }) */
-                      console.log(res)
                     })
                   }
                 }
@@ -238,7 +243,6 @@ export default {
       this.deleteId = this.confData[index].id
       this.deleteServiceTypeCode = this.confData[index].serviceTypeCode
       this.modalDelete = true
-      console.log(this.confData[index])
     },
     handleSubmitDelete () {
       const info = {
@@ -264,9 +268,7 @@ export default {
       switch (this.showType) {
         case 'add':
           const infoAdd = this.formInline
-          console.log(infoAdd)
           addThirdService(infoAdd).then(res => {
-            console.log(res)
           }).catch(error => {
             this.$Message.error({
               content: error
@@ -278,7 +280,6 @@ export default {
           break
         case 'edit':
           const info = this.formInline
-          console.log(info)
           editThirdService(info).then(res => {
             this.$Message.success({
               content: res.data.message
@@ -305,9 +306,7 @@ export default {
         pageNum: this.pageNum,
         pageSize: this.pageSize
       }
-      console.log(info)
       getThirdService(info).then(res => {
-        console.log(res)
         this.renderPage(res.data.data.records, res.data.data.total)
       })
     },

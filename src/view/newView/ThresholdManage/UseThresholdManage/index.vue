@@ -14,6 +14,7 @@
                 >查询</Button
             >
             <Button type="primary" icon="md-add" @click="addSetting()"
+                v-show="permission.includes('threshold:application:add')"
                 >新增阈值</Button
             >
         </div>
@@ -31,6 +32,8 @@
                         size="small"
                         style="margin-right: 5px"
                         @click="edit(index)"
+                                        v-show="permission.includes('threshold:application:edit')"
+
                         >编辑</Button
                     >
                     <Button
@@ -38,6 +41,8 @@
                         size="small"
                         style="margin-right: 5px"
                         @click="deleteThreshold(index)"
+                                        v-show="permission.includes('threshold:application:delete')"
+
                         >删除</Button
                     >
                 </div>
@@ -172,6 +177,7 @@ export default {
     }
 
     return {
+      permission: sessionStorage.getItem('permission'),
       applicationCodeSelected: [],
       appOption: [],
       modalFusing: false,
@@ -273,15 +279,17 @@ export default {
           key: 'serviceStatus',
           width: 300,
           render: (h, params) => {
-            if (params.row.fused === 1) {
-              return h('Button', {
-                on: {
-                  click: () => {
-                    this.modalFusing = true
-                    this.fusingId = params.row.id
+            if (permission.includes('threshold:application:cut')) {
+              if (params.row.fused === 1) {
+                return h('Button', {
+                  on: {
+                    click: () => {
+                      this.modalFusing = true
+                      this.fusingId = params.row.id
+                    }
                   }
-                }
-              }, '熔断')
+                }, '熔断')
+              }
             }
           }
         }
@@ -315,7 +323,6 @@ export default {
               hoursThreshold: parseInt(this.formInline.hoursThreshold),
               serviceTypeCode: this.formInline.serviceTypeCode
             } */
-            console.log(this.formInline)
             addUseThreShold(this.formInline)
               .then(res => {
                 this.$Message['success']({
@@ -337,7 +344,6 @@ export default {
               serviceTypeCode: this.formInline.serviceTypeCode,
               id: this.editId
             }
-            console.log(info, 'edit')
             editUseThreShold(info)
               .then(res => {
                 this.$Message['success']({
@@ -376,9 +382,7 @@ export default {
       this.modalEdit = true
     },
     handleSubmitFusng () {
-      console.log(this.fusingId)
       cancelUseThreShold(this.fusingId).then(res => {
-        console.log(res)
       })
     },
     cancelFusing () {
@@ -388,7 +392,6 @@ export default {
       this.modalDelete = false
     },
     handleSubmitDelete () {
-      console.log(this.editId)
       deleteUseThreShold(this.editId)
         .then(res => {
           this.$Message['success']({
@@ -412,7 +415,6 @@ export default {
         applicationCode: ''
       }
       getUseThreShold(info).then(res => {
-        console.log(res)
         this.renderPage(res.data.data.records, res.data.data.total)
       })
     }
@@ -427,7 +429,6 @@ export default {
     })
     getAllApp().then(res => {
       this.appOption = res.data.data
-      console.log(res)
     }).catch(error => {
       console.log(error)
     })

@@ -16,6 +16,7 @@
                 >查询</Button
             >
             <Button type="primary" icon="md-add" @click="addSetting()"
+                        v-show="permission.includes('weight:manage: add')"
                 >新增权重</Button
             >
         </div>
@@ -33,6 +34,7 @@
                         size="small"
                         style="margin-right: 5px"
                         @click="edit(index,row)"
+                        v-show="permission.includes('weight:manage: edit')"
                         >编辑</Button
                     >
                     <Button
@@ -40,6 +42,8 @@
                         size="small"
                         style="margin-right: 5px"
                         @click="lookAbnormalWeight(index)"
+                        v-show="permission.includes('weight:manage: look')"
+
                         >查看异常权重</Button
                     >
                     <Button
@@ -47,6 +51,7 @@
                         size="small"
                         style="margin-right: 5px"
                         @click="deleteId(index,row)"
+                        v-show="permission.includes('weight:manage: delete')"
                         >删除</Button
                     >
                 </div>
@@ -213,6 +218,7 @@ export default {
       }
     }
     return {
+      permission: sessionStorage.getItem('permission'),
       modalDelete: false,
       checkList: [],
       checkedData: [],
@@ -356,7 +362,6 @@ export default {
                 on: {
                   click: () => {
                     alert('等待开发')
-                    console.log(params)
                   }
                 }
               }, '权重恢复')
@@ -371,24 +376,17 @@ export default {
   },
   methods: {
     selectedCheckBox (e) {
-      console.log(e)
     },
     selectedTypeClick (e) {
-      console.log(e)
       const info = {
         serviceTypeCode: e
       }
       console.log(info)
       searchManufacture(info).then(res => {
         this.checkList = res.data.data
-        console.log(res)
       })
     },
     selectedModuleClick (e) {
-      const info = {
-        serviceModulCode: e
-      }
-      console.log(info)
       serarchTypeByModule(e).then(res => {
         this.typeOption = res.data.data
       }).catch(err => this.$Message.info(err))
@@ -421,9 +419,7 @@ export default {
       this.modalEdit = true
     },
     handleSubmitAddOrUpdate (index) {
-      console.log(index)
       this.$refs[index].validate(valid => {
-        console.log(valid)
         if (valid) {
           if (this.showType === 'add') {
             const info = {
@@ -434,9 +430,7 @@ export default {
               weightType: this.selectedWeight,
               serviceModuleCode: this.selectedModuleTwo
             }
-            console.log(info)
             addWeight(info).then(res => {
-              console.log(res)
               this.$Message.success({
                 content: res.data.message
               })
@@ -457,9 +451,7 @@ export default {
               weightType: this.selectedWeight,
               serviceModuleCode: this.selectedModuleTwo
             }
-            console.log(info)
             editWeight(info).then(res => {
-              console.log(res)
               this.$Message.success({
                 content: res.data.message
               })
@@ -485,12 +477,10 @@ export default {
       this.modalEdit = false
     },
     edit (index, row) {
-      console.log(index, row)
       this.useSelected = row.applicationCode
       this.inputValue = row.weightRatioValue
       this.selectedWeight = row.weightType
       this.selectedModuleTwo = row.serviceModule
-      console.log(row.weightRatioName)
       this.showType = 'edit'
       this.detailTitle = '编辑模块'
       this.modalEdit = true
@@ -504,11 +494,9 @@ export default {
       this.deleteOject.weightType = row.weightType
       this.deleteOject.serviceTypeCode = row.serviceTypeCode
       this.modalDelete = true
-      console.log(this.deleteOject, index, row)
     },
     handleSubmitDelete () {
       deleteWeight(this.deleteOject).then(res => {
-        console.log(res)
         this.getWeight(1, 1)
         this.modalDelete = false
       }).catch(error => {

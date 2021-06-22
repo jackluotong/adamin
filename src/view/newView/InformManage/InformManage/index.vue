@@ -170,7 +170,6 @@ export default {
               return h('Button', {
                 on: {
                   click: () => {
-                    console.log(params)
                     this.modalEdit = true
                     this.editId = params.row.id
                     this.formInline.contactMobile = params.row.contactMobile
@@ -191,7 +190,6 @@ export default {
   },
   methods: {
     selectedType (e) {
-      console.log(e, this.noticeSelected)
     },
     handleSubmitAddOrUpdate (index) {
       const info = {
@@ -199,7 +197,6 @@ export default {
         contactMail: this.formInline.contactMail,
         contactMobile: this.formInline.contactMobile
       }
-      console.log(info)
       editInfoInform(info).then(res => {
         this.$Message.success({
           content: res.data.message
@@ -249,7 +246,6 @@ export default {
       } else {
         this.isShow = false
       }
-      console.log(this.showTypeId)
     }
   },
   created () {

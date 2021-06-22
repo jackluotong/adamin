@@ -13,18 +13,24 @@
 </template>
 
 <script>
+
 import './user.less'
 import { mapActions } from 'vuex'
 export default {
   name: 'User',
   props: {
-    userAvatar: {
+    /*  userAvatar: {
       type: String,
       default: ''
-    },
+    }, */
     messageUnreadCount: {
       type: Number,
       default: 0
+    }
+  },
+  data () {
+    return {
+      userAvatar: require('@/assets/images/sample.jpg')
     }
   },
   methods: {
@@ -32,11 +38,14 @@ export default {
       'handleLogOut'
     ]),
     logout () {
-      this.handleLogOut().then(() => {
-        this.$router.push({
-          name: 'login'
+      sessionStorage.clear()
+      if (sessionStorage.length === 0) {
+        this.handleLogOut().then(() => {
+          this.$router.push({
+            name: 'login'
+          })
         })
-      })
+      }
     },
     message () {
       this.$router.push({

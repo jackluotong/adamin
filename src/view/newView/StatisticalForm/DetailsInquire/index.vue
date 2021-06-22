@@ -29,7 +29,9 @@
         <div style="">
             <Button type="primary" icon="md-search" @click="search()" style="margin:10px">查询</Button>
                   <Button type="primary" icon="md-refresh" @click="reset()">重置</Button>
-            <Button type="primary" icon="md-refresh" @click="exportExel()" style="margin:10px" :loading="exportLoading">按条件导出</Button>
+            <Button type="primary" icon="md-refresh" @click="exportExel()" style="margin:10px" :loading="exportLoading"
+                                    v-show="permission.includes('statistic:detail:export')"
+>按条件导出</Button>
 
         </div>
 
@@ -53,6 +55,7 @@ import excel from '@/libs/excel'
 export default {
   data () {
     return {
+      permission: sessionStorage.getItem('permission'),
       time: [],
       selectedDate: '',
       applicationName: '',
@@ -171,7 +174,6 @@ export default {
   },
   methods: {
     selectTime (e) {
-      console.log(e, this.selectedDate[0])
       this.time = e
     },
     search () {
@@ -187,7 +189,6 @@ export default {
          startTime: this.time === null ? '' : this.time[0],
          endTime: this.time === null ? '' : this.time[1]
        }
-      console.log(info)
       getInfoDetails(info).then(res => {
         this.renderPage(res.data.data.records, res.data.data.total)
       })
@@ -209,8 +210,7 @@ export default {
       } else {
         this.$Message('表格为空')
       }
-      let newArr = this.columns.map((item, index) => { return Object.assign({}, { '': item.title }) })
-      console.log(newArr, titleArr)
+      //   let newArr = this.columns.map((item, index) => { return Object.assign({}, { '': item.title }) })
       if (this.confData.length) {
         this.exportLoading = true
         const params = {
@@ -236,7 +236,6 @@ export default {
       }
       getInfoDetails(info).then(res => {
         this.renderPage(res.data.data.records, res.data.data.total)
-        console.log(res)
       }).catch(error => {
         this.$Message.error({
           content: error
@@ -252,7 +251,6 @@ export default {
     const info = {}
     this.getInfo()
     getManufacture(info).then(res => {
-      console.log(res, 'manufacture')
     })
     getServiceTypeInfo(info).then(res => {
       this.serviceTypeOption = res.data.data.records

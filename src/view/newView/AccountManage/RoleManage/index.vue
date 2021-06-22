@@ -37,13 +37,19 @@
       <span style="padding:10px">角色code</span>
       <Input v-model.trim="roleCode" />
       <Button type="primary" icon="md-search" @click="search()" style="margin:0 10px 0 20px">查询</Button>
-      <Button type="primary" icon="md-add" @click="addSetting()">新增</Button>
+      <Button type="primary" icon="md-add" @click="addSetting()"
+                  v-show="permission.includes('account:role:add')"
+>新增</Button>
     </div>
     <Table highlight-row stripe :columns="columns" :data="confData" style="margin-top: 5px">
        <template slot-scope="{ row, index }" slot="action">
           <div>
-            <Button type="primary" size="small" style="margin-right: 5px" @click="edit(index)">编辑</Button>
-            <Button type="error" size="small" style="margin-right: 5px" @click="del(index)">删除</Button>
+            <Button type="primary" size="small" style="margin-right: 5px" @click="edit(index)"
+                              v-show="permission.includes('account:role:edit')"
+>编辑</Button>
+            <Button type="error" size="small" style="margin-right: 5px" @click="del(index)"
+                              v-show="permission.includes('account:role:delete')"
+>删除</Button>
           </div>
         </template>
      </Table>
@@ -117,6 +123,7 @@ export default {
       }
     }
     return {
+      permission: sessionStorage.getItem('permission'),
       saveRoleCode: '',
       readOnly: false,
       saveRoleId: [],
@@ -188,7 +195,6 @@ export default {
       })
     },
     selected (e) {
-      console.log(e, this.selectedValue)
     },
     search () {
       const data = {
@@ -201,7 +207,6 @@ export default {
         this.$nextTick(() => {
           this.renderPage(data)
         })
-        console.log(res)
       }).catch(err => console.log(err))
     },
     addSetting () {
@@ -210,7 +215,6 @@ export default {
       this.modalAddOrUpdate = true
     },
     handleSubmitAddOrUpdate (index) {
-      console.log(this.saveRoleId, 'saveRoleId')
       this.$refs[index].validate((valid) => {
         if (valid) {
           if (this.showType === 'edit') {
@@ -264,7 +268,6 @@ export default {
     del (index) {
       this.modalDelete = true
       this.saveRoleCode = this.confData[index].roleCode
-    //   console.log(this.saveRoleCode)
     },
     cancelDelete () { // 取消删除
       this.modalDelete = false
@@ -305,7 +308,6 @@ export default {
   mounted () {
     getAuthTree().then(res => {
       this.treeData = res.data.data
-      console.log(res.data.data, 'authTree')
     })
   }
 }

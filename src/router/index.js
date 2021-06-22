@@ -9,7 +9,6 @@ import {
   setTitle
 } from '@/libs/util'
 import config from '@/config'
-import { Message } from '_element-ui@2.15.2@element-ui'
 const {
   homeName
 } = config
@@ -55,7 +54,10 @@ router.beforeEach((to, from, next) => {
   } else if (token && to.name !== LOGIN_PAGE_NAME) {
     next()
   } else {
-    Message.info('不合适哦....')
+    next({
+      replace: true,
+      name: 'error_401'
+    })
   }
 })
 

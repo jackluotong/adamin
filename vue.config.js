@@ -17,7 +17,7 @@ const resolve = dir => {
 // 例如：https://www.foobar.com/my-app/
 // 需要将它改为'/my-app/'
 // iview-admin线上演示打包路径： https://file.iviewui.com/admin-dist/
-const BASE_URL = process.env.NODE_ENV === 'production' ? '/dev/giq/' : ''
+const BASE_URL = process.env.NODE_ENV === 'production' ? '/dev/giq/tsam' : ''
 
 module.exports = {
   // Project deployment base
@@ -50,8 +50,8 @@ module.exports = {
   */
   devServer: {
     proxy: {
-      '/dcenter': { // https://wxcs.internal.manulife-sinochem.com/dev/giq
-        target: ' http://192.168.1.214:7799', // http://maxwell.cn.utools.club  http://yang.cn1.utools.club http://192.168.1.214:7799
+      '/dcenter': { // https://wxcs.internal.manulife-sinochem.com/dev/giq/
+        target: 'http://192.168.3.243:7799', // http://maxwell.cn.utools.club  http://yang.cn1.utools.club http://192.168.1.214:7799
         changeOrigin: true, // 改变源
         pathRewrite: { // '^/bridge': '/bridge' // 路径重写
         }
