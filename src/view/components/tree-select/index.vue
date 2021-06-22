@@ -217,7 +217,6 @@ export default {
     handleSubmitAddOrUpdate (index) { // 点击提交新增按钮
       console.log(index)
       this.$refs[index].validate((valid) => {
-        console.log(valid)
         if (valid) {
           if (this.showType === 'add') {
             const date = {

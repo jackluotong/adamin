@@ -79,7 +79,6 @@ export default {
     messageTrashCount: state => state.messageTrashList.length
   },
   actions: {
-    // 登录
     handleLogin ({ commit }, { userName, password }) {
       console.log(sessionStorage.getItem('permission'))
       userName = userName.trim()
