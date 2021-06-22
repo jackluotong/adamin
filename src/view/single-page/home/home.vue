@@ -28,6 +28,8 @@ export default {
     }
   },
   mounted () {
+    let all = sessionStorage.getItem('permission').split(',')
+    console.log(all.length)
   }
 }
 </script>

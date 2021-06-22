@@ -98,7 +98,6 @@ export default {
           commit('setAccess', userAccess)
           commit('setToken', userInfo.token)
           commit('setHasGetInfo', true)
-          console.log(sessionStorage.getItem('permission').split(','))
           resolve()
         }).catch(err => {
           reject(err)
