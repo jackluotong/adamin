@@ -235,7 +235,9 @@ export default {
     search () {
       const data = {
         roleName: this.roleName,
-        roleCode: this.roleCode
+        roleCode: this.roleCode,
+        pageSize: this.pageSize,
+        currentPage: 1
       }
       getInfoRole(data).then(res => {
         const data = res.data.data

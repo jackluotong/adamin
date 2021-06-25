@@ -24,7 +24,7 @@
 
 </div>
     <Table highlight-row stripe :columns="columns" :data="confData" style="margin-top: 5px">
-       <template slot-scope="{ row, index }" slot="action">
+       <template slot-scope="{ index }" slot="action">
           <div>
             <Button type="info"
             size="small"
@@ -35,7 +35,9 @@
           </div>
         </template>
     </Table>
-    <Page :total='total' :page-size='pageSize' :show-total="true" show-sizer style="text-align: center;margin-top: 5px"/>
+    <Page :total='total' :page-size='pageSize' :show-total="true" show-sizer style="text-align: center;margin-top: 5px"
+            @on-change='changePage'
+            @on-page-size-change='onpagesizechange'/>
     <Modal v-model="modalCheck" width="30%" height="40%"  :mask-closable="false" :closable="true" title="详情" >
       <Form :model="formInline"  inline>
           <div v-if="isShow">
@@ -98,7 +100,7 @@ export default {
       showType: '',
       total: 0,
       pageNum: 1,
-      pageSize: 30,
+      pageSize: 10,
       manufacturerName: '',
       serviceModule: '',
       serviceType: '',
@@ -196,6 +198,25 @@ export default {
     }
   },
   methods: {
+    onpagesizechange (e) {
+      const info = {
+        pageSize: e,
+        currentPage: this.pageNum
+
+      }
+      getServiceThreShold(info).then(res => {
+        this.renderPage(res.data.data.records, res.data.data.total)
+      })
+    },
+    changePage (e) {
+      const info = {
+        pageSize: this.pageSize,
+        currentPage: e
+      }
+      getServiceThreShold(info).then(res => {
+        this.renderPage(res.data.data.records, res.data.data.total)
+      })
+    },
     search () {
       this.getServiceThreShold(this.manufacturerName, this.serviceType, this.serviceModule)
     },
@@ -253,6 +274,7 @@ export default {
         case 'add':
           addServiceThreShold(this.formInline).then(res => {
             this.getServiceThreShold()
+            this.modalCheck = false
           }).catch(error => {
             this.$Message.error({
               content: error
@@ -260,7 +282,6 @@ export default {
             this.getServiceThreShold()
             this.modalCheck = false
           })
-          this.modalCheck = false
           break
         case 'edit':
           editServiceThreShold(infoEdit).then(res => {

@@ -70,7 +70,7 @@
                 <Checkbox
                     v-for="(item, index) in checkList"
                     :key="index"
-                    :label="item"
+                    :label="item.roleCode"
                     size="large"
                     ref="checkBox"
                     >{{ item.roleName }}</Checkbox
@@ -167,10 +167,11 @@ export default {
       const info = {
         pageSize: e,
         currentPage: this.pageNum
-
       }
       getInfoUser(info).then(res => {
-        this.renderPage(res.data.data.records, res.data.data.total)
+        const data = res.data.data.records
+        const total = res.data.data.total
+        this.renderPage(this.translate(data), total)
       })
     },
     changePage (e) {
@@ -179,7 +180,9 @@ export default {
         currentPage: e
       }
       getInfoUser(info).then(res => {
-        this.renderPage(res.data.data.records, res.data.data.total)
+        const data = res.data.data.records
+        const total = res.data.data.total
+        this.renderPage(this.translate(data), total)
       })
     },
     reset () {
@@ -190,6 +193,7 @@ export default {
       this.getInfoUser()
     },
     selected (data) {
+      console.log(data, this.checkData)
       this.selectOptions = []
       for (let i = 0; i < data.length; i++) {
         this.selectOptions.push(data[i].roleCode)
@@ -200,7 +204,9 @@ export default {
     },
     search () {
       const info = {
-        'userCode': this.userCode
+        userCode: this.userCode,
+        pageSize: this.pageSize,
+        currentPage: this.pageNum
       }
       getInfoUser(info).then(res => {
         const data = res.data.data.records
@@ -213,8 +219,9 @@ export default {
     handleSubmitAddOrUpdate (index) {
       const info = {
         'userCode': this.formInline.userCode,
-        'roles': this.selectOptions
+        'roles': this.checkData
       }
+      console.log(info)
       roleConnect(info).then(res => {
         this.modalAddOrUpdate = false
         this.getInfoUser()
@@ -250,7 +257,6 @@ export default {
           roleName
         })
       })
-      console.log(array)
       return array
     },
     getInfoUser () {
@@ -262,7 +268,6 @@ export default {
       getInfoUser(info).then(res => {
         const data = res.data.data.records
         const total = res.data.data.total
-        this.translate(data)
         this.confData = this.translate(data)
         this.total = total
       }).catch(err => { console.log(err) })

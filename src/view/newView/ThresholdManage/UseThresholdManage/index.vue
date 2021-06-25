@@ -83,6 +83,8 @@
             :show-total="true"
             show-sizer
             style="text-align: center;margin-top: 5px"
+            @on-change='changePage'
+            @on-page-size-change='onpagesizechange'
         />
 
         <Modal
@@ -326,6 +328,25 @@ export default {
     }
   },
   methods: {
+    onpagesizechange (e) {
+      const info = {
+        pageSize: e,
+        currentPage: this.pageNum
+
+      }
+      getUseThreShold(info).then(res => {
+        this.renderPage(res.data.data.records, res.data.data.total)
+      })
+    },
+    changePage (e) {
+      const info = {
+        pageSize: this.pageSize,
+        currentPage: e
+      }
+      getUseThreShold(info).then(res => {
+        this.renderPage(res.data.data.records, res.data.data.total)
+      })
+    },
     deleteThreshold (index) {
       this.modalDelete = true
       this.editId = this.confData[index].id
@@ -352,8 +373,10 @@ export default {
               hoursThreshold: parseInt(this.formInline.hoursThreshold),
               serviceTypeCode: this.formInline.serviceTypeCode
             } */
+            console.log(this.formInline)
             addUseThreShold(this.formInline)
               .then(res => {
+                console.log(res)
                 this.$Message['success']({
                   background: true,
                   content: res.data.message

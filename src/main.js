@@ -54,7 +54,6 @@ Vue.prototype.$config = config
  */
 importDirective(Vue)
 Vue.directive('clickOutside', clickOutside)
-
 /* eslint-disable no-new */
 new Vue({
   el: '#app',

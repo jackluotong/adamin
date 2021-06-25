@@ -63,6 +63,8 @@
             :show-total="true"
             show-sizer
             style="text-align: center;margin-top: 5px"
+            @on-change='changePage'
+            @on-page-size-change='onpagesizechange'
         />
 
         <Modal
@@ -235,7 +237,7 @@ export default {
       showWeightAbnormal: false,
       total: 0,
       pageNum: 1,
-      pageSize: 30,
+      pageSize: 10,
       useName: '',
       useCalled: '',
       contactPhone: '',
@@ -375,6 +377,25 @@ export default {
     }
   },
   methods: {
+    onpagesizechange (e) {
+      const info = {
+        pageSize: e,
+        currentPage: this.pageNum
+
+      }
+      getWeight(info).then(res => {
+        this.renderPage(res.data.data.records, res.data.data.total, 1)
+      })
+    },
+    changePage (e) {
+      const info = {
+        pageSize: this.pageSize,
+        currentPage: e
+      }
+      getWeight(info).then(res => {
+        this.renderPage(res.data.data.records, res.data.data.total, 1)
+      })
+    },
     selectedCheckBox (e) {
     },
     selectedTypeClick (e) {

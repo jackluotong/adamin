@@ -74,6 +74,8 @@
             :show-total="true"
             show-sizer
             style="text-align: center;margin-top: 5px"
+            @on-change='changePage'
+            @on-page-size-change='onpagesizechange'
         />
         <Modal
             v-model.trim="modalAddOrUpdate"
@@ -150,7 +152,7 @@ export default {
       deleteId: '',
       total: 0,
       pageNum: 1,
-      pageSize: 30,
+      pageSize: 10,
       manufacturerName: '',
       modalAddOrUpdate: false,
       modalAddOrUpdateType: false,
@@ -211,6 +213,26 @@ export default {
     }
   },
   methods: {
+    onpagesizechange (e) {
+      const info = {
+        pageSize: e,
+        currentPage: this.pageNum
+      }
+      getManufacture(info).then(res => {
+        this.confData = res.data.data.records
+        this.total = res.data.data.total
+      })
+    },
+    changePage (e) {
+      const info = {
+        pageSize: this.pageSize,
+        currentPage: e
+      }
+      getManufacture(info).then(res => {
+        this.confData = res.data.data.records
+        this.total = res.data.data.total
+      })
+    },
     resetClick () {
       this.manufacturerName = null
     },

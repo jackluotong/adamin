@@ -75,7 +75,7 @@
        </div>
           <FormItem label="服务类型" prop="serviceType" style="width:270px;">
         <Select style="width:200px" @on-change='selectedTypeAdd' :label-in-value="true" clearable>
-            <Option v-for="(item,index) in allServiceType"
+            <Option v-for="(item,index) in allType"
             :key="index"
             :value="item.serviceTypeCode"
             >{{item.serviceType}}</Option>
@@ -87,7 +87,7 @@
       </Form>
       <div slot="footer">
         <Button type="primary" ghost size="large" @click="cancelAddNewService('formInline')">返回</Button>
-        <Button type="primary" size="large" @click="addNewServiceTypeClick()">新增类型</Button>
+        <Button type="primary" size="large" @click="addNewServiceTypeClick()">保存</Button>
       </div>
      </Modal>
 <!-- 编辑 -->
@@ -168,6 +168,7 @@ export default {
       }
     }
     return {
+      allType: '',
       permission: sessionStorage.getItem('permission'),
       selectedModuleAdd: '',
       serviceTypeAdd: '',
@@ -251,9 +252,8 @@ export default {
       const info = {
         pageSize: e,
         currentPage: this.pageNum
-
       }
-      getInfoUser(info).then(res => {
+      getServiceTypeInfo(info).then(res => {
         this.renderPage(res.data.data.records, res.data.data.total)
       })
     },
@@ -262,14 +262,14 @@ export default {
         pageSize: this.pageSize,
         currentPage: e
       }
-      getInfoUser(info).then(res => {
+      getServiceTypeInfo(info).then(res => {
         this.renderPage(res.data.data.records, res.data.data.total)
       })
     },
     selectedModuleAddClick (e) {
-      serarchTypeByModule(e).then(res => {
+      /*  serarchTypeByModule(e).then(res => {
         this.allServiceType = res.data.data
-      }).catch(err => this.$Message.info(err))
+      }).catch(err => this.$Message.info(err)) */
     },
     selectModule (e) {
       serarchTypeByModule(e).then(res => {
@@ -284,11 +284,12 @@ export default {
       this.addServiceType.serviceTypeCode = e.value
       this.addServiceType.serviceType = e.label
     },
-
     search () {
       const info = {
-        'serviceModule': this.serviceModule,
-        'serviceType': this.serviceType
+        serviceModule: this.serviceModule,
+        serviceType: this.serviceType,
+        currentPage: this.pageNum,
+        pageSize: this.pageSize
       }
       getServiceTypeInfo(info).then(res => {
         this.renderPage(res.data.data.records, res.data.data.total)
@@ -467,6 +468,7 @@ export default {
         currentPage: this.pageNum
       }
       getServiceTypeInfo(info).then(res => {
+        this.allType = res.data.data.records
         this.renderPage(res.data.data.records, res.data.data.total)
       }).catch(err => this.$Message.info(err))
     },

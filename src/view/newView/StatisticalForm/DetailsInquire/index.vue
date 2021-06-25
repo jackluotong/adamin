@@ -7,7 +7,7 @@
             <Input v-model.trim="applicationCode" />
             <span style="padding:10px 10px 10px 10px ">厂商名称</span>
             <Select label="" v-model.trim="manufactureSelected" style="width:150px; margin-right:20px;" >
-                <Option v-for="item of manufacturerOption" :key="item.value" :value="item.code">{{item.label}}</Option>
+                <Option v-for="(item,id) of manufacturerOption" :key="id" :value="item.manufacturerCode">{{item.manufacturerName}}</Option>
             </Select>
             <span style="padding:10px 10px 10px 10px ">服务模块</span>
             <Select label="" v-model.trim="serviceModuleSelected" style="width:150px; margin-right:20px;">
@@ -36,13 +36,15 @@
         </div>
 
         <Table highlight-row="highlight-row" stripe="stripe" :columns="columns" :data="confData" style="margin-top: 5px" >
-            <template slot-scope="{ row, index }" slot="action">
+            <template slot-scope="{index }" slot="action">
                 <div>
                     <Button type="info" size="small" style="margin-right: 5px" @click="edit(index)">编辑</Button>
                 </div>
             </template>
         </Table>
-        <Page :total='total' :page-size='pageSize' :show-total="true" show-sizer="show-sizer" style="text-align: center;margin-top: 5px"/>
+        <Page :total='total' :page-size='pageSize' :show-total="true" show-sizer="show-sizer" style="text-align: center;margin-top: 5px"
+         @on-change='changePage'
+         @on-page-size-change='onpagesizechange'/>
 
     </div>
 </template>
@@ -64,7 +66,7 @@ export default {
       exportLoading: false,
       total: 0,
       pageNum: 1,
-      pageSize: 30,
+      pageSize: 10,
       manufactureSelected: '',
       serviceModuleSelected: '',
       serviceTypeSelected: ' ',
@@ -173,6 +175,26 @@ export default {
     }
   },
   methods: {
+    onpagesizechange (e) {
+      const info = {
+        pageSize: e,
+        currentPage: this.pageNum
+      }
+      getThirdService(info).then(res => {
+        this.confData = res.data.data.records
+        this.total = res.data.data.total
+      })
+    },
+    changePage (e) {
+      const info = {
+        pageSize: this.pageSize,
+        currentPage: e
+      }
+      getThirdService(info).then(res => {
+        this.confData = res.data.data.records
+        this.total = res.data.data.total
+      })
+    },
     selectTime (e) {
       this.time = e
     },
@@ -235,6 +257,7 @@ export default {
         pageSize: this.pageSize
       }
       getInfoDetails(info).then(res => {
+        console.log(res)
         this.renderPage(res.data.data.records, res.data.data.total)
       }).catch(error => {
         this.$Message.error({
@@ -248,9 +271,14 @@ export default {
     }
   },
   created () {
-    const info = {}
+    const info = {
+      currentPage: 1,
+      pageSize: 10000
+    }
     this.getInfo()
     getManufacture(info).then(res => {
+      this.manufacturerOption = res.data.data.records
+      console.log(res)
     })
     getServiceTypeInfo(info).then(res => {
       this.serviceTypeOption = res.data.data.records

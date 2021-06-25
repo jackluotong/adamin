@@ -42,7 +42,7 @@
     <div class="content-button" >
       <Button type="primary" icon="md-add" @click="addSetting()"
             v-show="permission.includes('account:auth:addFather')"
->添加一级菜单</Button>
+                >添加一级菜单</Button>
     </div>
    <div class="block">
             <el-tree
@@ -196,8 +196,8 @@ export default {
     const AuthLevel = (rule, value, callback) => {
       if (!value) {
         callback(new Error('请输入权限等级使用数字（1,2,3）'))
-      } else if (value !== 1 && value !== 2 && value !== 3) {
-        console.log(this.formInline.AuthLevel)
+      } else if (value !== '1' && value !== '2' && value !== '3') {
+        console.log(value)
         callback(new Error('请输入权限数字（1,2,3）'))
       } else {
         callback()
@@ -293,6 +293,7 @@ export default {
       return treeData
     },
     append (data) {
+      this.claer(this.formInline)
       this.showType = 'add son'
       if (data.authLevel === 3) {
         this.$Message.error('最多可以添加三级！')
@@ -316,7 +317,13 @@ export default {
       this.showType = 'edit'
       this.detailTitle = '编辑信息'
     },
+    claer (obj) {
+      for (let key in obj) {
+        delete obj[key]
+      }
+    },
     addSetting () {
+      this.claer(this.formInline)
       this.showType = 'add'
       this.detailTitle = '新增全局配置信息'
       this.modalAddOrUpdate = true

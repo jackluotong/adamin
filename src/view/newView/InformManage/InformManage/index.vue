@@ -59,6 +59,8 @@
             :show-total="true"
             show-sizer
             style="text-align: center;margin-top: 5px"
+            @on-change='changePage'
+            @on-page-size-change='onpagesizechange'
         />
 
         <Modal
@@ -220,6 +222,25 @@ export default {
     }
   },
   methods: {
+    onpagesizechange (e) {
+      const info = {
+        pageSize: e,
+        currentPage: this.pageNum
+
+      }
+      getInfoInform(info).then(res => {
+        this.renderPage(res.data.data.records, res.data.data.total)
+      })
+    },
+    changePage (e) {
+      const info = {
+        pageSize: this.pageSize,
+        currentPage: e
+      }
+      getInfoInform(info).then(res => {
+        this.renderPage(res.data.data.records, res.data.data.total)
+      })
+    },
     selectedType (e) {
     },
     handleSubmitAddOrUpdate (index) {

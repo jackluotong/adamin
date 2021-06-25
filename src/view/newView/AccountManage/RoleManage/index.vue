@@ -38,19 +38,19 @@
       <Input v-model.trim="roleCode" />
       <Button type="primary" icon="md-search" @click="search()" style="margin:0 10px 0 20px">查询</Button>
       <Button type="primary" icon="md-add" @click="addSetting()"
-                  v-show="permission.includes('account:role:add')"
->新增</Button>
-                  <Button type="primary" icon="md-refresh" @click="reset()">重置</Button>
+                v-show="permission.includes('account:role:add')"
+            >新增</Button>
+            <Button type="primary" icon="md-refresh" @click="reset()">重置</Button>
     </div>
     <Table highlight-row stripe :columns="columns" :data="confData" style="margin-top: 5px">
        <template slot-scope="{ row, index }" slot="action">
           <div>
             <Button type="primary" size="small" style="margin-right: 5px" @click="edit(index)"
                 v-show="permission.includes('account:role:edit')"
->编辑</Button>
+            >编辑</Button>
             <Button type="error" size="small" style="margin-right: 5px" @click="del(index)"
                 v-show="permission.includes('account:role:delete')"
->删除</Button>
+            >删除</Button>
           </div>
         </template>
      </Table>

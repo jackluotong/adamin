@@ -58,7 +58,9 @@
           </div>
         </template>
     </Table>
-    <Page :total='total' :page-size='pageSize' :show-total="true" show-sizer style="text-align: center;margin-top: 5px"/>
+    <Page :total='total' :page-size='pageSize' :show-total="true" show-sizer style="text-align: center;margin-top: 5px"
+            @on-change='changePage'
+            @on-page-size-change='onpagesizechange'/>
     <Modal v-model="modalCheck" width="30%" height="40%"  :mask-closable="false" :closable="true" title="详情" >
       <Form :model="formInline"  inline>
         <FormItem  label="厂商名称" style="width:300px;" >
@@ -111,7 +113,7 @@ export default {
       showType: '',
       total: 0,
       pageNum: 1,
-      pageSize: 30,
+      pageSize: 10,
       manufacturerName: '',
       serviceModule: '',
       serviceType: '',
@@ -242,6 +244,26 @@ export default {
     }
   },
   methods: {
+    onpagesizechange (e) {
+      const info = {
+        pageSize: e,
+        currentPage: this.pageNum
+      }
+      getThirdService(info).then(res => {
+        this.confData = res.data.data.records
+        this.total = res.data.data.total
+      })
+    },
+    changePage (e) {
+      const info = {
+        pageSize: this.pageSize,
+        currentPage: e
+      }
+      getThirdService(info).then(res => {
+        this.confData = res.data.data.records
+        this.total = res.data.data.total
+      })
+    },
     selectedModuleClickShow (e) {
       serarchTypeByModule(e).then(res => {
         this.typeOption = res.data.data
@@ -339,7 +361,6 @@ export default {
         pageSize: this.pageSize
       }
       getThirdService(info).then(res => {
-        console.log(res)
         this.renderPage(res.data.data.records, res.data.data.total)
       })
     },

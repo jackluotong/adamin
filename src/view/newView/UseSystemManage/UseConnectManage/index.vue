@@ -12,7 +12,7 @@
                 :key="index"
                 :value="item.serviceModuleCode">{{ item.serviceModule}}</Option>
             </Select>
-                              <Button type="primary" icon="md-refresh" @click="reset()">重置</Button>
+            <Button type="primary" icon="md-refresh" @click="reset()">重置</Button>
 
             <Button
                 type="primary"
@@ -55,6 +55,8 @@
             :show-total="true"
             show-sizer
             style="text-align: center;margin-top: 5px"
+            @on-change='changePage'
+            @on-page-size-change='onpagesizechange'
         />
 
         <Modal
@@ -180,13 +182,13 @@ export default {
         callback()
       }
     } */
-    const validateConfValue = (rule, value, callback) => {
+    /* const validateConfValue = (rule, value, callback) => {
       if (!value) {
         callback(new Error('请输入参数键名'))
       } else {
         callback()
       }
-    }
+    } */
 
     return {
       permission: sessionStorage.getItem('permission'),
@@ -199,7 +201,7 @@ export default {
       appData: [],
       total: 0,
       pageNum: 1,
-      pageSize: 30,
+      pageSize: 10,
       applicationName: '',
       applicationCode: '',
       contactPhone: '',
@@ -217,8 +219,8 @@ export default {
       ruleInline: {
         serviceType: [
           {
-            required: true,
-            validator: validateConfValue,
+            // required: true,
+            // validator: validateConfValue,
             trigger: 'blur'
           }
         ]
@@ -253,6 +255,25 @@ export default {
     }
   },
   methods: {
+    onpagesizechange (e) {
+      const info = {
+        pageSize: e,
+        currentPage: this.pageNum
+
+      }
+      getInfo(info).then(res => {
+        this.renderPage(res.data.data.records, res.data.data.total)
+      })
+    },
+    changePage (e) {
+      const info = {
+        pageSize: this.pageSize,
+        currentPage: e
+      }
+      getInfo(info).then(res => {
+        this.renderPage(res.data.data.records, res.data.data.total)
+      })
+    },
     selectedAppNameClick (e) { },
     selectedModuleClick (e) {
       serarchTypeByModule(e).then(res => {
