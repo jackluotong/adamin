@@ -3,7 +3,6 @@ import Cookies from 'js-cookie'
 import config from '@/config'
 import { forEach, hasOneOf, objEqual } from '@/libs/tools'
 const { title, cookieExpires } = config
-
 export const TOKEN_KEY = 'token'
 
 export const setToken = (token) => {
@@ -15,9 +14,7 @@ export const getToken = () => {
   if (token) return token
   else return false
 }
-/*
-    set get all permission
-*/
+
 export const setPermission = (permission) => {
   sessionStorage.setItem('permission', permission)
 }
@@ -51,23 +48,28 @@ const showThisMenuEle = (item) => {
  */
 export const getMenuByRouter = (list) => {
   let res = []
-  let permission = sessionStorage.getItem('permission').split(',')
-  forEach(list, item => {
-    if (permission.includes(item.meta.access)) {
-      if (!item.meta || (item.meta && !item.meta.hideInMenu)) {
-        let obj = {
-          icon: (item.meta && item.meta.icon) || '',
-          name: item.name,
-          meta: item.meta
+  if (sessionStorage.getItem('permission') !== null) {
+    let permission = sessionStorage.getItem('permission').split(',')
+    forEach(list, item => {
+      if (permission.includes(item.meta.access)) {
+        if (!item.meta || (item.meta && !item.meta.hideInMenu)) {
+          let obj = {
+            icon: (item.meta && item.meta.icon) || '',
+            name: item.name,
+            meta: item.meta
+          }
+          if ((hasChild(item) || (item.meta && item.meta.showAlways)) && showThisMenuEle(item)) {
+            obj.children = getMenuByRouter(item.children)
+          }
+          if (item.meta && item.meta.href) obj.href = item.meta.href
+          if (showThisMenuEle(item)) res.push(obj)
         }
-        if ((hasChild(item) || (item.meta && item.meta.showAlways)) && showThisMenuEle(item)) {
-          obj.children = getMenuByRouter(item.children)
-        }
-        if (item.meta && item.meta.href) obj.href = item.meta.href
-        if (showThisMenuEle(item)) res.push(obj)
       }
-    }
-  })
+    })
+  } else if (sessionStorage.getItem('permission') === null) {
+    alert('无权限')
+  }
+
   return res
 }
 

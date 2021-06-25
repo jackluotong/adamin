@@ -30,7 +30,7 @@
 
 <template>
   <div class="user-content">
-    <h1 style="margin:10px 10px 10px 10px">账户管理-角色管理</h1>
+    <h1 style="margin:10px 10px 10px 10px">服务类型管理-服务模块管理</h1>
     <div class="content-button" >
       <span style="padding:10px" >角色名称</span>
       <Input v-model.trim="roleName" @on-enter="enter"/>
@@ -43,17 +43,18 @@
                   <Button type="primary" icon="md-refresh" @click="reset()">重置</Button>
     </div>
     <Table highlight-row stripe :columns="columns" :data="confData" style="margin-top: 5px">
-       <template slot-scope="{ row, index }" slot="action">
+       <template slot-scope="{index }" slot="action">
           <div>
             <Button type="primary" size="small" style="margin-right: 5px" @click="edit(index)"
-                v-show="permission.includes('account:role:edit')"
+                              v-show="permission.includes('account:role:edit')"
 >编辑</Button>
             <Button type="error" size="small" style="margin-right: 5px" @click="del(index)"
-                v-show="permission.includes('account:role:delete')"
+                              v-show="permission.includes('account:role:delete')"
 >删除</Button>
           </div>
         </template>
      </Table>
+     <Page :total='total' :page-size='pageSize' :show-total="true" show-sizer style="text-align: center;margin-top: 5px"/>
      <Modal
      v-model.trim="modalAddOrUpdate"
      width="600"
@@ -70,8 +71,7 @@
         </FormItem>
         <FormItem>
         <div style="width:280px">
-      <!--   <a-tree-select
-            showSearch
+        <a-tree-select
             :defaultValue='defaultSelected'
             :allowClear='true'
             v-model="selectedValue"
@@ -82,20 +82,20 @@
             placeholder='请选择'
             :appendToBody="true"
             @select='selected'
-        /> -->
-         <el-tree
-            icon-class='el-icon-caret-right'
+        />
+      <!--    <el-tree
             :data="treeData"
             show-checkbox
             node-key="id"
-            :default-checked-keys="this.checkedData"
+            :default-expanded-keys="[2, 3]"
+            :default-checked-keys="[5]"
             :props="defaultProps"
             highlight-current
             ref="tree"
-            empty-text='暂无权限列表'
-            @check-change="getCheckedKeys"
+            @check-change="handleNodeClick"
+            @node-click="handleNodeClickNode"
             >
-            </el-tree>
+            </el-tree> -->
          </div>
         </FormItem>
       </Form>
@@ -113,6 +113,7 @@
           <Button type="primary" @click="handleSubmitDelete" size="large" >确定</Button>
       </div>
     </Modal>
+
   </div>
 </template>
 
@@ -144,7 +145,6 @@ export default {
       }
     }
     return {
-      checkedData: [],
       expandedKeys: '',
       checkedKeys: '',
       defaultSelected: '',
@@ -199,7 +199,7 @@ export default {
       defaultProps: {
         children: 'children',
         label: 'authName',
-        key: 'authCode',
+        id: 'id',
         value: 'authCode'
       },
       replaceFields: {
@@ -212,9 +212,6 @@ export default {
     }
   },
   methods: {
-    getCheckedKeys (e) {
-      console.log(e)
-    },
     reset () {
       this.roleName = null
       this.roleCode = null
@@ -252,17 +249,14 @@ export default {
       this.modalAddOrUpdate = true
     },
     handleSubmitAddOrUpdate (index) {
-      console.log(this.$refs.tree.getCheckedNodes())
       this.$refs[index].validate((valid) => {
         if (valid) {
           if (this.showType === 'edit') {
             const info = {
-              roleName: this.formInline.roleName,
-              roleCode: this.formInline.roleCode,
-              roleId: this.saveRoleId,
-              auths: this.$refs.tree.getCheckedNodes().map((item) => {
-                return item.authCode
-              })
+              'roleName': this.formInline.roleName,
+              'roleCode': this.formInline.roleCode,
+              'roleId': this.saveRoleId,
+              'authCode': this.selectedValue
             }
             console.log(info)
             editRole(info).then(res => {
@@ -276,10 +270,8 @@ export default {
             }).catch(err => console.log(err))
           } else if (this.showType === 'add') {
             const info = {
-              roleName: this.formInline.roleName,
-              auths: this.$refs.tree.getCheckedNodes().map((item) => {
-                return item.authCode
-              })
+              'roleName': this.formInline.roleName,
+              'authCode': this.selectedValue
             }
             console.log(info)
             editRole(info).then(res => {
@@ -300,11 +292,6 @@ export default {
     },
     edit (index) {
       this.saveRoleId = this.confData[index].roleId
-      //   this.checkedData=this.confData[index]
-      console.log(this.confData[index])
-      this.checkedData = this.confData[index].auths.map((item) => {
-        return item
-      })
       this.showType = 'edit'
       this.id = this.confData[index].id
       this.formInline.roleName = this.confData[index].roleName
@@ -345,6 +332,7 @@ export default {
       pageSize: this.pageSize
     }
     getInfoRole(data).then(res => {
+      console.log(res)
       const data = res.data.data
       const total = res.data.data.length
       this.renderPage(data, total)

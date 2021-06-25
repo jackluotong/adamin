@@ -9,31 +9,34 @@
       <Button type="primary" icon="md-search" @click="search()" style="margin:0 10px 0 20px">查询</Button>
       <Button type="primary" icon="md-refresh" @click="reset()">重置</Button>
       <Button type="primary" icon="md-add" @click="addSetting()"
-      v-show="permission.includes('serviceType:manage: addModule')"
+      v-show="permission.includes('serviceType:manage:addModule')"
       >新增模块</Button>
       <Button type="primary" icon="md-add" @click="addSettingType()"
-            v-show="permission.includes('serviceType:manage: addType')"
+            v-show="permission.includes('serviceType:manage:addType')"
 >新增服务类型</Button>
     </div>
     <Table highlight-row stripe :columns="columns" :data="confData" style="margin-top: 5px">
        <template slot-scope="{ row, index }" slot="action">
           <div>
-            <Button type="primary" size="small" style="margin-right: 5px" @click="editModule(index)"
-                  v-show="permission.includes('serviceType:manage: editModule')"
+           <!--  <Button type="primary" size="small" style="margin-right: 5px" @click="editModule(index)"
+                  v-show="permission.includes('serviceType:manage:editModule')"
 >编辑模块</Button>
             <Button type="error" size="small" style="margin-right: 5px" @click="delModule(index)"
-                  v-show="permission.includes('serviceType:manage: deleteModule')"
->删除模块</Button>
+                  v-show="permission.includes('serviceType:manage:deleteModule')"
+>删除模块</Button> -->
             <Button type="primary" size="small" style="margin-right: 5px" @click="editType(index)"
-                  v-show="permission.includes('serviceType:manage: editType')"
+                  v-show="permission.includes('serviceType:manage:editType')"
 >编辑类型</Button>
             <Button type="error" size="small" style="margin-right: 5px" @click="delType(index)"
-                  v-show="permission.includes('serviceType:manage: deleteType')"
+                  v-show="permission.includes('serviceType:manage:deleteType')"
 >删除类型</Button>
           </div>
         </template>
      </Table>
-     <Page :total='total' :page-size='pageSize' :show-total="true" show-sizer style="text-align: center;margin-top: 5px"/>
+     <Page :total='total' :page-size='pageSize' :show-total="true" show-sizer style="text-align: center;margin-top: 5px"
+     @on-change='changePage'
+     @on-page-size-change='onpagesizechange'
+     />
      <Modal v-model.trim="modalAddOrUpdate" width="600" :mask-closable="false" :closable="false" v-bind:title="detailTitle">
       <Form ref="formInline" :model="formInline" :rules="ruleInline" inline>
         <FormItem label="服务模块" prop="serviceModule" style="width:270px;">
@@ -47,14 +50,14 @@
      </Modal>
      <!-- 新增模块 -->
       <Modal v-model.trim="addNewModuleMoal" width="600" :mask-closable="false" :closable="false" v-bind:title="detailTitle">
-      <Form :model="formInline" :rules="ruleInline" inline>
+        <Form ref="formInline" :model="formInline" :rules="ruleInline" inline>
         <FormItem label="服务模块" style="width:270px;">
           <Input v-model.trim="addServiceModule"/>
         </FormItem>
       </Form>
       <div slot="footer">
         <Button type="primary" ghost size="large" @click="cancelAddModule()">返回</Button>
-        <Button type="primary" size="large" @click="addNewModule()">保存模块</Button>
+        <Button type="primary" size="large" @click="addNewModule()">保存</Button>
       </div>
      </Modal>
      <!-- 新增服务类型 -->
@@ -62,7 +65,7 @@
       <Form  :model="formInline"  >
         <div style="display:inline-table">
         <FormItem label="服务模块" prop="serviceModule" style="width:270px;">
-        <Select v-model.trim="selectedModuleAdd" style="width:200px">
+        <Select v-model.trim="selectedModuleAdd" style="width:200px" @on-change='selectedModuleAddClick' clearable >
             <Option v-for="(item,id) in allModulesOption"
             :key="id"
             :value="item.serviceModuleCode"
@@ -71,11 +74,11 @@
           </FormItem>
        </div>
           <FormItem label="服务类型" prop="serviceType" style="width:270px;">
-        <Select style="width:200px" @on-change='selectedTypeAdd' :label-in-value="true">
+        <Select style="width:200px" @on-change='selectedTypeAdd' :label-in-value="true" clearable>
             <Option v-for="(item,index) in allServiceType"
             :key="index"
-            :value="item.code"
-            >{{item.name}}</Option>
+            :value="item.serviceTypeCode"
+            >{{item.serviceType}}</Option>
         </Select>
           </FormItem>
         <FormItem label="服务地址"  style="width:270px;">
@@ -92,20 +95,20 @@
       <Form ref="formInline" :model="formInline"  >
         <div style="display:inline-table">
         <FormItem label="服务模块" prop="serviceModule" style="width:270px;">
-        <Select v-model.trim="selectValue" style="width:200px">
+        <Select v-model.trim="selectValue" style="width:200px" @on-change='selectModule' clearable >
             <Option v-for="(item,id) in allModulesOption"
             :key="id"
             :value="item.serviceModuleCode"
             >{{item.serviceModule}}</Option>
         </Select>
-          </FormItem>
+        </FormItem>
        </div>
            <FormItem label="服务类型" prop="serviceTypeAdd" style="width:270px;">
-        <Select @on-change='selectedTypeEdit' :label-in-value="true" style="width:200px"  >
-            <Option v-for="(item,index) of allServiceType"
+        <Select @on-change='selectedTypeEdit' :label-in-value="true" style="width:200px" clearable >
+            <Option v-for="(item,index) in allServiceType"
             :key="index"
-            :value="item.code"
-            >{{item.name}}</Option>
+            :value="item.serviceTypeCode"
+            >{{item.serviceType}}</Option>
         </Select>
           </FormItem>
         <FormItem label="服务地址" prop="serviceAddress" style="width:270px;">
@@ -114,7 +117,7 @@
       </Form>
       <div slot="footer">
         <Button type="primary" ghost size="large" @click="cancelAddOrUpdateType('formInline')">返回</Button>
-        <Button type="primary" size="large" @click="handleSubmitType('formInline')">保存类型</Button>
+        <Button type="primary" size="large" @click="handleSubmitType('formInline')">保存</Button>
       </div>
      </Modal>
     <Modal v-model.trim="modalDelete" width="450" title="删除参数配置提示">
@@ -130,7 +133,7 @@
 </template>
 
 <script>
-import { getServiceTypeInfo, editServiceModule, editServiceType, inquireServiceModule, deletModule, deleteType, getAllServiceType } from '@/api/data'
+import { getServiceTypeInfo, editServiceModule, editServiceType, inquireServiceModule, deletModule, deleteType, serarchTypeByModule } from '@/api/data'
 
 export default {
   data () {
@@ -197,7 +200,7 @@ export default {
       showType: '',
       modalDelete: false,
       formInline: {
-        serviceModule: null,
+        serviceModule: '',
         serviceType: '',
         serviceAddress: '',
         serviceCode: '',
@@ -244,6 +247,35 @@ export default {
     }
   },
   methods: {
+    onpagesizechange (e) {
+      const info = {
+        pageSize: e,
+        currentPage: this.pageNum
+
+      }
+      getInfoUser(info).then(res => {
+        this.renderPage(res.data.data.records, res.data.data.total)
+      })
+    },
+    changePage (e) {
+      const info = {
+        pageSize: this.pageSize,
+        currentPage: e
+      }
+      getInfoUser(info).then(res => {
+        this.renderPage(res.data.data.records, res.data.data.total)
+      })
+    },
+    selectedModuleAddClick (e) {
+      serarchTypeByModule(e).then(res => {
+        this.allServiceType = res.data.data
+      }).catch(err => this.$Message.info(err))
+    },
+    selectModule (e) {
+      serarchTypeByModule(e).then(res => {
+        this.allServiceType = res.data.data
+      }).catch(err => this.$Message.info(err))
+    },
     selectedTypeEdit (e) {
       this.formInline.serviceCode = e.value
       this.formInline.serviceType = e.label
@@ -268,14 +300,19 @@ export default {
       this.serviceAddress = null
     },
     addSetting () {
+      this.addServiceModule = null
       this.detailTitle = '新增模块'
       this.addNewModuleMoal = true
     },
 
     addSettingType () {
+      this.addServiceType.url = null
       this.detailTitle = '新增服务类型'
       this.addNewServiceType = true
-      const info = {}
+      const info = {
+        pageSize: 10000,
+        currentPage: 1
+      }
       inquireServiceModule(info).then(res => {
         this.allModulesOption = res.data.data.records
       })
@@ -286,6 +323,9 @@ export default {
         'serviceModuleCode': this.serviceModuleCode
       }
       editServiceModule(info).then(res => {
+        this.$Message.success({
+          content: res.data.message
+        })
         this.getServiceTypeInfo()
       }).catch(error => console.log(error))
       this.addNewModuleMoal = false
@@ -300,6 +340,9 @@ export default {
           serviceModuleCode: this.editModuleId
         }
         editServiceModule(info).then(res => {
+          this.$Message.success({
+            content: res.data.message
+          })
           this.getServiceTypeInfo()
         }).catch(error => console.log(error))
       } catch (error) {
@@ -318,6 +361,9 @@ export default {
           'id': this.formInline.editId
         }
         editServiceType(info).then(res => {
+          this.$Message.success({
+            content: res.data.message
+          })
           this.getServiceTypeInfo()
         }).catch(error => console.log(error))
       } catch (error) {
@@ -337,6 +383,9 @@ export default {
         'serviceType': this.addServiceType.serviceType
       }
       editServiceType(info).then(res => {
+        this.$Message.success({
+          content: res.data.message
+        })
         this.getServiceTypeInfo()
         this.addNewServiceType = false
       }).catch(() => {
@@ -388,6 +437,9 @@ export default {
       if (this.judgedeleteType === 'module') {
         const info = this.editModuleId
         deletModule(info).then(res => {
+          this.$Message.success({
+            content: res.data.message
+          })
           this.getServiceTypeInfo()
           this.modalDelete = false
         }).catch(error => console.log(error))
@@ -396,6 +448,9 @@ export default {
         const code = this.deleteServiceTypeCode
         const id = this.deleteTypeId
         deleteType(id, code).then(res => {
+          this.$Message.success({
+            content: res.data.message
+          })
           this.getServiceTypeInfo()
           this.modalDelete = false
         }).catch(error => {
@@ -423,7 +478,10 @@ export default {
 
     },
     async getAllModuleOptions () {
-      const info = {}
+      const info = {
+        pageSize: 10000,
+        currentPage: 1
+      }
       inquireServiceModule(info).then(res => {
         this.allModulesOption = res.data.data.records
       })
@@ -432,9 +490,6 @@ export default {
   created () {
     this.getServiceTypeInfo()
     this.getAllModuleOptions()
-    getAllServiceType().then(res => {
-      this.allServiceType = res.data.data
-    })
   },
   mounted () {
 

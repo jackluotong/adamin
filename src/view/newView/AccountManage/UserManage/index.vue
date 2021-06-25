@@ -33,11 +33,13 @@
     <h1 style="margin:10px 10px 10px 10px">账户管理-用户管理</h1>
     <div class="content-button" >
       <span style="padding:10px">用户code</span>
-      <Input v-model.trim="userCode"/>
+      <Input v-model.trim="userCode" @on-enter="enter"/>
       <Button type="primary" icon="md-search" @click="search()" style="margin:0 10px 0 20px">查询</Button>
+                        <Button type="primary" icon="md-refresh" @click="reset()">重置</Button>
+
     </div>
     <Table highlight-row stripe :columns="columns" :data="confData" style="margin-top: 5px">
-       <template slot-scope="{ row, index }" slot="action">
+       <template slot-scope="{ index }" slot="action">
           <div>
             <Button type="primary" size="small" style="margin-right: 5px" @click="edit(index)"
                               v-show="permission.includes('account:user:roleConnect')"
@@ -45,11 +47,18 @@
           </div>
         </template>
      </Table>
-     <Page :total='total' :page-size='pageSize' :show-total="true" show-sizer style="text-align: center;margin-top: 5px"/>
+     <Page :total='total'
+     :page-size='pageSize'
+     :show-total="true"
+     show-sizer
+     style="text-align: center;margin-top: 5px"
+     @on-change='changePage'
+     @on-page-size-change='onpagesizechange'
+      />
      <Modal v-model.trim="modalAddOrUpdate" width="600" :mask-closable="false" :closable="false" v-bind:title="detailTitle">
       <Form ref="formInline" :model="formInline" :rules="ruleInline" inline>
-        <FormItem label="用户code" prop="userCode" style="width:270px;">
-            <span label="">{{formInline.userCode}}</span>
+        <FormItem label="用户code" style="width:270px;">
+            <span>{{formInline.userCode}}</span>
         </FormItem>
 
       </Form>
@@ -113,11 +122,11 @@ export default {
       roleName: '',
       total: 0,
       pageNum: 1,
-      pageSize: 30,
+      pageSize: 10,
       userCode: '',
       modalAddOrUpdate: false,
       detailTitle: '',
-      showType: '', // 表单展示类型（edit、add）
+      showType: '',
       modalDelete: false,
       formInline: { // 实体
         userCode: '',
@@ -154,6 +163,32 @@ export default {
     }
   },
   methods: {
+    onpagesizechange (e) {
+      const info = {
+        pageSize: e,
+        currentPage: this.pageNum
+
+      }
+      getInfoUser(info).then(res => {
+        this.renderPage(res.data.data.records, res.data.data.total)
+      })
+    },
+    changePage (e) {
+      const info = {
+        pageSize: this.pageSize,
+        currentPage: e
+      }
+      getInfoUser(info).then(res => {
+        this.renderPage(res.data.data.records, res.data.data.total)
+      })
+    },
+    reset () {
+      this.userCode = null
+    },
+    enter (e) {
+      console.log(e)
+      this.getInfoUser()
+    },
     selected (data) {
       this.selectOptions = []
       for (let i = 0; i < data.length; i++) {
@@ -181,14 +216,12 @@ export default {
         'roles': this.selectOptions
       }
       roleConnect(info).then(res => {
-        this.$Message.success('操作成功')
         this.modalAddOrUpdate = false
-        this.$router.go(0)
-        this.$nextTick(() => {
-        })
+        this.getInfoUser()
+        this.$Message.success('操作成功')
       }).catch(error => console.log(error))
     },
-    cancelAddOrUpdate (name) { // 取消新增
+    cancelAddOrUpdate (name) {
       this.checked = false
       this.$refs[name].resetFields()
       this.modalAddOrUpdate = false
@@ -209,7 +242,7 @@ export default {
         let roleName = ''
         if (item.roles.length !== 0) {
           item.roles.map((i, t) => {
-            roleName = roleName + ',' + i.roleName
+            roleName = i.roleName + ';' + roleName
           })
         }
         array.push({
@@ -217,7 +250,22 @@ export default {
           roleName
         })
       })
+      console.log(array)
       return array
+    },
+    getInfoUser () {
+      const info = {
+        userCode: this.userCode,
+        pageSize: this.pageSize,
+        currentPage: this.pageNum
+      }
+      getInfoUser(info).then(res => {
+        const data = res.data.data.records
+        const total = res.data.data.total
+        this.translate(data)
+        this.confData = this.translate(data)
+        this.total = total
+      }).catch(err => { console.log(err) })
     }
 
   },
@@ -241,18 +289,7 @@ export default {
     })
   },
   created () {
-    const info = {
-      userCode: this.userCode,
-      pageSize: this.pageSize,
-      currentPage: this.pageNum
-    }
-    getInfoUser(info).then(res => {
-      const data = res.data.data.records
-      const total = res.data.data.total
-      this.translate(data)
-      this.confData = this.translate(data)
-      this.total = total
-    }).catch(err => { console.log(err) })
+    this.getInfoUser()
   },
   watch: {
     userCode: {

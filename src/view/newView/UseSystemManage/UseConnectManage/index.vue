@@ -1,17 +1,19 @@
 <template>
     <div class="user-content">
-        <h1 style="margin:10px 10px 10px 10px">应用系统管理-应用系统管理</h1>
+        <h1 style="margin:10px 10px 10px 10px">应用系统管理-应用关联服务管理</h1>
         <div class="content-button">
             <span style="padding:10px">应用名称</span>
             <Input v-model.trim="applicationName" />
             <span style="padding:10px">应用简称</span>
             <Input v-model.trim="applicationCode" />
             <span style="padding:10px">服务模块</span>
-            <Select v-model.trim="selectedModule" style="width:200px" @on-change='selectedModuleClick'>
+            <Select v-model.trim="selectedModule" style="width:200px" >
                 <Option v-for="(item,index) in moduleOptions"
                 :key="index"
                 :value="item.serviceModuleCode">{{ item.serviceModule}}</Option>
             </Select>
+                              <Button type="primary" icon="md-refresh" @click="reset()">重置</Button>
+
             <Button
                 type="primary"
                 icon="md-search"
@@ -23,7 +25,7 @@
             type="primary"
             icon="md-add"
             @click="addSetting()"
-            v-show="permission.includes('application:service: connect')"
+            v-show="permission.includes('application:service:connect')"
                 >服务关联</Button
             >
         </div>
@@ -41,7 +43,7 @@
                         size="small"
                         style="margin-right: 5px"
                         @click="edit(index)"
-                        v-show="permission.includes('application:service: cancel')"
+                        v-show="permission.includes('application:service:cancel')"
                         >取消关联</Button
                     >
                 </div>
@@ -62,7 +64,7 @@
             :closable="false"
             v-bind:title="detailTitle"
         >
-            <Form ref="formInline" :model="formInline">
+            <Form ref="formInline" :model="formInline" :rules='ruleInline'>
                 <div style="display:inline-table">
                     <FormItem
                         label="应用名称"
@@ -101,10 +103,10 @@
                 <FormItem
                     label="服务类型"
                     style="width:270px;"
-                    prop="applicationCode"
+                    prop="serviceType"
                 >
-             <Select v-model.trim="selectedModule" style="width:200px" @on-change='selectedModuleClick'>
-                <Option v-for="(item,index) in moduleOptions"
+             <Select v-model.trim="selectedType" style="width:200px" >
+                <Option v-for="(item,index) in typeOption"
                 :key="index"
                 :value="item.serviceTypeCode">{{ item.serviceType}}</Option>
             </Select>
@@ -143,12 +145,12 @@
 </template>
 
 <script>
-import { confPageList, getServiceTypeInfo } from '@/api/data'
-import { getInfoConnect, getInfo, addConnect, cancelConnect } from '@/api/useSystem' // ,
+import { serarchTypeByModule, inquireServiceModule } from '@/api/data'
+import { getInfoConnect, getInfo, addConnect, cancelConnect } from '@/api/useSystem'
 
 export default {
   data () {
-    function getByteLen (val) {
+    /*  function getByteLen (val) {
       var len = 0
       for (var i = 0, len1 = val.length; i < len1; i++) {
         var length = val.charCodeAt(i)
@@ -159,8 +161,8 @@ export default {
         }
       }
       return len
-    }
-    const validateapplicationName = function (rule, value, callback) {
+    } */
+    /* const validateapplicationName = function (rule, value, callback) {
       if (!value) {
         callback(new Error('请输入参数名称'))
       } else if (getByteLen(value) > 128) {
@@ -168,8 +170,8 @@ export default {
       } else {
         callback()
       }
-    }
-    const validateapplicationCode = (rule, value, callback) => {
+    } */
+    /* const validateapplicationCode = (rule, value, callback) => {
       if (!value) {
         callback(new Error('请输入参数键名'))
       } else if (getByteLen(value) > 64) {
@@ -177,7 +179,7 @@ export default {
       } else {
         callback()
       }
-    }
+    } */
     const validateConfValue = (rule, value, callback) => {
       if (!value) {
         callback(new Error('请输入参数键名'))
@@ -191,7 +193,9 @@ export default {
       deleteId: '',
       selectedAppName: '',
       selectedModule: '',
+      selectedType: '',
       moduleOptions: [],
+      typeOption: [],
       appData: [],
       total: 0,
       pageNum: 1,
@@ -211,21 +215,7 @@ export default {
         contactEmails: ''
       },
       ruleInline: {
-        applicationName: [
-          {
-            required: true,
-            validator: validateapplicationName,
-            trigger: 'blur'
-          }
-        ],
-        applicationCode: [
-          {
-            required: true,
-            validator: validateapplicationCode,
-            trigger: 'blur'
-          }
-        ],
-        confValue: [
+        serviceType: [
           {
             required: true,
             validator: validateConfValue,
@@ -264,14 +254,18 @@ export default {
   },
   methods: {
     selectedAppNameClick (e) { },
-    selectedModuleClick (e) { },
+    selectedModuleClick (e) {
+      serarchTypeByModule(e).then(res => {
+        this.typeOption = res.data.data
+      }).catch(err => this.$Message.info(err))
+    },
     search () {
-      this.getInfo(this.applicationCode, this.applicationName)
+      this.getInfo(this.applicationCode, this.applicationName, this.selectedModule)
     },
     reset () {
       this.applicationName = null
       this.applicationCode = null
-      this.contactPhone = null
+      this.selectedModule = null
     },
     addSetting () {
       this.reset()
@@ -284,19 +278,18 @@ export default {
       this.$refs[index].validate(valid => {
         if (valid) {
           const info = {
-            applicationName: this.formInline.applicationName,
-            applicationCode: this.formInline.applicationCode,
-            confValue: this.formInline.confValue,
-            confDescribtion: this.formInline.confDescribtion
+            applicationCode: this.selectedAppName,
+            serviceModuleCode: this.selectedModule,
+            serviceTypeCode: this.selectedType
           }
           addConnect(info)
             .then(res => {
+              this.getInfo()
               this.$Message['success']({
                 background: true,
                 content: res.data.message
               })
               this.modalEdit = false
-              this.confPageList()
               this.$refs[index].resetFields()
             })
             .catch(err => {
@@ -306,7 +299,6 @@ export default {
       })
     },
     cancelAddOrUpdate (name) {
-      // 取消新增
       this.$refs[name].resetFields()
       this.modalEdit = false
     },
@@ -335,32 +327,17 @@ export default {
         this.modalDelete = false
       })
     },
-    confPageList () {
-      // 根据条件分页查询全部配置
-      const date = {
-        pageNum: this.pageNum,
-        pageSize: this.pageSize
-      }
-      confPageList(date)
-        .then(res => {
-          this.confData = res.data.data.resultList
-          this.total = res.data.data.totalAmount
-        })
-        .catch(err => {
-          console.log(err)
-        })
-    },
     renderPage (data, total) {
       this.confData = data
       this.total = total
     },
-    getInfo (code, name) {
+    getInfo (code, name, serviceModuleCode) {
       const info = {
         applicationCode: code,
         applicationName: name,
         currentPage: this.pageNum,
         pageSize: this.pageSize,
-        serviceModuleCode: ''
+        serviceModuleCode: serviceModuleCode
       }
       getInfoConnect(info).then(res => {
         this.renderPage(res.data.data.records, res.data.data.total)
@@ -381,7 +358,7 @@ export default {
     getInfo(info).then(res => {
       this.appData = res.data.data.records
     })
-    getServiceTypeInfo(info).then(res => {
+    inquireServiceModule(info).then(res => {
       this.moduleOptions = res.data.data.records
     }).catch(err => this.$Message.info(err))
   }

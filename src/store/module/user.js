@@ -9,7 +9,8 @@ import {
   restoreTrash
 } from '@/api/user'
 import { setToken, setPermission, getToken, setAccess } from '@/libs/util'
-import encrypt from '@/libs/RSAutil'
+// import encrypt from '@/libs/RSAutil'
+// import Cookies from 'js-cookie'
 
 export default {
   state: {
@@ -80,9 +81,8 @@ export default {
   },
   actions: {
     handleLogin ({ commit }, { userName, password }) {
-      console.log(sessionStorage.getItem('permission'))
       userName = userName.trim()
-      password = encrypt(password)
+      password = password.trim()
       return new Promise((resolve, reject) => {
         login({
           userName,
@@ -121,7 +121,6 @@ export default {
     getUserInfoForRouter ({ state, commit }) {
       return new Promise((resolve, reject) => {
         try {
-          debugger
           const allInfo = window.sessionStorage.getItem('allUserInfo')
           const userInfo = JSON.parse(allInfo)
           console.log(userInfo)

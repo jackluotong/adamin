@@ -21,7 +21,7 @@ Router.prototype.push = function push (location) {
 }
 const router = new Router({
   routes,
-  mode: 'history'
+  mode: 'hash'
 })
 const LOGIN_PAGE_NAME = 'login'
 
@@ -44,15 +44,16 @@ router.beforeEach((to, from, next) => {
       name: LOGIN_PAGE_NAME // 跳转到登录页
     })
   } else if (!token && to.name === LOGIN_PAGE_NAME) {
-    // 未登陆且要跳转的页面是登录页
+    // 未登陆且要跳转的页面是登录页 有权限
     next() // 跳转
-  } else if (token && to.name === LOGIN_PAGE_NAME) {
-    // 已登录且要跳转的页面是登录页
+  } else if (token && sessionStorage.getItem('permission') === null) {
+    // 已登录且要跳转的页面是登录页且有权限
     next({
       name: homeName
     })
-  } else if (token && to.name !== LOGIN_PAGE_NAME) {
-    next()
+  } else if (token && to.name !== LOGIN_PAGE_NAME && to.name !== LOGIN_PAGE_NAME) {
+    next(
+    )
   } else {
     next({
       replace: true,

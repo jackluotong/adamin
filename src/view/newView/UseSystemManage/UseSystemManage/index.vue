@@ -35,6 +35,8 @@
       :show-total="true"
       show-sizer
       style="text-align: center;margin-top: 5px"
+      @on-change='changePage'
+      @on-page-size-change='onpagesizechange'
     />
 
     <Modal
@@ -44,7 +46,7 @@
       :closable="false"
       v-bind:title="detailTitle"
     >
-      <Form ref="formInline" :model="formInline">
+      <Form ref="formInline" :model="formInline" :rules='ruleInline'>
         <div style="display:inline-table">
         <div v-show="isHaveKey">
           <FormItem label="应用名称" prop="applicationName" style="width:270px;">
@@ -64,17 +66,17 @@
         </div>
         <div v-show="isHavaShow">
             <FormItem label="AESKEY" prop="aeskey" >
-          <Input v-model.trim="formInline.aeskey" />
+          <Input v-model.trim="formInline.aeskey" readonly/>
         </FormItem>
         <FormItem label="AESLV" prop="aesiv" >
-          <Input v-model.trim="formInline.aesiv"  />
+          <Input v-model.trim="formInline.aesiv"  readonly/>
         </FormItem>
         </div>
 
       </Form>
       <div slot="footer">
         <Button type="primary" ghost size="large" @click="cancelAddOrUpdateType('formInline')">返回</Button>
-        <Button type="primary" size="large" @click="handleSubmitAddOrUpdate('formInline')">保存</Button>
+        <Button type="primary" size="large" @click="handleSubmitAddOrUpdate('formInline')" v-show="!isHavaShow">保存</Button>
       </div>
     </Modal>
   </div>
@@ -123,12 +125,13 @@ export default {
     }
 
     return {
+      current: 1,
       permission: sessionStorage.getItem('permission'),
       isHavaShow: false,
       isHaveKey: true,
-      total: 0, // 总数
-      pageNum: 1, // 第几页
-      pageSize: 30, // 每页几条数据
+      total: 0,
+      pageNum: 1,
+      pageSize: 10,
       applicationName: '',
       applicationCode: '',
       contactMobile: '',
@@ -153,7 +156,10 @@ export default {
         applicationCode: [
           { required: true, validator: validateapplicationCode, trigger: 'blur' }
         ],
-        confValue: [
+        contactMail: [
+          { required: true, validator: validateConfValue, trigger: 'blur' }
+        ],
+        contactMobile: [
           { required: true, validator: validateConfValue, trigger: 'blur' }
         ]
       },
@@ -195,6 +201,25 @@ export default {
     }
   },
   methods: {
+    onpagesizechange (e) {
+      const info = {
+        pageSize: e,
+        currentPage: this.pageNum
+
+      }
+      getInfo(info).then(res => {
+        this.renderPage(res.data.data.records, res.data.data.total)
+      })
+    },
+    changePage (e) {
+      const info = {
+        pageSize: this.pageSize,
+        currentPage: e
+      }
+      getInfo(info).then(res => {
+        this.renderPage(res.data.data.records, res.data.data.total)
+      })
+    },
     search () {
       const info = {
         pageSize: this.pageSize,
@@ -325,8 +350,8 @@ export default {
     },
     getInfo () {
       const info = {
-        'pageSize': this.pageSize,
-        'currentPage': this.pageNum
+        pageSize: this.pageSize,
+        currentPage: this.pageNum
       }
       getInfo(info).then(res => {
         this.renderPage(res.data.data.records, res.data.data.total)

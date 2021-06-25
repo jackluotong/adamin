@@ -19,7 +19,7 @@
 <div style="">
       <Button type="primary" icon="md-search" @click="search()" style="margin:10px">查询</Button>
       <Button type="primary" icon="md-refresh" @click="addNew()" style="margin:10px"
-                      v-show="permission.includes('threshold:service: add')"
+                      v-show="permission.includes('threshold:service:add')"
 >新增阈值</Button>
 
 </div>
@@ -30,7 +30,7 @@
             size="small"
              style="margin-right: 5px"
              @click="edit(index)"
-                      v-show="permission.includes('threshold:service: edit')"
+                      v-show="permission.includes('threshold:service:edit')"
              >编辑</Button>
           </div>
         </template>
@@ -283,7 +283,7 @@ export default {
     },
     getServiceThreShold (manufacturerCode, serviceTypeCode, serviceModuleCode) {
       const info = {
-        pageNum: this.pageNum,
+        currentPage: this.pageNum,
         pageSize: this.pageSize,
         manufacturerCode: manufacturerCode,
         serviceTypeCode: serviceTypeCode,
@@ -300,7 +300,10 @@ export default {
   },
   created () {
     this.getServiceThreShold()
-    const info = {}
+    const info = {
+      pageSize: this.pageSize,
+      currentPage: this.pageNum
+    }
     getManufacture(info).then(res => {
       this.manufacturerOption = res.data.data.records
     }).catch(error => {

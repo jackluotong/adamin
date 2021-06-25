@@ -1,3 +1,33 @@
+<style lang="less" scoped>
+.user-content {
+    .content-button {
+        padding: 5px;
+        display: inline;
+        .ivu-select-single {
+            width: 150px;
+        }
+        .ivu-input-type {
+            width: 150px;
+            margin-left: 10px;
+        }
+        .ivu-btn {
+            margin-left: 10px;
+        }
+        .ivu-btn-info {
+            background: #2d8cf0;
+            border-color: #2d8cf0;
+        }
+    }
+}
+.ivu-modal-confirm-body {
+    padding-left: 42px;
+    font-size: 14px;
+    color: #515a6e;
+    position: relative;
+    word-break: break-all;
+}
+</style>
+
 <template>
     <div class="user-content">
         <h1 style="margin:10px 10px 10px 10px">第三方服务管理-第三方厂商管理</h1>
@@ -10,20 +40,21 @@
                 @click="search()"
                 style="margin:0 10px 0 20px"
             >查询</Button>
+            <Button type="primary" icon="md-refresh" @click="resetClick()">重置</Button>
             <Button type="primary" icon="md-add" @click="addSetting()"
-                                  v-show="permission.includes(' tripartite:provider:addProvider')"
+                v-show="permission.includes('tripartite:provider:addProvider')"
 
             >新增厂商</Button>
         </div>
         <Table highlight-row stripe :columns="columns" :data="confData" style="margin-top: 5px">
-            <template slot-scope="{ row, index }" slot="action">
+            <template slot-scope="{index }" slot="action">
                 <div>
                     <Button
                         type="primary"
                         size="small"
                         style="margin-right: 5px"
                         @click="editModule(index)"
-                                                          v-show="permission.includes(' tripartite:provider:edit')"
+                      v-show="permission.includes('tripartite:provider:edit')"
 
                     >编辑模块</Button>
                      <Button
@@ -31,7 +62,7 @@
                         size="small"
                         style="margin-right: 5px"
                         @click="deleteClick(index)"
-                                                          v-show="permission.includes(' tripartite:provider:delete')"
+                       v-show="permission.includes('tripartite:provider:delete')"
 
                     >删除</Button>
                 </div>
@@ -63,17 +94,17 @@
                 </FormItem>
             </Form>
             <div slot="footer">
-                <Button
-                    type="primary"
-                    size="large"
-                    @click="handleSubmitAddOrUpdate('formInline')"
-                >保存</Button>
-                <Button
+                 <Button
                     type="primary"
                     ghost
                     size="large"
                     @click="cancelAddOrUpdate('formInline')"
                 >返回</Button>
+                <Button
+                    type="primary"
+                    size="large"
+                    @click="handleSubmitAddOrUpdate('formInline')"
+                >保存</Button>
             </div>
         </Modal>
         <Modal v-model.trim="modalDelete" width="450" title="删除参数配置提示">
@@ -106,7 +137,7 @@ export default {
     }
     const validatemanufacturerName = function (rule, value, callback) {
       if (!value) {
-        callback(new Error('请输入参数名称'))
+        callback(new Error('请输入厂商名称'))
       } else if (getByteLen(value) > 128) {
         callback(new Error('字符串长度不能超过128'))
       } else {
@@ -137,6 +168,13 @@ export default {
           {
             required: true,
             validator: validatemanufacturerName,
+            trigger: 'blur'
+          }
+        ],
+        manufacturerContactType: [
+          {
+            required: true,
+            message: '请输入邮箱或者电话',
             trigger: 'blur'
           }
         ]
@@ -173,6 +211,9 @@ export default {
     }
   },
   methods: {
+    resetClick () {
+      this.manufacturerName = null
+    },
     reset (obj) {
       obj.manufacturerName = ''
       obj.manufacturerContact = ''
@@ -237,7 +278,7 @@ export default {
       this.formInline.manufacturerContact = this.confData[index].manufacturerContact
       this.formInline.manufacturerContactType = this.confData[index].manufacturerContactType
       this.showType = 'edit'
-      this.detailTitle = '编辑模块'
+      this.detailTitle = '厂商编辑'
       this.modalAddOrUpdate = true
     },
     deleteClick (index) {
@@ -280,32 +321,3 @@ export default {
   }
 }
 </script>
-<style lang="less" scoped>
-.user-content {
-    .content-button {
-        padding: 5px;
-        display: inline;
-        .ivu-select-single {
-            width: 150px;
-        }
-        .ivu-input-type {
-            width: 150px;
-            margin-left: 10px;
-        }
-        .ivu-btn {
-            margin-left: 10px;
-        }
-        .ivu-btn-info {
-            background: #2d8cf0;
-            border-color: #2d8cf0;
-        }
-    }
-}
-.ivu-modal-confirm-body {
-    padding-left: 42px;
-    font-size: 14px;
-    color: #515a6e;
-    position: relative;
-    word-break: break-all;
-}
-</style>

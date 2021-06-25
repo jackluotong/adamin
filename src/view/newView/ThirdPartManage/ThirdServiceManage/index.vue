@@ -1,17 +1,39 @@
+<style lang="less" scoped>
+.user-content{
+  .content-button {
+    padding: 5px;
+    .ivu-select-single {
+      width: 150px;
+    }
+    .ivu-input-type {
+      width: 150px;
+      margin-left: 10px;
+    }
+    .ivu-btn{
+      margin-left: 10px;
+    }
+    .ivu-btn-info{
+      background: #2d8cf0;
+      border-color: #2d8cf0;
+    }
+  }
+}
+</style>
+
 <template>
   <div class="user-content">
     <div class="content-button">
 <span style="padding:10px 10px 10px 10px ">厂商名称</span>
-<Select label="" v-model.trim="manufacturerName" style="width:150px; margin-right:20px;">
+<Select label="" v-model.trim="manufacturerName" style="width:150px; margin-right:20px;" clearable >
         <Option v-for="(item,id) in manufacturerOption" :key="id" :value="item.manufacturerCode">{{item.manufacturerName}}</Option>
       </Select>
-<span style="padding:10px 10px 10px 10px ">服务模块</span>
- <Select label="" v-model.trim="serviceModule" style="width:150px; margin-right:20px;">
+<span style="padding:10px 10px 10px 10px " >服务模块</span>
+ <Select label="" v-model.trim="serviceModule" style="width:150px; margin-right:20px;" @on-change='selectedModuleClickShow' clearable >
         <Option v-for="(item,id) in moduleOption" :key="id" :value="item.serviceModuleCode">{{item.serviceModule}}</Option>
       </Select>
 <div style="padding:10px 10px 10px 10px ">
 <span style="padding:10px 10px 10px 0 ">服务类型</span>
-      <Select label="" v-model.trim="serviceType" style="width:150px;margin-right:20px">
+      <Select label="" v-model.trim="serviceType" style="width:150px;margin-right:20px" clearable >
         <Option v-for="(item,id) of typeOption" :key="id" :value="item.serviceTypeCode">{{item.serviceType}}</Option>
       </Select>
 </div>
@@ -19,7 +41,7 @@
 <div style="">
       <Button type="primary" icon="md-search" @click="search()" style="margin:10px">查询</Button>
       <Button type="primary" icon="md-refresh" @click="addNew()" style="margin:10px"
-                                        v-show="permission.includes('tripartite:service: add')"
+                                        v-show="permission.includes('tripartite:service:add')"
 >新增服务</Button>
 
 </div>
@@ -28,10 +50,10 @@
        <template slot-scope="{ row, index }" slot="action">
           <div>
             <Button type="info" size="small" style="margin-right: 5px" @click="edit(index)"
-                                                    v-show="permission.includes('tripartite:service: edit')"
+            v-show="permission.includes('tripartite:service:edit')"
 >编辑</Button>
             <Button type="error" size="small" style="margin-right: 5px" @click="deleteService(index)"
-                                                    v-show="permission.includes('tripartite:service: delete')"
+             v-show="permission.includes('tripartite:service:delete')"
 >删除</Button>
           </div>
         </template>
@@ -45,11 +67,11 @@
             </Select>
         </FormItem><br>
         <FormItem label="服务模块" style="width:300px;" >
-           <Select label="" v-model.trim="formInline.serviceModuleCode" style="width:150px; margin-right:20px;">
+           <Select label="" v-model.trim="formInline.serviceModuleCode" @on-change='selectedModuleClick' style="width:150px; margin-right:20px;">
         <Option v-for="(item,id) in moduleOption" :key="id" :value="item.serviceModuleCode">{{item.serviceModule}}</Option>
          </Select>
            </FormItem>
-                    <FormItem label="服务类型" style="width:300px;" >
+        <FormItem label="服务类型" style="width:300px;" >
             <Select label="" v-model.trim="formInline.serviceTypeCode" style="width:150px;margin-right:20px">
         <Option v-for="(item,id) of typeOption" :key="id" :value="item.serviceTypeCode">{{item.serviceType}}</Option>
              </Select>
@@ -77,7 +99,7 @@
 
 <script>
 import { getThirdService, getManufacture, toggle, addThirdService, deleteThirdService, editThirdService } from '@/api/thirdPart'
-import { getServiceTypeInfo, inquireServiceModule } from '@/api/data'
+import { inquireServiceModule, serarchTypeByModule } from '@/api/data'
 
 export default {
   data () {
@@ -183,11 +205,12 @@ export default {
                         status: 1
                       }
                       toggle(info).then(res => {
-                      /*  this.$Message.success({
-                        content: res.data.message
+                        this.getThirdService()
+                        this.$Message.success({
+                          content: res.data.message
+                        })
                       }).catch(error => {
                         this.$Message.error(error)
-                      }) */
                       })
                     }
                   }
@@ -202,11 +225,12 @@ export default {
                       status: 0
                     }
                     toggle(info).then(res => {
-                      /*  this.$Message.success({
+                      this.getThirdService()
+                      this.$Message.success({
                         content: res.data.message
-                      }).catch(error => {
-                        this.$Message.error(error)
-                      }) */
+                      })
+                    }).catch(error => {
+                      this.$Message.error(error)
                     })
                   }
                 }
@@ -218,6 +242,11 @@ export default {
     }
   },
   methods: {
+    selectedModuleClickShow (e) {
+      serarchTypeByModule(e).then(res => {
+        this.typeOption = res.data.data
+      }).catch(err => this.$Message.info(err))
+    },
     search () {
       this.getThirdService(this.manufacturerName, this.serviceType, this.serviceModule)
     },
@@ -267,8 +296,11 @@ export default {
     handleSubmitAddOrUpdate (index) {
       switch (this.showType) {
         case 'add':
-          const infoAdd = this.formInline
-          addThirdService(infoAdd).then(res => {
+          addThirdService(this.formInline).then(res => {
+            this.getThirdService()
+            this.$Message.success({
+              content: res.data.message
+            })
           }).catch(error => {
             this.$Message.error({
               content: error
@@ -279,8 +311,8 @@ export default {
           this.modalCheck = false
           break
         case 'edit':
-          const info = this.formInline
-          editThirdService(info).then(res => {
+          console.log(this.formInline)
+          editThirdService(this.formInline).then(res => {
             this.$Message.success({
               content: res.data.message
             })
@@ -303,27 +335,33 @@ export default {
         manufacturerCode: manufacturerCode,
         serviceTypeCode: serviceTypeCode,
         serviceModuleCode: serviceModuleCode,
-        pageNum: this.pageNum,
+        currentPage: this.pageNum,
         pageSize: this.pageSize
       }
       getThirdService(info).then(res => {
+        console.log(res)
         this.renderPage(res.data.data.records, res.data.data.total)
       })
     },
     renderPage (data, total) {
       this.confData = data
       this.total = total
+    },
+    selectedModuleClick (e) {
+      serarchTypeByModule(e).then(res => {
+        this.typeOption = res.data.data
+      }).catch(err => this.$Message.info(err))
     }
 
   },
   created () {
-    const info = {}
+    const info = {
+      pageSize: 10000,
+      currentPage: 1
+    }
     this.getThirdService()
     getManufacture(info).then(res => {
       this.manufacturerOption = res.data.data.records
-    })
-    getServiceTypeInfo(info).then(res => {
-      this.typeOption = res.data.data.records
     })
     inquireServiceModule(info).then(res => {
       this.moduleOption = res.data.data.records
@@ -331,24 +369,3 @@ export default {
   }
 }
 </script>
-<style lang="less" scoped>
-.user-content{
-  .content-button {
-    padding: 5px;
-    .ivu-select-single {
-      width: 150px;
-    }
-    .ivu-input-type {
-      width: 150px;
-      margin-left: 10px;
-    }
-    .ivu-btn{
-      margin-left: 10px;
-    }
-    .ivu-btn-info{
-      background: #2d8cf0;
-      border-color: #2d8cf0;
-    }
-  }
-}
-</style>

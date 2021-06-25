@@ -19,7 +19,7 @@ export const deleteInfoInform = (info) => {
 
 export const editInfoInform = (info) => {
   return axios.request({
-    url: '/dcenter/noticeInfo/editd/notice',
+    url: '/dcenter/noticeInfo/edit/notice',
     method: 'post',
     data: info
   })

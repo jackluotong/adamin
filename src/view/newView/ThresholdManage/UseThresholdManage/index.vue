@@ -1,3 +1,32 @@
+<style lang="less" scoped>
+.user-content {
+    .content-button {
+        padding: 5px;
+        display: inline;
+        .ivu-select-single {
+            width: 150px;
+        }
+        .ivu-input-type {
+            width: 150px;
+            margin-left: 10px;
+        }
+        .ivu-btn {
+            margin-left: 10px;
+        }
+        .ivu-btn-info {
+            background: #2d8cf0;
+            border-color: #2d8cf0;
+        }
+    }
+}
+.ivu-modal-confirm-body {
+    padding-left: 42px;
+    font-size: 14px;
+    color: #515a6e;
+    position: relative;
+    word-break: break-all;
+}
+</style>
 <template>
     <div class="user-content">
         <h1 style="margin:10px 10px 10px 10px">阈值管理-应用阈值管理</h1>
@@ -412,7 +441,9 @@ export default {
     },
     getUseThreShold () {
       const info = {
-        applicationCode: ''
+        applicationCode: '',
+        pageSize: this.pageSize,
+        currentPage: this.pageNum
       }
       getUseThreShold(info).then(res => {
         this.renderPage(res.data.data.records, res.data.data.total)
@@ -421,7 +452,10 @@ export default {
   },
   created () {
     this.getUseThreShold()
-    const info = {}
+    const info = {
+      pageSize: this.pageSize,
+      currentPage: this.pageNum
+    }
     getServiceTypeInfo(info).then(res => {
       this.typeOption = res.data.data.records
     }).catch(error => {
@@ -435,32 +469,3 @@ export default {
   }
 }
 </script>
-<style lang="less" scoped>
-.user-content {
-    .content-button {
-        padding: 5px;
-        display: inline;
-        .ivu-select-single {
-            width: 150px;
-        }
-        .ivu-input-type {
-            width: 150px;
-            margin-left: 10px;
-        }
-        .ivu-btn {
-            margin-left: 10px;
-        }
-        .ivu-btn-info {
-            background: #2d8cf0;
-            border-color: #2d8cf0;
-        }
-    }
-}
-.ivu-modal-confirm-body {
-    padding-left: 42px;
-    font-size: 14px;
-    color: #515a6e;
-    position: relative;
-    word-break: break-all;
-}
-</style>

@@ -1,5 +1,4 @@
 import Main from '@/components/main'
-// import parentView from '@/components/parent-view'
 export default [{
   path: '/login',
   name: 'login',
@@ -30,7 +29,7 @@ export default [{
     component: () => import('@/view/single-page/home')
   }]
 },
-/* {
+{
   path: '/argu',
   name: 'argu',
   meta: {
@@ -82,7 +81,7 @@ export default [{
     hideInMenu: false
   },
   component: () => import('@/view/error-page/404.vue')
-}, */
+},
 
   /*
   新定义的路由配置
@@ -145,17 +144,30 @@ export default [{
     hideInMenu: false
   },
   component: Main,
-  children: [{
-    path: '/ServiceTypeManage',
-    name: 'ServiceTypeManage',
-    meta: {
-      icon: 'ios-folder-open-outline',
-      title: '服务类型管理',
-      access: 'serviceType:manage',
-      hideInMenu: false
+  children: [
+    {
+      path: '/ServiceTypeManage',
+      name: 'ServiceTypeManage',
+      meta: {
+        icon: 'ios-folder-open-outline',
+        title: '服务类型管理',
+        access: 'serviceType:manage',
+        hideInMenu: false
+      },
+      component: () => import('@/view/newView/ServiceTypeManage/ServiceTypeManage')
     },
-    component: () => import('@/view/newView/ServiceTypeManage/ServiceTypeManage')
-  }]
+    {
+      path: '/ServiceModuleManage',
+      name: 'ServiceModuleManage',
+      meta: {
+        icon: 'ios-folder-open-outline',
+        title: '服务模块管理',
+        access: 'serviceModule:manage',
+        hideInMenu: false
+      },
+      component: () => import('@/view/newView/ServiceTypeManage/ServiceModuleManage')
+    }
+  ]
 },
 {
   path: '/ThirdPartManage',
@@ -313,7 +325,7 @@ export default [{
     meta: {
       icon: 'ios-settings',
       title: '警示管理',
-      access: ' notice:warning',
+      access: 'notice:warning',
 
       hideInMenu: false
     },

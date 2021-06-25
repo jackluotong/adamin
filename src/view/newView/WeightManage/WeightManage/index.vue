@@ -16,7 +16,7 @@
                 >查询</Button
             >
             <Button type="primary" icon="md-add" @click="addSetting()"
-                        v-show="permission.includes('weight:manage: add')"
+                        v-show="permission.includes('weight:manage:add')"
                 >新增权重</Button
             >
         </div>
@@ -34,7 +34,7 @@
                         size="small"
                         style="margin-right: 5px"
                         @click="edit(index,row)"
-                        v-show="permission.includes('weight:manage: edit')"
+                        v-show="permission.includes('weight:manage:edit')"
                         >编辑</Button
                     >
                     <Button
@@ -42,7 +42,7 @@
                         size="small"
                         style="margin-right: 5px"
                         @click="lookAbnormalWeight(index)"
-                        v-show="permission.includes('weight:manage: look')"
+                        v-show="permission.includes('weight:manage:look')"
 
                         >查看异常权重</Button
                     >
@@ -51,7 +51,7 @@
                         size="small"
                         style="margin-right: 5px"
                         @click="deleteId(index,row)"
-                        v-show="permission.includes('weight:manage: delete')"
+                        v-show="permission.includes('weight:manage:delete')"
                         >删除</Button
                     >
                 </div>
@@ -233,9 +233,9 @@ export default {
       selectedWeight: '',
       selectedModule: '',
       showWeightAbnormal: false,
-      total: 0, // 总数
-      pageNum: 1, // 第几页
-      pageSize: 30, // 每页几条数据
+      total: 0,
+      pageNum: 1,
+      pageSize: 30,
       useName: '',
       useCalled: '',
       contactPhone: '',
@@ -530,7 +530,9 @@ export default {
         currentPage: this.pageNum,
         pageSize: this.pageSize
       }
+      console.log(info)
       getWeight(info).then(res => {
+        console.log(res)
         this.renderPage(res.data.data.records, res.data.data.total, flag)
       }).catch(error => {
         this.$Message.error({
@@ -541,8 +543,11 @@ export default {
   },
   created () {
     this.getWeight(1, 1)
-    const info = {}
-    inquireServiceModule(info).then(res => {
+    const infoModule = {
+      pageSize: 10000,
+      currentPage: 1
+    }
+    inquireServiceModule(infoModule).then(res => {
       this.modulesOption = res.data.data.records
     })
     getAllApp().then(res => {
