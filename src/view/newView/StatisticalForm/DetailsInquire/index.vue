@@ -14,7 +14,7 @@
                 <Option v-for="(item,id) in serviceModuleOption" :key="id" :value="item.serviceModuleCode">{{item.serviceModule}}</Option>
             </Select>
             <div style="padding:10px 10px 10px 10px ">
-                <span style="padding:10px 10px 10px 0 ">服务类型</span>
+                <span style="padding:10px 10px 10px 0 ">服务类型1</span>
                 <Select label="" v-model.trim="serviceTypeSelected" style="width:150px;margin-right:20px">
                     <Option v-for="(item,id) in serviceTypeOption" :key="id" :value="item.serviceTypeCode">{{item.serviceType}}</Option>
                 </Select>
