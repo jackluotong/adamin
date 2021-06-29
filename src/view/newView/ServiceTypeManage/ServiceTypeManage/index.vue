@@ -8,9 +8,9 @@
       <Input v-model.trim="serviceType" />
       <Button type="primary" icon="md-search" @click="search()" style="margin:0 10px 0 20px">查询</Button>
       <Button type="primary" icon="md-refresh" @click="reset()">重置</Button>
-      <Button type="primary" icon="md-add" @click="addSetting()"
+     <!--  <Button type="primary" icon="md-add" @click="addSetting()"
       v-show="permission.includes('serviceType:manage:addModule')"
-      >新增模块</Button>
+      >新增模块</Button> -->
       <Button type="primary" icon="md-add" @click="addSettingType()"
             v-show="permission.includes('serviceType:manage:addType')"
 >新增服务类型</Button>
