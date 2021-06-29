@@ -51,7 +51,7 @@ module.exports = {
   devServer: {
     proxy: {
       '/dcenter': { // https://wxcs.internal.manulife-sinochem.com/dev/giq/
-        target: 'https://wxcs.internal.manulife-sinochem.com/dev/giq/', // http://maxwell.cn.utools.club  http://yang.cn1.utools.club http://192.168.1.214:7799
+        target: 'http://192.168.3.137:7799', // http://maxwell.cn.utools.club  http://yang.cn1.utools.club http://192.168.1.214:7799
         changeOrigin: true, // 改变源
         pathRewrite: { // '^/bridge': '/bridge' // 路径重写
         }

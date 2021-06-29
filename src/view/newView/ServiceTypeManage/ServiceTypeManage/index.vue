@@ -16,7 +16,7 @@
 >新增服务类型</Button>
     </div>
     <Table highlight-row stripe :columns="columns" :data="confData" style="margin-top: 5px">
-       <template slot-scope="{ row, index }" slot="action">
+       <template slot-scope="{ index }" slot="action">
           <div>
            <!--  <Button type="primary" size="small" style="margin-right: 5px" @click="editModule(index)"
                   v-show="permission.includes('serviceType:manage:editModule')"

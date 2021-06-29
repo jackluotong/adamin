@@ -351,7 +351,6 @@ export default[
           icon: 'ios-settings',
           title: '明细查询',
           access: 'statistic:detail',
-
           hideInMenu: false
         },
         component: () => import ('@/view/newView/StatisticalForm/DetailsInquire')

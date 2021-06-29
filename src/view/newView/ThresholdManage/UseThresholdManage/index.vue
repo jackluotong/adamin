@@ -153,7 +153,7 @@
         </Modal>
          <Modal v-model.trim="modalFusing" width="450" title="删除参数配置提示">
             <div>
-                <p>确定删除该参数配置吗？</p>
+                <p>确定熔断该配置吗？</p>
             </div>
             <div slot="footer">
                 <Button type="text" @click="cancelFusing" size="large">取消</Button>
@@ -208,6 +208,7 @@ export default {
     }
 
     return {
+      fusingId: '',
       permission: sessionStorage.getItem('permission'),
       applicationCodeSelected: [],
       appOption: [],
@@ -367,13 +368,6 @@ export default {
       this.$refs[index].validate(valid => {
         if (valid) {
           if (this.showType === 'add') {
-          /*   const info = {
-              applicationCode: this.formInline.applicationCode,
-              timesThreshold: parseInt(this.formInline.timesThreshold),
-              hoursThreshold: parseInt(this.formInline.hoursThreshold),
-              serviceTypeCode: this.formInline.serviceTypeCode
-            } */
-            console.log(this.formInline)
             addUseThreShold(this.formInline)
               .then(res => {
                 console.log(res)
@@ -435,6 +429,13 @@ export default {
     },
     handleSubmitFusng () {
       cancelUseThreShold(this.fusingId).then(res => {
+        this.$Message.info({
+          content: res.data.message
+        })
+        this.getUseThreShold()
+        this.modalFusing = false
+      }).catch(err => {
+        console.log(err)
       })
     },
     cancelFusing () {
@@ -469,7 +470,6 @@ export default {
         currentPage: this.pageNum
       }
       getUseThreShold(info).then(res => {
-        console.log(res)
         this.renderPage(res.data.data.records, res.data.data.total)
       })
     }
