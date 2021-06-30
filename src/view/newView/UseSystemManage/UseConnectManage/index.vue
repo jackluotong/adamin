@@ -247,7 +247,14 @@ export default {
           align: 'center'
         },
         {
+          title: '服务类型',
+          key: 'serviceType',
+          width: 300,
+          align: 'center'
+        },
+        {
           title: '操作',
+          width: 300,
           slot: 'action',
           align: 'center'
         }
@@ -259,9 +266,8 @@ export default {
       const info = {
         pageSize: e,
         currentPage: this.pageNum
-
       }
-      getInfo(info).then(res => {
+      getInfoConnect(info).then(res => {
         this.renderPage(res.data.data.records, res.data.data.total)
       })
     },
@@ -270,7 +276,8 @@ export default {
         pageSize: this.pageSize,
         currentPage: e
       }
-      getInfo(info).then(res => {
+      console.log(e)
+      getInfoConnect(info).then(res => {
         this.renderPage(res.data.data.records, res.data.data.total)
       })
     },

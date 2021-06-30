@@ -12,7 +12,7 @@
       v-show="permission.includes('serviceType:manage:addModule')"
       >新增模块</Button> -->
       <Button type="primary" icon="md-add" @click="addSettingType()"
-            v-show="permission.includes('serviceType:manage:addType')"
+            v-show="permission.includes('serviceType:serviceType:add')"
 >新增服务类型</Button>
     </div>
     <Table highlight-row stripe :columns="columns" :data="confData" style="margin-top: 5px">
@@ -25,10 +25,10 @@
                   v-show="permission.includes('serviceType:manage:deleteModule')"
 >删除模块</Button> -->
             <Button type="primary" size="small" style="margin-right: 5px" @click="editType(index)"
-                  v-show="permission.includes('serviceType:manage:editType')"
+                  v-show="permission.includes('serviceType:serviceType:edit')"
 >编辑类型</Button>
             <Button type="error" size="small" style="margin-right: 5px" @click="delType(index)"
-                  v-show="permission.includes('serviceType:manage:deleteType')"
+                  v-show="permission.includes('serviceType:serviceType:delete')"
 >删除类型</Button>
           </div>
         </template>

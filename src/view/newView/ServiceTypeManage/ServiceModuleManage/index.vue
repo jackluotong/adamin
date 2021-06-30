@@ -36,7 +36,7 @@
       <Input v-model.trim="serviceModule" @on-enter="enter"/>
       <Button type="primary" icon="md-search" @click="search()" style="margin:0 10px 0 20px">查询</Button>
       <Button type="primary" icon="md-add" @click="addSetting()"
-                  v-show="permission.includes('serviceModule:manage:add')"
+                  v-show="permission.includes('serviceType:serviceModule:add')"
 >新增</Button>
                   <Button type="primary" icon="md-refresh" @click="reset()">重置</Button>
     </div>
@@ -44,10 +44,10 @@
        <template slot-scope="{index }" slot="action">
           <div>
             <Button type="primary" size="small" style="margin-right: 5px" @click="edit(index)"
-                              v-show="permission.includes('serviceModule:manage:edit')"
+                              v-show="permission.includes('serviceType:serviceModule:edit')"
 >编辑</Button>
             <Button type="error" size="small" style="margin-right: 5px" @click="del(index)"
-                              v-show="permission.includes('serviceModule:manage:delete')"
+                              v-show="permission.includes('serviceType:serviceModule:delete')"
 >删除</Button>
           </div>
         </template>

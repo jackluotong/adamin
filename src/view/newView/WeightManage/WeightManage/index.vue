@@ -68,7 +68,7 @@
         />
 
         <Modal
-            v-model.trim="modalEdit"
+            v-model.trim="modalAdd"
             width="600"
             :mask-closable="false"
             :closable="false"
@@ -112,6 +112,7 @@
                     label="所属应用"
                     prop="useCalled"
                     style="width:270px;"
+                    v-show="selectedWeight===2?true:false"
                 >
                     <Select v-model.trim="useSelected" style="width:200px">
                             <Option v-for="(item,index) in useOption" :key="index" :value='item.applicationCode'>{{ item.applicationCode }}</Option>
@@ -174,12 +175,66 @@
                 >
             </div>
         </Modal>
+        <!-- edit -->
+          <Modal
+            v-model.trim="modalEdit"
+            width="600"
+            :mask-closable="false"
+            :closable="false"
+            title="编辑权重"
+        >
+
+            <span style="padding:10px">服务模块</span>
+                        <Input class="inputClasee" v-model.trim="editObj.moduleEdit" readonly/>
+            <span style="padding:10px">服务类型</span>
+                        <Input class="inputClasee" v-model.trim="editObj.serviceTypeEdit" readonly/>
+            <span style="padding:10px">权重类型</span>
+                        <Input class="inputClasee" v-model.trim="editObj.weightEit" readonly/>
+            <span style="padding:10px">所属应用</span>
+                        <Input class="inputClasee" v-model.trim="editObj.usingEdit" readonly/>
+            <div style="display:flex,flex-direction:row,justify-content:flex-start">
+            <Checkbox-group
+                v-model="editObj.checkedDataEdit"
+                @on-change="selectedEdit"
+            >
+                <Checkbox
+                    v-for="(item, index) in editObj.checkListEdit"
+                    :key="index"
+                    :label="item.manufacturerCode"
+                    :value="item.manufacturerName"
+                    size="large"
+                    ref="checkBox"
+                    >{{ item.manufacturerName }}</Checkbox
+                >
+              </Checkbox-group>
+
+               <span>权重</span>
+                <Input style="width:320px" v-model="inputValue">
+                </Input>
+        </div>
+            <div slot="footer">
+                <Button
+                    type="primary"
+                    ghost
+                    size="large"
+                    @click="cancelEdit('formInline')"
+                    >返回</Button
+                >
+                <Button
+                    type="primary"
+                    size="large"
+                    @click="handleSubmitEdit('formInline')"
+                    >保存</Button
+                >
+            </div>
+        </Modal>
     </div>
 </template>
 
 <script>
 import { inquireServiceModule, serarchTypeByModule } from '@/api/data'
 import { getWeight, searchManufacture, addWeight, deleteWeight, editWeight } from '@/api/weightManage'
+import { getManufacture } from '@/api/thirdPart'
 import { getAllApp } from '@/api/thresholdManage'
 export default {
   data () {
@@ -221,6 +276,16 @@ export default {
       }
     }
     return {
+      editObj: {
+        serviceTypeEdit: '',
+        moduleEdit: '',
+        usingEdit: '',
+        weightEit: '',
+        checkedDataEdit: [],
+        checkListEdit: [],
+        serviceTypeCode: ''
+      },
+      modalEdit: false,
       permission: sessionStorage.getItem('permission'),
       modalDelete: false,
       checkList: [],
@@ -243,9 +308,8 @@ export default {
       useCalled: '',
       contactPhone: '',
       contactEmails: '',
-      modalEdit: false,
+      modalAdd: false,
       detailTitle: '',
-      showType: '',
       deleteOject: {
         serviceTypeCode: '',
         applicationCode: '',
@@ -303,7 +367,10 @@ export default {
         },
         { title: '权重类型',
           key: 'weightType',
-          align: 'center'
+          align: 'center',
+          render: (h, params) => {
+            if (params.row.weightType === '1') { return h('span', '应用权重') } else if (params.row.weightType === '2') { return h('span', '通用权重') } else { return h('span', '参数错误') }
+          }
         },
         { title: '服务类型',
           key: 'serviceType',
@@ -342,7 +409,7 @@ export default {
           key: 'weightType',
           align: 'center',
           render: (h, params) => {
-            if (params.row.weightType === '1') { return h('span', '应用权重') } else if (params.row.weightType === '2') { return h('span', '应用权重') } else { return h('span', '参数错误') }
+            if (params.row.weightType === '1') { return h('span', '应用权重') } else if (params.row.weightType === '2') { return h('span', '通用权重') } else { return h('span', '参数错误') }
           }
         },
         { title: '所属应用',
@@ -378,11 +445,23 @@ export default {
     }
   },
   methods: {
+    getManufacture () {
+      const info = {
+        currentPage: 1,
+        pageSize: 100000
+      }
+      getManufacture(info).then(res => {
+        console.log(res)
+        this.editObj.checkListEdit = res.data.data.records
+      })
+    },
+    selectedEdit (e) {
+      console.log(e, this.editObj.checkedDataEdit)
+    },
     onpagesizechange (e) {
       const info = {
         pageSize: e,
         currentPage: this.pageNum
-
       }
       getWeight(info).then(res => {
         this.renderPage(res.data.data.records, res.data.data.total, 1)
@@ -405,6 +484,7 @@ export default {
       }
       console.log(info)
       searchManufacture(info).then(res => {
+        console.log(res)
         this.checkList = res.data.data
       })
     },
@@ -430,82 +510,89 @@ export default {
       })
     },
     reset () {
-      this.useName = null
-      this.useCalled = null
-      this.contactPhone = null
+      this.useSelected = null
+      this.selectedModuleType = null
+      this.checkedData = null
+      this.inputValue = null
+      this.selectedWeight = null
+      this.selectedModuleTwo = null
     },
     addSetting () {
-      this.reset()
-      this.showType = 'add'
-      this.detailTitle = '新增模块'
-      this.modalEdit = true
+      this.inputValue = null
+      this.detailTitle = '新增阈值管理'
+      this.modalAdd = true
     },
     handleSubmitAddOrUpdate (index) {
       this.$refs[index].validate(valid => {
         if (valid) {
-          if (this.showType === 'add') {
-            const info = {
-              applicationCode: this.useSelected,
-              serviceTypeCode: this.selectedModuleType,
-              weightRatioKey: this.checkedData.join(':'),
-              weightRatioValue: this.inputValue,
-              weightType: this.selectedWeight,
-              serviceModuleCode: this.selectedModuleTwo
-            }
-            addWeight(info).then(res => {
-              this.$Message.success({
-                content: res.data.message
-              })
-              this.getWeight(1, 1)
-              this.modalEdit = false
-            }).catch(error => {
-              this.$Message.error({
-                content: error
-              })
-              this.modalEdit = false
-            })
-          } else if (this.showType === 'edit') {
-            const info = {
-              applicationCode: this.useSelected,
-              serviceTypeCode: this.selectedModuleType,
-              weightRatioKey: this.checkedData.join(':'),
-              weightRatioValue: this.inputValue,
-              weightType: this.selectedWeight,
-              serviceModuleCode: this.selectedModuleTwo
-            }
-            editWeight(info).then(res => {
-              this.$Message.success({
-                content: res.data.message
-              })
-              this.getWeight(1, 1)
-              this.modalEdit = false
-            }).catch(error => {
-              this.$Message.error({
-                content: error
-              })
-              this.modalEdit = false
-            })
+          const info = {
+            applicationCode: this.useSelected,
+            serviceTypeCode: this.selectedModuleType,
+            weightRatioKey: this.checkedData.join(':'),
+            weightRatioValue: this.inputValue,
+            weightType: this.selectedWeight,
+            serviceModuleCode: this.selectedModuleTwo
           }
+          addWeight(info).then(res => {
+            this.$Message.success({
+              content: res.data.message
+            })
+            this.getWeight(1, 1)
+            this.reset()
+            this.modalAdd = false
+          }).catch(error => {
+            this.$Message.error({
+              content: error
+            })
+          })
         } else {
           this.$Message.error('请检查参数是否有误!')
         }
       })
     },
+    handleSubmitEdit () {
+      const info = {
+        applicationCode: this.editObj.usingEdit,
+        serviceTypeCode: this.editObj.serviceTypeCode,
+        weightRatioKey: this.editObj.checkedDataEdit.join(':'),
+        weightRatioValue: this.inputValue,
+        weightType: this.editObj.weightEit
+      }
+      console.log(info)
+      editWeight(info).then(res => {
+        this.$Message.success({
+          content: res.data.message
+        })
+        this.getWeight(1, 1)
+        this.modalEdit = false
+      }).catch(error => {
+        console.log(error)
+      })
+    },
+    cancelEdit () {
+      this.modalEdit = false
+    },
     cancelAddOrUpdate (name) {
       this.$refs[name].resetFields()
-      this.modalEdit = false
+      this.modalAdd = false
     },
     cancelAddOrUpdateType () {
-      this.modalEdit = false
+      this.modalAdd = false
     },
     edit (index, row) {
-      this.useSelected = row.applicationCode
+      console.log(row)
+      /*  this.useSelected = row.applicationCode
       this.inputValue = row.weightRatioValue
       this.selectedWeight = row.weightType
-      this.selectedModuleTwo = row.serviceModule
-      this.showType = 'edit'
-      this.detailTitle = '编辑模块'
+      this.selectedModuleTwo = row.serviceModule */
+      this.editObj.checkedDataEdit = row.weightRatioKey.replace(new RegExp(/(:)/g), ',').split(',')
       this.modalEdit = true
+      this.editObj.moduleEdit = row.serviceModule
+      this.editObj.serviceTypeEdit = row.serviceType
+      this.editObj.weightEit = row.weightType
+      this.editObj.usingEdit = row.applicationCode
+      this.inputValue = row.weightRatioValue
+      this.editObj.serviceTypeCode = row.serviceTypeCode
     },
     lookAbnormalWeight (index) {
       this.showWeightAbnormal = true
@@ -552,7 +639,6 @@ export default {
         currentPage: this.pageNum,
         pageSize: this.pageSize
       }
-      console.log(info)
       getWeight(info).then(res => {
         console.log(res)
         this.renderPage(res.data.data.records, res.data.data.total, flag)
@@ -565,6 +651,7 @@ export default {
   },
   created () {
     this.getWeight(1, 1)
+    this.getManufacture()
     const infoModule = {
       pageSize: 10000,
       currentPage: 1
@@ -607,5 +694,15 @@ export default {
     color: #515a6e;
     position: relative;
     word-break: break-all;
+}
+.inputClasee{
+    width: 200px;
+    border-radius:30px ;
+    display: flex;
+    align-items: center;
+}
+.span{
+    font-size: 14px;
+    font-weight: 100;
 }
 </style>

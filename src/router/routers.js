@@ -153,7 +153,7 @@ export default[
         meta: {
           icon: 'ios-folder-open-outline',
           title: '服务类型管理',
-          access: 'serviceType:manage',
+          access: 'serviceType:serviceType',
           hideInMenu: false
         },
         component: () => import ('@/view/newView/ServiceTypeManage/ServiceTypeManage')
@@ -163,7 +163,7 @@ export default[
         meta: {
           icon: 'ios-folder-open-outline',
           title: '服务模块管理',
-          access: 'serviceModule:manage',
+          access: 'serviceType:serviceModule',
           hideInMenu: false
         },
         component: () => import ('@/view/newView/ServiceTypeManage/ServiceModuleManage')
@@ -241,7 +241,7 @@ export default[
     ]
   }, {
     path: '/WeightManage',
-    name: 'WeightManage',
+    name: '_WeightManage',
     meta: {
       icon: 'ios-construct',
       title: '权重管理',
@@ -256,7 +256,7 @@ export default[
         meta: {
           icon: 'ios-settings',
           title: '权重管理',
-          access: ' weight:manage',
+          access: 'weight:manage',
 
           hideInMenu: false
         },
