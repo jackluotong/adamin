@@ -639,6 +639,7 @@ export default {
         currentPage: this.pageNum,
         pageSize: this.pageSize
       }
+      console.log(info)
       getWeight(info).then(res => {
         console.log(res)
         this.renderPage(res.data.data.records, res.data.data.total, flag)
@@ -694,15 +695,5 @@ export default {
     color: #515a6e;
     position: relative;
     word-break: break-all;
-}
-.inputClasee{
-    width: 200px;
-    border-radius:30px ;
-    display: flex;
-    align-items: center;
-}
-.span{
-    font-size: 14px;
-    font-weight: 100;
 }
 </style>
