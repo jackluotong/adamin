@@ -27,6 +27,7 @@ module.exports = {
       .set('@', resolve('src')) // key,value自行定义，比如.set('@@', resolve('src/components'))
       .set('_c', resolve('src/components'))
   },
+
   productionSourceMap: true,
   devServer: {
     port: 3030,
@@ -35,7 +36,7 @@ module.exports = {
     open: true,
     proxy: {
       '/dcenter': { // https://wxcs.internal.manulife-sinochem.com/dev/giq/
-        target: 'http://192.168.3.137:7799', // http://maxwell.cn.utools.club  http://yang.cn1.utools.club http://192.168.1.214:7799
+        target: 'https://wxcs.internal.manulife-sinochem.com/dev/giq/', // http://maxwell.cn.utools.club  http://yang.cn1.utools.club http://192.168.1.214:7799
         changeOrigin: true, // 改变源
         pathRewrite: { // '^/bridge': '/bridge' // 路径重写
         }
@@ -45,7 +46,10 @@ module.exports = {
   configureWebpack: {
     plugins: [
       new webpack.HotModuleReplacementPlugin()
-    ]
+    ],
+    output: {
+      filename: this.mode === 'production' ? 'js/[name].[contenthash:10].js' : 'js/[name].[hash:10].js'
+    }
   }
 
 }

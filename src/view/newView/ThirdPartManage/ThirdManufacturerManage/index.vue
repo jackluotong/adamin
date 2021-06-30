@@ -304,13 +304,14 @@ export default {
       this.modalAddOrUpdate = true
     },
     deleteClick (index) {
-      this.deleteId = this.confData[index].id
+      this.deleteId = this.confData[index].manufacturerCode
       this.modalDelete = true
     },
     cancelDelete () {
       this.modalDelete = false
     },
     handleSubmitDelete () {
+      console.log(this.deleteId)
       deleteManufacture(this.deleteId)
         .then((res) => {
           this.$Message['success']({
