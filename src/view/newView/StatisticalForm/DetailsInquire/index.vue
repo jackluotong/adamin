@@ -1,6 +1,7 @@
 <template>
     <div class="user-content">
-        <div class="content-button">
+        <h1 style="margin:10px 10px 10px 10px">应用系统管理-明细查询</h1>
+        <div class="content-button" >
             <span style="padding:10px">应用名称</span>
             <Input v-model.trim="applicationName" />
             <span style="padding:10px">应用简称</span>
@@ -13,19 +14,20 @@
             <Select label="" v-model.trim="serviceModuleSelected" style="width:150px; margin-right:20px;">
                 <Option v-for="(item,id) in serviceModuleOption" :key="id" :value="item.serviceModuleCode">{{item.serviceModule}}</Option>
             </Select>
-            <div style="padding:10px 10px 10px 10px ">
-                <span style="padding:10px 10px 10px 0 ">服务类型1</span>
+                <span style="padding:10px 10px 10px 0 ">服务类型</span>
                 <Select label="" v-model.trim="serviceTypeSelected" style="width:150px;margin-right:20px">
                     <Option v-for="(item,id) in serviceTypeOption" :key="id" :value="item.serviceTypeCode">{{item.serviceType}}</Option>
                 </Select>
-                <span style="padding:10px">请求时间</span>
+             </div>
+            <div style="display:flex">
+                <span style="padding:10px 18px">请求时间</span>
                 <Row>
                 <Col span="12">
-                         <Date-picker type="daterange" placement="bottom-end" placeholder="选择日期" style="width: 200px" @on-change='selectTime' v-model="selectedDate"></Date-picker>
+                    <Date-picker type="daterange" placement="bottom-end" placeholder="选择日期" style="width: 200px" @on-change='selectTime' v-model="selectedDate"></Date-picker>
                 </Col>
                 </Row>
             </div>
-        </div>
+
         <div style="">
             <Button type="primary" icon="md-search" @click="search()" style="margin:10px">查询</Button>
                   <Button type="primary" icon="md-refresh" @click="reset()">重置</Button>
@@ -202,7 +204,7 @@ export default {
       const info =
        {
          currentPage: 1,
-         pageSize: 20,
+         pageSize: 10,
          applicationCode: this.applicationCode,
          serviceTypeCode: this.serviceTypeSelected,
          manufacturerCode: '',
@@ -211,7 +213,9 @@ export default {
          startTime: this.time === null ? '' : this.time[0],
          endTime: this.time === null ? '' : this.time[1]
        }
+      console.log(info)
       getInfoDetails(info).then(res => {
+        console.log(res)
         this.renderPage(res.data.data.records, res.data.data.total)
       })
     },

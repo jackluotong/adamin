@@ -96,17 +96,17 @@
         >
     <Form ref="formInline" :model="formInline">
         <FormItem label="服务类型" style="width:300px;" >
-            <Select label="" v-model.trim="formInline.serviceTypeCode" style="width:150px;margin-right:20px">
+            <Select label="" v-model.trim="formInline.serviceTypeCode" style="width:150px;margin-right:20px" clearable>
                    <Option v-for="(item,id) of typeOption" :key="id" :value="item.serviceTypeCode">{{item.serviceType}}</Option>
             </Select>
         </FormItem><br>
          <FormItem label="应用名称" style="width:300px;" >
-            <Select label="" v-model.trim="formInline.applicationCode" style="width:150px;margin-right:20px">
+            <Select label="" v-model.trim="formInline.applicationCode" style="width:150px;margin-right:20px" clearable>
                    <Option v-for="(item,index) of appOption" :key="index" :value="item.applicationCode">{{item.applicationName}}</Option>
             </Select>
         </FormItem><br>
          <FormItem label="应用简称" style="width:300px;" >
-            <Select label="" v-model.trim="formInline.applicationCode" style="width:150px;margin-right:20px">
+            <Select label="" v-model.trim="formInline.applicationCode" style="width:150px;margin-right:20px" clearable>
                    <Option v-for="(item,index) of appOption" :key="index" :value="item.applicationCode">{{item.applicationCode}}</Option>
             </Select>
         </FormItem><br>
@@ -153,7 +153,7 @@
         </Modal>
          <Modal v-model.trim="modalFusing" width="450" title="删除参数配置提示">
             <div>
-                <p>确定删除该参数配置吗？</p>
+                <p>确定熔断该配置吗？</p>
             </div>
             <div slot="footer">
                 <Button type="text" @click="cancelFusing" size="large">取消</Button>
@@ -208,6 +208,7 @@ export default {
     }
 
     return {
+      fusingId: '',
       permission: sessionStorage.getItem('permission'),
       applicationCodeSelected: [],
       appOption: [],
@@ -310,7 +311,7 @@ export default {
           key: 'serviceStatus',
           width: 300,
           render: (h, params) => {
-            if (permission.includes('threshold:application:cut')) {
+            if (this.permission.includes('threshold:application:cut')) {
               if (params.row.fused === 1) {
                 return h('Button', {
                   on: {
@@ -360,20 +361,13 @@ export default {
     addSetting () {
       this.reset()
       this.showType = 'add'
-      this.detailTitle = '新增模块'
+      this.detailTitle = '新增阈值'
       this.modalEdit = true
     },
     handleSubmitAddOrUpdate (index) {
       this.$refs[index].validate(valid => {
         if (valid) {
           if (this.showType === 'add') {
-          /*   const info = {
-              applicationCode: this.formInline.applicationCode,
-              timesThreshold: parseInt(this.formInline.timesThreshold),
-              hoursThreshold: parseInt(this.formInline.hoursThreshold),
-              serviceTypeCode: this.formInline.serviceTypeCode
-            } */
-            console.log(this.formInline)
             addUseThreShold(this.formInline)
               .then(res => {
                 console.log(res)
@@ -430,11 +424,18 @@ export default {
       this.formInline.hoursThreshold = this.confData[index].hoursThreshold
       this.formInline.timesThreshold = this.confData[index].timesThreshold
       this.showType = 'edit'
-      this.detailTitle = '编辑模块'
+      this.detailTitle = '编辑阈值'
       this.modalEdit = true
     },
     handleSubmitFusng () {
       cancelUseThreShold(this.fusingId).then(res => {
+        this.$Message.info({
+          content: res.data.message
+        })
+        this.getUseThreShold()
+        this.modalFusing = false
+      }).catch(err => {
+        console.log(err)
       })
     },
     cancelFusing () {

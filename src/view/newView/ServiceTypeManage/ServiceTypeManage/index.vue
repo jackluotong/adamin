@@ -8,15 +8,15 @@
       <Input v-model.trim="serviceType" />
       <Button type="primary" icon="md-search" @click="search()" style="margin:0 10px 0 20px">查询</Button>
       <Button type="primary" icon="md-refresh" @click="reset()">重置</Button>
-      <Button type="primary" icon="md-add" @click="addSetting()"
+     <!--  <Button type="primary" icon="md-add" @click="addSetting()"
       v-show="permission.includes('serviceType:manage:addModule')"
-      >新增模块</Button>
+      >新增模块</Button> -->
       <Button type="primary" icon="md-add" @click="addSettingType()"
             v-show="permission.includes('serviceType:manage:addType')"
 >新增服务类型</Button>
     </div>
     <Table highlight-row stripe :columns="columns" :data="confData" style="margin-top: 5px">
-       <template slot-scope="{ row, index }" slot="action">
+       <template slot-scope="{ index }" slot="action">
           <div>
            <!--  <Button type="primary" size="small" style="margin-right: 5px" @click="editModule(index)"
                   v-show="permission.includes('serviceType:manage:editModule')"

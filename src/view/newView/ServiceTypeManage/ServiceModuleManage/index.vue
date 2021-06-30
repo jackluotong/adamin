@@ -32,13 +32,11 @@
   <div class="user-content">
     <h1 style="margin:10px 10px 10px 10px">服务类型管理-服务模块管理</h1>
     <div class="content-button" >
-      <span style="padding:10px" >角色名称</span>
-      <Input v-model.trim="roleName" @on-enter="enter"/>
-      <span style="padding:10px">角色code</span>
-      <Input v-model.trim="roleCode" />
+      <span style="padding:10px" >模块名称</span>
+      <Input v-model.trim="serviceModule" @on-enter="enter"/>
       <Button type="primary" icon="md-search" @click="search()" style="margin:0 10px 0 20px">查询</Button>
       <Button type="primary" icon="md-add" @click="addSetting()"
-                  v-show="permission.includes('account:role:add')"
+                  v-show="permission.includes('serviceModule:manage:add')"
 >新增</Button>
                   <Button type="primary" icon="md-refresh" @click="reset()">重置</Button>
     </div>
@@ -46,15 +44,17 @@
        <template slot-scope="{index }" slot="action">
           <div>
             <Button type="primary" size="small" style="margin-right: 5px" @click="edit(index)"
-                              v-show="permission.includes('account:role:edit')"
+                              v-show="permission.includes('serviceModule:manage:edit')"
 >编辑</Button>
             <Button type="error" size="small" style="margin-right: 5px" @click="del(index)"
-                              v-show="permission.includes('account:role:delete')"
+                              v-show="permission.includes('serviceModule:manage:delete')"
 >删除</Button>
           </div>
         </template>
      </Table>
-     <Page :total='total' :page-size='pageSize' :show-total="true" show-sizer style="text-align: center;margin-top: 5px"/>
+     <Page :total='total' :page-size='pageSize' :show-total="true" show-sizer style="text-align: center;margin-top: 5px"
+      @on-change='changePage'
+     @on-page-size-change='onpagesizechange'/>
      <Modal
      v-model.trim="modalAddOrUpdate"
      width="600"
@@ -63,40 +63,8 @@
      v-bind:title="detailTitle"
      class-name="vertical-center-modal">
       <Form ref="formInline" :model="formInline" :rules="ruleInline" inline>
-        <FormItem label="角色名称" prop="roleName" style="width:270px;">
-          <Input v-model.trim="formInline.roleName"/>
-        </FormItem>
-        <FormItem label="角色code" prop="roleCode" style="display:none">
-          <Input  v-model.trim="formInline.roleCode" :disabled='readOnly'/>
-        </FormItem>
-        <FormItem>
-        <div style="width:280px">
-        <a-tree-select
-            :defaultValue='defaultSelected'
-            :allowClear='true'
-            v-model="selectedValue"
-            :tree-data="treeData"
-            tree-checkable
-            :show-checked-strategy="SHOW_PARENT"
-            :replaceFields='replaceFields'
-            placeholder='请选择'
-            :appendToBody="true"
-            @select='selected'
-        />
-      <!--    <el-tree
-            :data="treeData"
-            show-checkbox
-            node-key="id"
-            :default-expanded-keys="[2, 3]"
-            :default-checked-keys="[5]"
-            :props="defaultProps"
-            highlight-current
-            ref="tree"
-            @check-change="handleNodeClick"
-            @node-click="handleNodeClickNode"
-            >
-            </el-tree> -->
-         </div>
+        <FormItem label="服务模块" prop="serviceModule" style="width:270px;">
+          <Input v-model.trim="formInline.serviceModule"/>
         </FormItem>
       </Form>
       <div slot="footer">
@@ -118,9 +86,7 @@
 </template>
 
 <script>
-import { getInfoRole, getAuthTree, editRole, deleteRole } from '@/api/data'
-import { TreeSelect } from 'ant-design-vue'
-const SHOW_PARENT = TreeSelect.SHOW_PARENT
+import { editServiceModule, inquireServiceModule, deletModule } from '@/api/data'
 export default {
   data () {
     function getByteLen (val) {
@@ -135,7 +101,7 @@ export default {
       }
       return len
     }
-    const validateroleName = function (rule, value, callback) {
+    const validateserviceModule = function (rule, value, callback) {
       if (!value) {
         callback(new Error('请输入角色名称'))
       } else if (getByteLen(value) > 128) {
@@ -145,48 +111,36 @@ export default {
       }
     }
     return {
-      expandedKeys: '',
-      checkedKeys: '',
-      defaultSelected: '',
       permission: sessionStorage.getItem('permission'),
-      saveRoleCode: '',
+      serviceModuleCode: '',
       readOnly: false,
       saveRoleId: [],
       selectedValue: [],
       treeData: [],
-      SHOW_PARENT,
       total: 0,
       pageNum: 1,
       pageSize: 10,
-      roleName: '',
+      serviceModule: '',
       roleCode: '',
       modalAddOrUpdate: false,
       detailTitle: '',
       showType: '',
       modalDelete: false,
       formInline: {
-        roleName: '',
-        roleCode: '',
-        confValue: '',
-        confDescribtion: ''
+        serviceModule: '',
+        serviceModuleCode: ''
       },
       ruleInline: {
-        roleName: [
-          { required: true, validator: validateroleName, trigger: 'blur' }
+        serviceModule: [
+          { required: true, validator: validateserviceModule, trigger: 'blur' }
         ]
       },
       confData: [],
       columns: [
         {
-          title: '角色名称',
-          key: 'roleName',
+          title: '服务模块',
+          key: 'serviceModule',
           tooltip: true,
-          width: 300,
-          align: 'center'
-        },
-        {
-          title: '角色code',
-          key: 'roleCode',
           width: 300,
           align: 'center'
         },
@@ -195,54 +149,43 @@ export default {
           slot: 'action',
           align: 'center'
         }
-      ],
-      defaultProps: {
-        children: 'children',
-        label: 'authName',
-        id: 'id',
-        value: 'authCode'
-      },
-      replaceFields: {
-        children: 'children',
-        title: 'authName',
-        key: 'id',
-        value: 'authCode'
-      }
-
+      ]
     }
   },
   methods: {
+    onpagesizechange (e) {
+      const info = {
+        pageSize: e,
+        currentPage: this.pageNum
+      }
+      inquireServiceModule(info).then(res => {
+        this.renderPage(res.data.data.records, res.data.data.total)
+      })
+    },
+    changePage (e) {
+      const info = {
+        pageSize: this.pageSize,
+        currentPage: e
+      }
+      inquireServiceModule(info).then(res => {
+        this.renderPage(res.data.data.records, res.data.data.total)
+      })
+    },
     reset () {
-      this.roleName = null
+      this.serviceModule = null
       this.roleCode = null
     },
     enter () {
-      this.renderPangeAgain()
-    },
-    renderPangeAgain () {
-      const data = {
-        roleName: this.roleName,
-        roleCode: this.roleCode
-      }
-      getInfoRole(data).then(res => {
-        const data = res.data.data
-        const total = res.data.data.total
-        this.renderPage(data, total)
-      })
-    },
-    selected (checkedKeys) {
+      this.getInfo()
     },
     search () {
       const data = {
-        roleName: this.roleName,
-        roleCode: this.roleCode,
-        pageSize: this.pageSize,
-        currentPage: 1
+        serviceModule: this.serviceModule,
+        currentPage: this.pageNum,
+        pageSize: this.pageSize
       }
-      getInfoRole(data).then(res => {
-        const data = res.data.data
-        const total = res.data.data.length
-        this.renderPage(data, total)
+      inquireServiceModule(data).then(res => {
+        this.renderPage(res.data.data.records, res.data.data.records.length)
       }).catch(err => console.log(err))
     },
     addSetting () {
@@ -255,14 +198,12 @@ export default {
         if (valid) {
           if (this.showType === 'edit') {
             const info = {
-              'roleName': this.formInline.roleName,
-              'roleCode': this.formInline.roleCode,
-              'roleId': this.saveRoleId,
-              'authCode': this.selectedValue
+              serviceModuleCode: this.formInline.serviceModuleCode,
+              serviceModule: this.formInline.serviceModule
             }
             console.log(info)
-            editRole(info).then(res => {
-              this.renderPangeAgain()
+            editServiceModule(info).then(res => {
+              this.getInfo()
               this.$Message['success']({
                 background: true,
                 content: res.data.message
@@ -272,13 +213,15 @@ export default {
             }).catch(err => console.log(err))
           } else if (this.showType === 'add') {
             const info = {
-              'roleName': this.formInline.roleName,
-              'authCode': this.selectedValue
+              serviceModule: this.formInline.serviceModule
             }
-            console.log(info)
-            editRole(info).then(res => {
+            editServiceModule(info).then(res => {
+              this.$Message['success']({
+                background: true,
+                content: res.data.message
+              })
               this.modalAddOrUpdate = false
-              this.renderPangeAgain()
+              this.getInfo()
             }).catch(err => {
               console.log(err)
             })
@@ -296,54 +239,50 @@ export default {
       this.saveRoleId = this.confData[index].roleId
       this.showType = 'edit'
       this.id = this.confData[index].id
-      this.formInline.roleName = this.confData[index].roleName
-      this.formInline.roleCode = this.confData[index].roleCode
-      this.formInline.confValue = this.confData[index].confValue
-      this.formInline.confDescribtion = this.confData[index].confDescribtion
+      this.formInline.serviceModule = this.confData[index].serviceModule
+      this.formInline.serviceModuleCode = this.confData[index].serviceModuleCode
       this.detailTitle = '修改全局配置信息'
       this.modalAddOrUpdate = true
       this.defaultSelected = ''
     },
     del (index) {
       this.modalDelete = true
-      this.saveRoleCode = this.confData[index].roleCode
+      this.serviceModuleCode = this.confData[index].serviceModuleCode
     },
     cancelDelete () {
       this.modalDelete = false
     },
     handleSubmitDelete () {
-      const info = this.saveRoleCode
-      deleteRole(info).then(res => {
+      console.log(this.serviceModuleCode)
+      deletModule(this.serviceModuleCode).then(res => {
         this.$Message.success({
           content: res.data.message
         })
-        this.renderPangeAgain()
+        this.getInfo()
       }).catch(err => console.log(err))
       this.modalDelete = false
     },
     renderPage (data, total) {
       this.confData = data
       this.total = total
+    },
+    getInfo () {
+      const data = {
+        currentPage: this.pageNum,
+        pageSize: this.pageSize
+      }
+      inquireServiceModule(data).then(res => {
+        console.log(res)
+        const data = res.data.data.records
+        const total = res.data.data.total
+        this.renderPage(data, total)
+      })
     }
   },
   created () {
-    const data = {
-      roleName: this.roleName,
-      roleCode: this.roleCode,
-      pageNum: this.pageNum,
-      pageSize: this.pageSize
-    }
-    getInfoRole(data).then(res => {
-      console.log(res)
-      const data = res.data.data
-      const total = res.data.data.length
-      this.renderPage(data, total)
-    })
+    this.getInfo()
   },
   mounted () {
-    getAuthTree().then(res => {
-      this.treeData = res.data.data
-    })
   }
 }
 </script>

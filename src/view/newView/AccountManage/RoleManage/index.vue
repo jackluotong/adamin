@@ -283,6 +283,10 @@ export default {
             }
             console.log(info)
             editRole(info).then(res => {
+              this.$Message['success']({
+                background: true,
+                content: res.data.message
+              })
               this.modalAddOrUpdate = false
               this.renderPangeAgain()
             }).catch(err => {

@@ -1,17 +1,38 @@
+<style lang="less" scoped>
+.user-content{
+  .content-button {
+    padding: 5px;
+    .ivu-select-single {
+      width: 150px;
+    }
+    .ivu-input-type {
+      width: 150px;
+      margin-left: 10px;
+    }
+    .ivu-btn{
+      margin-left: 10px;
+    }
+    .ivu-btn-info{
+      background: #2d8cf0;
+      border-color: #2d8cf0;
+    }
+  }
+}
+</style>
 <template>
   <div class="user-content">
     <div class="content-button">
 <span style="padding:10px 10px 10px 10px ">厂商名称</span>
-<Select label="" v-model.trim="manufacturerName" style="width:150px; margin-right:20px;">
+<Select label="" v-model.trim="manufacturerName" style="width:150px; margin-right:20px;" clearable >
         <Option v-for="(item,id) in manufacturerOption" :key="id" :value="item.manufacturerCode">{{item.manufacturerName}}</Option>
       </Select>
 <span style="padding:10px 10px 10px 10px ">服务模块</span>
- <Select label="" v-model.trim="serviceModule" style="width:150px; margin-right:20px;">
+ <Select label="" v-model.trim="serviceModule" style="width:150px; margin-right:20px;" clearable >
         <Option v-for="(item,id) in moduleOption" :key="id" :value="item.serviceModuleCode">{{item.serviceModule}}</Option>
       </Select>
 <div style="padding:10px 10px 10px 10px ">
 <span style="padding:10px 10px 10px 0 ">服务类型</span>
-      <Select label="" v-model.trim="serviceType" style="width:150px;margin-right:20px">
+      <Select label="" v-model.trim="serviceType" style="width:150px;margin-right:20px" clearable >
         <Option v-for="(item,id) of typeOption" :key="id" :value="item.serviceTypeCode">{{item.serviceType}}</Option>
       </Select>
 </div>
@@ -42,18 +63,18 @@
       <Form :model="formInline"  inline>
           <div v-if="isShow">
         <FormItem  label="厂商名称" style="width:300px;" >
-            <Select label="" v-model.trim="formInline.manufacturerCode" style="width:150px; margin-right:20px;">
+            <Select label="" v-model.trim="formInline.manufacturerCode" style="width:150px; margin-right:20px;" clearable >
               <Option v-for="(item,id) in manufacturerOption" :key="id" :value="item.manufacturerCode">{{item.manufacturerName}}</Option>
             </Select>
         </FormItem><br>
         <FormItem label="服务模块" style="width:300px;" >
-           <Select label="" v-model.trim="formInline.serviceModuleCode" style="width:150px; margin-right:20px;">
+           <Select label="" v-model.trim="formInline.serviceModuleCode" style="width:150px; margin-right:20px;"  @on-change='selectedModuleClick' clearable >
         <Option v-for="(item,id) in moduleOption" :key="id" :value="item.serviceModuleCode">{{item.serviceModule}}</Option>
          </Select>
            </FormItem>
-                    <FormItem label="服务类型" style="width:300px;" >
-            <Select label="" v-model.trim="formInline.serviceTypeCode" style="width:150px;margin-right:20px">
-        <Option v-for="(item,id) of typeOption" :key="id" :value="item.serviceTypeCode">{{item.serviceType}}</Option>
+        <FormItem label="服务类型" style="width:300px;" >
+            <Select label="" v-model.trim="formInline.serviceTypeCode" style="width:150px;margin-right:20px" clearable >
+        <Option v-for="(item,id) of typeOptionConnect" :key="id" :value="item.serviceTypeCode">{{item.serviceType}}</Option>
              </Select>
             </FormItem><br>
         </div>
@@ -85,7 +106,7 @@
 </template>
 
 <script>
-import { getServiceTypeInfo, inquireServiceModule } from '@/api/data'
+import { getServiceTypeInfo, inquireServiceModule, serarchTypeByModule } from '@/api/data'
 import { getServiceThreShold, addServiceThreShold, editServiceThreShold } from '@/api/thresholdManage'
 import { getManufacture } from '@/api/thirdPart'
 export default {
@@ -120,6 +141,7 @@ export default {
       manufacturerOption: [ ],
       moduleOption: [ ],
       typeOption: [ ],
+      typeOptionConnect: [ ],
       confData: [ ],
       columns: [
         {
@@ -198,6 +220,11 @@ export default {
     }
   },
   methods: {
+    selectedModuleClick (e) {
+      serarchTypeByModule(e).then(res => {
+        this.typeOptionConnect = res.data.data
+      }).catch(err => this.$Message.info(err))
+    },
     onpagesizechange (e) {
       const info = {
         pageSize: e,
@@ -273,6 +300,9 @@ export default {
       switch (this.showType) {
         case 'add':
           addServiceThreShold(this.formInline).then(res => {
+            this.$Message.info({
+              content: res.data.message
+            })
             this.getServiceThreShold()
             this.modalCheck = false
           }).catch(error => {
@@ -339,24 +369,3 @@ export default {
   }
 }
 </script>
-<style lang="less" scoped>
-.user-content{
-  .content-button {
-    padding: 5px;
-    .ivu-select-single {
-      width: 150px;
-    }
-    .ivu-input-type {
-      width: 150px;
-      margin-left: 10px;
-    }
-    .ivu-btn{
-      margin-left: 10px;
-    }
-    .ivu-btn-info{
-      background: #2d8cf0;
-      border-color: #2d8cf0;
-    }
-  }
-}
-</style>

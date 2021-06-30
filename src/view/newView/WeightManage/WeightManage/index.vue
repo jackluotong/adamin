@@ -117,7 +117,7 @@
                             <Option v-for="(item,index) in useOption" :key="index" :value='item.applicationCode'>{{ item.applicationCode }}</Option>
                     </Select>
                 </FormItem>
-                   <div>
+            <div style="display:flex,flex-direction:row,justify-content:flex-start">
             <Checkbox-group
                 v-model="checkedData"
                 @on-change="selectedCheckBox"
@@ -131,17 +131,18 @@
                     >{{ item.manufacturerName }}</Checkbox
                 >
               </Checkbox-group>
-             </div>
+
                 <FormItem
+                 v-show="checkList.length>0"
                 label='权重'
                   prop="weight"
                 >
-                <Input placeholder="输入权重配比按照x:x:x类型（如果有三个其余以此类推）" style="width:200px" v-model="inputValue">
+                <Input placeholder="输入权重配比按照x:x:x类型（如果有三个其余以此类推）" style="width:320px" v-model="inputValue">
                 </Input>
                 </FormItem>
-
+        </div>
             </Form>
-            <div slot="footer" style="display:flex;justify-content: center;align-items:center">
+            <div slot="footer">
                 <Button
                     type="primary"
                     ghost
