@@ -18,18 +18,12 @@
     <Table highlight-row stripe :columns="columns" :data="confData" style="margin-top: 5px">
        <template slot-scope="{ index }" slot="action">
           <div>
-           <!--  <Button type="primary" size="small" style="margin-right: 5px" @click="editModule(index)"
-                  v-show="permission.includes('serviceType:manage:editModule')"
->编辑模块</Button>
-            <Button type="error" size="small" style="margin-right: 5px" @click="delModule(index)"
-                  v-show="permission.includes('serviceType:manage:deleteModule')"
->删除模块</Button> -->
             <Button type="primary" size="small" style="margin-right: 5px" @click="editType(index)"
                   v-show="permission.includes('serviceType:serviceType:edit')"
->编辑类型</Button>
+                >编辑类型</Button>
             <Button type="error" size="small" style="margin-right: 5px" @click="delType(index)"
                   v-show="permission.includes('serviceType:serviceType:delete')"
->删除类型</Button>
+                >删除类型</Button>
           </div>
         </template>
      </Table>
@@ -37,29 +31,6 @@
      @on-change='changePage'
      @on-page-size-change='onpagesizechange'
      />
-     <Modal v-model.trim="modalAddOrUpdate" width="600" :mask-closable="false" :closable="false" v-bind:title="detailTitle">
-      <Form ref="formInline" :model="formInline" :rules="ruleInline" inline>
-        <FormItem label="服务模块" prop="serviceModule" style="width:270px;">
-          <Input v-model.trim="formInline.serviceModule"/>
-        </FormItem>
-      </Form>
-      <div slot="footer">
-        <Button type="primary" ghost size="large" @click="cancelAddOrUpdate('formInline')">返回</Button>
-        <Button type="primary" size="large" @click="handleSubmitModule('formInline')">保存模块</Button>
-      </div>
-     </Modal>
-     <!-- 新增模块 -->
-      <Modal v-model.trim="addNewModuleMoal" width="600" :mask-closable="false" :closable="false" v-bind:title="detailTitle">
-        <Form ref="formInline" :model="formInline" :rules="ruleInline" inline>
-        <FormItem label="服务模块" style="width:270px;">
-          <Input v-model.trim="addServiceModule"/>
-        </FormItem>
-      </Form>
-      <div slot="footer">
-        <Button type="primary" ghost size="large" @click="cancelAddModule()">返回</Button>
-        <Button type="primary" size="large" @click="addNewModule()">保存</Button>
-      </div>
-     </Modal>
      <!-- 新增服务类型 -->
      <Modal v-model.trim="addNewServiceType" width="600" :mask-closable="false" :closable="false" v-bind:title="detailTitle">
       <Form  :model="formInline"  >
@@ -95,7 +66,10 @@
       <Form ref="formInline" :model="formInline"  >
         <div style="display:inline-table">
         <FormItem label="服务模块" prop="serviceModule" style="width:270px;">
-        <Select v-model.trim="selectValue" style="width:200px" @on-change='selectModule' clearable >
+        <Select v-model.trim="selectValue"
+         style="width:200px"
+         @on-change='selectModule'
+         clearable >
             <Option v-for="(item,id) in allModulesOption"
             :key="id"
             :value="item.serviceModuleCode"
@@ -104,8 +78,13 @@
         </FormItem>
        </div>
            <FormItem label="服务类型" prop="serviceTypeAdd" style="width:270px;">
-        <Select @on-change='selectedTypeEdit' :label-in-value="true" style="width:200px" clearable >
-            <Option v-for="(item,index) in allServiceType"
+        <Select
+        @on-change='selectedTypeEdit'
+        :label-in-value="true"
+        style="width:200px"
+        clearable
+        v-model="selectedType">
+            <Option v-for="(item,index) in allType"
             :key="index"
             :value="item.serviceTypeCode"
             >{{item.serviceType}}</Option>
@@ -168,6 +147,7 @@ export default {
       }
     }
     return {
+      selectedType: '',
       allType: '',
       permission: sessionStorage.getItem('permission'),
       selectedModuleAdd: '',
@@ -272,6 +252,7 @@ export default {
       }).catch(err => this.$Message.info(err)) */
     },
     selectModule (e) {
+      console.log(e)
       serarchTypeByModule(e).then(res => {
         this.allServiceType = res.data.data
       }).catch(err => this.$Message.info(err))
@@ -279,6 +260,7 @@ export default {
     selectedTypeEdit (e) {
       this.formInline.serviceCode = e.value
       this.formInline.serviceType = e.label
+      console.log(e)
     },
     selectedTypeAdd (e) {
       this.addServiceType.serviceTypeCode = e.value
@@ -353,25 +335,20 @@ export default {
       }
     },
     handleSubmitType () {
-      try {
-        const info = {
-          'serviceModuleCode': this.selectValue,
-          'serviceType': this.formInline.serviceType,
-          'serviceTypeCode': this.formInline.serviceCode,
-          'serviceUrl': this.formInline.serviceAddress,
-          'id': this.formInline.editId
-        }
-        editServiceType(info).then(res => {
-          this.$Message.success({
-            content: res.data.message
-          })
-          this.getServiceTypeInfo()
-        }).catch(error => console.log(error))
-      } catch (error) {
-        this.modalAddOrUpdateType = false
-      } finally {
-        this.modalAddOrUpdateType = false
+      console.log(this.selectValue)
+      const info = {
+        serviceModuleCode: this.selectValue,
+        serviceType: this.formInline.serviceType,
+        serviceTypeCode: this.formInline.serviceCode,
+        serviceUrl: this.formInline.serviceAddress,
+        id: this.formInline.editId
       }
+      editServiceType(info).then(res => {
+        this.$Message.success({
+          content: res.data.message
+        })
+        this.getServiceTypeInfo()
+      }).catch(error => console.log(error))
     },
     cancelAddNewService () {
       this.addNewServiceType = false
@@ -409,7 +386,9 @@ export default {
       this.modalAddOrUpdate = true
     },
     editType (index) {
-      this.selectValue = this.confData[index].serviceModule
+      this.selectedType = this.confData[index].serviceTypeCode
+      console.log(this.confData[index])
+      this.selectValue = this.confData[index].serviceModuleCode
       this.id = this.confData[index].id
       this.formInline.serviceModule = this.confData[index].serviceModuleCode
       this.formInline.serviceType = this.confData[index].serviceType
@@ -464,10 +443,11 @@ export default {
     },
     getServiceTypeInfo () {
       const info = {
-        pageSize: this.pageSize,
-        currentPage: this.pageNum
+        pageSize: 10000,
+        currentPage: 1
       }
       getServiceTypeInfo(info).then(res => {
+        console.log(res)
         this.allType = res.data.data.records
         this.renderPage(res.data.data.records, res.data.data.total)
       }).catch(err => this.$Message.info(err))
@@ -485,6 +465,7 @@ export default {
         currentPage: 1
       }
       inquireServiceModule(info).then(res => {
+        console.log(res)
         this.allModulesOption = res.data.data.records
       })
     }

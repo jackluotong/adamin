@@ -18,6 +18,7 @@
       border-color: #2d8cf0;
     }
   }
+
 }
 .ivu-modal-confirm-body {
   padding-left: 42px;
@@ -42,7 +43,7 @@
        <template slot-scope="{ index }" slot="action">
           <div>
             <Button type="primary" size="small" style="margin-right: 5px" @click="edit(index)"
-                              v-show="permission.includes('account:user:roleConnect')"
+                        v-show="permission.includes('account:user:roleConnect')"
 >角色关联</Button>
           </div>
         </template>
@@ -55,22 +56,24 @@
      @on-change='changePage'
      @on-page-size-change='onpagesizechange'
       />
-     <Modal v-model.trim="modalAddOrUpdate" width="600" :mask-closable="false" :closable="false" v-bind:title="detailTitle">
+     <Modal v-model.trim="modalAddOrUpdate" width="600" :mask-closable="false" :closable="true" v-bind:title="detailTitle">
       <Form ref="formInline" :model="formInline" :rules="ruleInline" inline>
-        <FormItem label="用户code" style="width:270px;">
-            <span>{{formInline.userCode}}</span>
+        <FormItem label="用户code:" style="width:270px;">
+            <span style=" font-size: 30px;
+      font-weight: 400;
+      color: black;" >{{formInline.userCode}}</span>
         </FormItem>
 
       </Form>
          <div>
             <Checkbox-group
                 v-model="checkData"
-                @on-change="selected"
             >
                 <Checkbox
                     v-for="(item, index) in checkList"
                     :key="index"
                     :label="item.roleCode"
+                    :value="item.roleName"
                     size="large"
                     ref="checkBox"
                     >{{ item.roleName }}</Checkbox
@@ -128,7 +131,7 @@ export default {
       detailTitle: '',
       showType: '',
       modalDelete: false,
-      formInline: { // 实体
+      formInline: {
         userCode: '',
         checkList: '',
         roleName: ''
@@ -189,19 +192,9 @@ export default {
       this.userCode = null
     },
     enter (e) {
-      console.log(e)
       this.getInfoUser()
     },
-    selected (data) {
-      console.log(data, this.checkData)
-      this.selectOptions = []
-      for (let i = 0; i < data.length; i++) {
-        this.selectOptions.push(data[i].roleCode)
-      }
-    },
-    onChange (data) {
-      this.selectOptions = data
-    },
+
     search () {
       const info = {
         userCode: this.userCode,
@@ -218,10 +211,9 @@ export default {
     },
     handleSubmitAddOrUpdate (index) {
       const info = {
-        'userCode': this.formInline.userCode,
-        'roles': this.checkData
+        userCode: this.formInline.userCode,
+        roles: this.checkData
       }
-      console.log(info)
       roleConnect(info).then(res => {
         this.modalAddOrUpdate = false
         this.getInfoUser()
@@ -234,6 +226,7 @@ export default {
       this.modalAddOrUpdate = false
     },
     edit (index) {
+      this.checkData = this.confData[index].roleCode.split(',')
       this.id = this.confData[index].id
       this.formInline.userCode = this.confData[index].userCode
       this.detailTitle = '账户管理-用户管理'
@@ -247,15 +240,18 @@ export default {
       let array = []
       arr.map((item) => {
         let roleName = ''
+        let roleCode = ''
         if (item.roles.length !== 0) {
           item.roles.map((i, t) => {
-            roleName = i.roleName + ';' + roleName
+            roleName = i.roleName + ',' + roleName
+            roleCode = i.roleCode + ',' + roleCode
+          })
+          array.push({
+            userCode: item.userCode,
+            roleName,
+            roleCode
           })
         }
-        array.push({
-          userCode: item.userCode,
-          roleName
-        })
       })
       return array
     },
@@ -275,22 +271,13 @@ export default {
 
   },
   mounted () {
-    /*
-            get all roleName
-        */
     const data = {
       roleName: this.roleName,
       roleCode: this.roleCode
     }
     getInfoRole(data).then(res => {
       const data = res.data.data
-      /*
-        get info role set in checkList
-      */
       this.checkList = data
-      /*
-         defalut  checkList get from api
-        */
     })
   },
   created () {
@@ -300,9 +287,6 @@ export default {
     userCode: {
       handler: function (val, old) {
         if (val === '') {
-          /*
-                to do
-            */
         }
       }
     }

@@ -70,30 +70,19 @@
         </FormItem>
         <FormItem>
         <div style="width:280px">
-      <!--   <a-tree-select
-            showSearch
-            :defaultValue='defaultSelected'
-            :allowClear='true'
-            v-model="selectedValue"
-            :tree-data="treeData"
-            tree-checkable
-            :show-checked-strategy="SHOW_PARENT"
-            :replaceFields='replaceFields'
-            placeholder='请选择'
-            :appendToBody="true"
-            @select='selected'
-        /> -->
          <el-tree
+            v-model="getEl"
             icon-class='el-icon-caret-right'
             :data="treeData"
             show-checkbox
-            node-key="id"
-            :default-checked-keys="this.checkedData"
+            node-key="authCode"
+            :default-checked-keys="checkedData"
             :props="defaultProps"
             highlight-current
             ref="tree"
             empty-text='暂无权限列表'
             @check-change="getCheckedKeys"
+            check-strictly
             >
             </el-tree>
          </div>
@@ -144,6 +133,7 @@ export default {
       }
     }
     return {
+      getEl: '',
       checkedData: [],
       expandedKeys: '',
       checkedKeys: '',
@@ -201,19 +191,11 @@ export default {
         label: 'authName',
         key: 'authCode',
         value: 'authCode'
-      },
-      replaceFields: {
-        children: 'children',
-        title: 'authName',
-        key: 'id',
-        value: 'authCode'
       }
-
     }
   },
   methods: {
     getCheckedKeys (e) {
-      console.log(e)
     },
     reset () {
       this.roleName = null
@@ -303,12 +285,13 @@ export default {
       this.modalAddOrUpdate = false
     },
     edit (index) {
+      this.checkedData = null
+      console.log(this.checkedData, this.confData[index], this.getEl)
       this.saveRoleId = this.confData[index].roleId
-      //   this.checkedData=this.confData[index]
-      console.log(this.confData[index])
       this.checkedData = this.confData[index].auths.map((item) => {
         return item
       })
+      console.log(this.confData[index])
       this.showType = 'edit'
       this.id = this.confData[index].id
       this.formInline.roleName = this.confData[index].roleName
@@ -358,6 +341,9 @@ export default {
     getAuthTree().then(res => {
       this.treeData = res.data.data
     })
+  },
+  computed: {
+
   }
 }
 </script>

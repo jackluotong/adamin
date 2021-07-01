@@ -94,7 +94,7 @@ export default[
   */
   {
     path: '/AccountManage',
-    name: 'AccountManage',
+    name: '_AccountManage',
     meta: {
       icon: 'ios-construct',
       title: '账户管理',
@@ -138,7 +138,7 @@ export default[
     ]
   }, {
     path: '/ServiceTypeManage',
-    name: 'ServiceTypeManage',
+    name: '_ServiceTypeManage',
     meta: {
       icon: 'ios-construct',
       title: ' 服务类型管理',
@@ -171,7 +171,7 @@ export default[
     ]
   }, {
     path: '/ThirdPartManage',
-    name: 'ThirdPartManage',
+    name: '_ThirdPartManage',
     meta: {
       icon: 'ios-search',
       title: '第三方服务管理',
@@ -206,7 +206,7 @@ export default[
     ]
   }, {
     path: '/UseSystemManage',
-    name: 'UseSystemManage',
+    name: '_UseSystemManage',
     meta: {
       icon: 'ios-construct',
       title: '应用系统管理',
@@ -265,7 +265,7 @@ export default[
     ]
   }, {
     path: '/ThresholdManage',
-    name: 'ThresholdManage',
+    name: '_ThresholdManage',
     meta: {
       icon: 'ios-construct',
       title: '阈值管理',
@@ -300,7 +300,7 @@ export default[
     ]
   }, {
     path: '/InformManage',
-    name: 'InformManage',
+    name: '_InformManage',
     meta: {
       icon: 'ios-construct',
       title: '提醒通知管理',
@@ -335,7 +335,7 @@ export default[
     ]
   }, {
     path: '/StatisticalForm',
-    name: 'StatisticalForm',
+    name: '_StatisticalForm',
     meta: {
       icon: 'ios-construct',
       title: '统计报表',

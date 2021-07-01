@@ -1,3 +1,33 @@
+<style lang="less" scoped>
+.user-content {
+    .content-button {
+        padding: 5px;
+        display: inline;
+        .ivu-select-single {
+            width: 150px;
+        }
+        .ivu-input-type {
+            width: 150px;
+            margin-left: 10px;
+        }
+        .ivu-btn {
+            margin-left: 10px;
+        }
+        .ivu-btn-info {
+            background: #2d8cf0;
+            border-color: #2d8cf0;
+        }
+    }
+}
+.ivu-modal-confirm-body {
+    padding-left: 42px;
+    font-size: 14px;
+    color: #515a6e;
+    position: relative;
+    word-break: break-all;
+}
+</style>
+
 <template>
     <div class="user-content">
         <h1 style="margin:10px 10px 10px 10px">权重管理-权重管理</h1>
@@ -580,11 +610,6 @@ export default {
       this.modalAdd = false
     },
     edit (index, row) {
-      console.log(row)
-      /*  this.useSelected = row.applicationCode
-      this.inputValue = row.weightRatioValue
-      this.selectedWeight = row.weightType
-      this.selectedModuleTwo = row.serviceModule */
       this.editObj.checkedDataEdit = row.weightRatioKey.replace(new RegExp(/(:)/g), ',').split(',')
       this.modalEdit = true
       this.editObj.moduleEdit = row.serviceModule
@@ -668,32 +693,3 @@ export default {
   }
 }
 </script>
-<style lang="less" scoped>
-.user-content {
-    .content-button {
-        padding: 5px;
-        display: inline;
-        .ivu-select-single {
-            width: 150px;
-        }
-        .ivu-input-type {
-            width: 150px;
-            margin-left: 10px;
-        }
-        .ivu-btn {
-            margin-left: 10px;
-        }
-        .ivu-btn-info {
-            background: #2d8cf0;
-            border-color: #2d8cf0;
-        }
-    }
-}
-.ivu-modal-confirm-body {
-    padding-left: 42px;
-    font-size: 14px;
-    color: #515a6e;
-    position: relative;
-    word-break: break-all;
-}
-</style>

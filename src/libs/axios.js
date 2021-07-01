@@ -2,8 +2,8 @@ import axios from 'axios'
 import store from '@/store'
 import { getToken } from '@/libs/util'
 import Res from '@/libs/global'
-import { Message } from 'iview'
-// import { Spin } from 'iview'
+import { Message, Spin } from 'iview'
+import router from '../router/index'
 const addErrorLog = errorInfo => {
   const { statusText, status, request: { responseURL } } = errorInfo
   let info = {
@@ -23,7 +23,8 @@ class HttpRequest {
     const config = {
       baseURL: this.baseUrl,
       headers: {
-        'X-Token': getToken()// token
+        'X-Token': getToken(),
+        'X-Requested-With': 'XMLHttpRequest'
       }
     }
     return config
@@ -31,15 +32,15 @@ class HttpRequest {
   destroy (url) {
     delete this.queue[url]
     if (!Object.keys(this.queue).length) {
-      // Spin.hide()
+      Spin.hide()
     }
   }
   interceptors (instance, url) {
     // 请求拦截
     instance.interceptors.request.use(config => {
-      // 添加全局的loading...
+    // 添加全局的loading...
       if (!Object.keys(this.queue).length) {
-        // Spin.show()
+        Spin.show()
       }
       this.queue[url] = true
       return config
@@ -47,29 +48,102 @@ class HttpRequest {
       return Promise.reject(error)
     })
 
-    // 响应拦截
     instance.interceptors.response.use(res => {
       this.destroy(url)
-      if (res.data.code === Res.SUCCESS) {
-        const { data, status } = res
-        return { data, status }
-      } else if (res.data.code === Res.ERROR) {
-        Message.error(res.data.message)
-      } else if (res.data.code === Res.BAD_REQUEST) {
-        Message.error(res.data.message)
-      } else if (res.data.code === Res.FORBIDDEN) {
-        Message.error(res.data.message)
-      } else if (res.data.code === Res.UNAUTHORIZED) {
-        Message.error(res.data.message)
-        commit('setToken', '')
-        commit('setAccess', [])
-        this.$router.push({
-          name: 'login'
-        })
-      } else {
-        Message.error(res.data.message)
+      switch (res.data.code) {
+        case Res.SUCCESS:
+          const { data, status } = res
+          return { data, status }
+        case Res.BAD_REQUEST:
+          Message.error(res.data.message)
+          break
+        case Res.UNAUTHORIZED:
+          Message.error(res.data.message)
+          break
+        case Res.FORBIDDEN:
+          Message.error(res.data.message)
+          console.log(this)
+          router.push({
+            name: 'login'
+          })
+          break
+        case Res.NOT_FOND:
+          Message.error(res.data.message)
+          break
+        case Res.METHOD_NOT_ALLOWED:
+          Message.error(res.data.message)
+          break
+        case Res.NOT_ACCEPTABLE:
+          Message.error(res.data.message)
+          break
+        case Res.CODE_EXISTED:
+          Message.error(res.data.message)
+          break
+        case Res.ID_NOT_EMPTY:
+          Message.error(res.data.message)
+          break
+        case Res.UNSUPPORTED_MEDIA_TYPE:
+          Message.error(res.data.message)
+          break
+        case Res.USED_IN_WEIGHTS:
+          Message.error(res.data.message)
+          break
+        case Res.M_USING:
+          Message.error(res.data.message)
+          break
+        case Res.SERVER_ERROR:
+          Message.error(res.data.message)
+          break
+        case Res.EMPTY_ERROR:
+          Message.error(res.data.message)
+          break
+        case Res.EMPTY_VALUE_ERROR:
+          Message.error(res.data.message)
+          break
+        case Res.KEY_VALUE_ERROR:
+          Message.error(res.data.message)
+          break
+        case Res.VALUES_ERROR:
+          Message.error(res.data.message)
+          break
+        case Res.PARAMS_ERROR:
+          Message.error(res.data.message)
+          break
+        case Res.CREATE_ERROR:
+          Message.error(res.data.message)
+          break
+        case Res.REMOVE_ERROR:
+          Message.error(res.data.message)
+          break
+        case Res.REMOVE_ERROR1:
+          Message.error(res.data.message)
+          break
+        case Res.REMOVE_ERROR2:
+          Message.error(res.data.message)
+          break
+        case Res.DOWNLOAD_ERROR:
+          Message.error(res.data.message)
+          break
+        case Res.EXIST_THRESHOLD:
+          Message.error(res.data.message)
+          break
+        case Res.AFTERS_REPEATEDS:
+          Message.error(res.data.message)
+          break
+        case Res.CODES_REPEATEDS:
+          Message.error(res.data.message)
+          break
+        case Res.RELEVANCE_REPEATEDS:
+          Message.error(res.data.message)
+          break
+        case Res.WEIGHT_REPEATEDS:
+          Message.error(res.data.message)
+          break
+        default:
+          Message.error('未知类型的错误')
+          this.destroy(url)
+          break
       }
-      this.destroy(url)
       return Promise.reject(res.data.message)
     }, error => {
       this.destroy(url)
