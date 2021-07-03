@@ -97,7 +97,7 @@
      :mask-closable="false"
      :closable="false"
      v-bind:title="detailTitle">
-      <Form ref="formInline" :model="formInline" :rules="ruleInline" inline>
+      <Form ref="formInline" :model="formInline"  inline>
         <div v-show="showType==='edit'?false:true">
         <FormItem label="权限编码" prop="AuthCode" style="width:270px;">
           <Input v-model.trim="formInline.AuthCode"/>
