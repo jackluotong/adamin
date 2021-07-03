@@ -49,7 +49,7 @@
                 :data="treeData"
                 show-checkbox
                 node-key="id"
-                default-expand-all
+                :default-expand-all="false"
                 :expand-on-click-node="false"
                 :props="defaultProps"
                 @node-click="handleNodeClick"
