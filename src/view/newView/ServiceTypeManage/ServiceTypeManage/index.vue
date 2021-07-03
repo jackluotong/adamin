@@ -33,7 +33,7 @@
      />
      <!-- 新增服务类型 -->
      <Modal v-model.trim="addNewServiceType" width="600" :mask-closable="false" :closable="false" v-bind:title="detailTitle">
-      <Form  :model="formInline"  >
+      <Form  :model="formInline"  :rules="ruleInline" ref="formInline" >
         <div style="display:inline-table">
         <FormItem label="服务模块" prop="serviceModule" style="width:270px;">
         <Select v-model.trim="selectedModuleAdd" style="width:200px" @on-change='selectedModuleAddClick' clearable >
@@ -45,7 +45,10 @@
           </FormItem>
        </div>
           <FormItem label="服务类型" prop="serviceType" style="width:270px;">
-        <Select style="width:200px" @on-change='selectedTypeAdd' :label-in-value="true" clearable>
+        <Select style="width:200px" @on-change='selectedTypeAdd'
+        :label-in-value="true"
+        v-model="selectedT"
+        clearable>
             <Option v-for="(item,index) in allType"
             :key="index"
             :value="item.serviceTypeCode"
@@ -112,41 +115,12 @@
 </template>
 
 <script>
-import { getServiceTypeInfo, editServiceModule, editServiceType, inquireServiceModule, deletModule, deleteType, serarchTypeByModule } from '@/api/data'
+import { getServiceTypeInfo, editServiceType, inquireServiceModule, deletModule, deleteType, serarchTypeByModule } from '@/api/data'
 
 export default {
   data () {
-    function getByteLen (val) {
-      var len = 0
-      for (var i = 0, len1 = val.length; i < len1; i++) {
-        var length = val.charCodeAt(i)
-        if (length >= 0 && length <= 128) {
-          len += 1
-        } else {
-          len += 3
-        }
-      }
-      return len
-    }
-    const validateserviceModule = function (rule, value, callback) {
-      if (!value) {
-        callback(new Error('请输入参数名称'))
-      } else if (getByteLen(value) > 128) {
-        callback(new Error('字符串长度不能超过128'))
-      } else {
-        callback()
-      }
-    }
-    const validateserviceType = (rule, value, callback) => {
-      if (!value) {
-        callback(new Error('请输入参数键名'))
-      } else if (getByteLen(value) > 64) {
-        callback(new Error('字符串长度不能超过64'))
-      } else {
-        callback()
-      }
-    }
     return {
+      selectedT: '',
       selectedType: '',
       allType: '',
       permission: sessionStorage.getItem('permission'),
@@ -171,7 +145,6 @@ export default {
       judgeEditType: '',
       allModulesOption: [],
       judgedeleteType: '',
-      editModuleId: '',
       total: 0,
       pageNum: 1,
       pageSize: 10,
@@ -190,12 +163,11 @@ export default {
       },
       ruleInline: {
         serviceModule: [
-          { required: true, validator: validateserviceModule, trigger: 'blur' }
+          { required: true, trigger: 'blur', message: '请选择模块' }
         ],
         serviceType: [
-          { required: true, validator: validateserviceType, trigger: 'blur' }
+          { required: true, trigger: 'blur', message: '请选择类型' }
         ]
-
       },
       confData: [],
       columns: [
@@ -231,7 +203,9 @@ export default {
     onpagesizechange (e) {
       const info = {
         pageSize: e,
-        currentPage: this.pageNum
+        currentPage: this.pageNum,
+        serviceType: this.serviceType,
+        serviceModule: this.serviceModule
       }
       getServiceTypeInfo(info).then(res => {
         this.renderPage(res.data.data.records, res.data.data.total)
@@ -240,7 +214,9 @@ export default {
     changePage (e) {
       const info = {
         pageSize: this.pageSize,
-        currentPage: e
+        currentPage: e,
+        serviceType: this.serviceType,
+        serviceModule: this.serviceModule
       }
       getServiceTypeInfo(info).then(res => {
         this.renderPage(res.data.data.records, res.data.data.total)
@@ -289,7 +265,6 @@ export default {
     },
 
     addSettingType () {
-      this.addServiceType.url = null
       this.detailTitle = '新增服务类型'
       this.addNewServiceType = true
       const info = {
@@ -299,40 +274,6 @@ export default {
       inquireServiceModule(info).then(res => {
         this.allModulesOption = res.data.data.records
       })
-    },
-    addNewModule () {
-      const info = {
-        'serviceModule': this.addServiceModule,
-        'serviceModuleCode': this.serviceModuleCode
-      }
-      editServiceModule(info).then(res => {
-        this.$Message.success({
-          content: res.data.message
-        })
-        this.getServiceTypeInfo()
-      }).catch(error => console.log(error))
-      this.addNewModuleMoal = false
-    },
-    cancelAddModule () {
-      this.addNewModuleMoal = false
-    },
-    handleSubmitModule () {
-      try {
-        const info = {
-          serviceModule: this.formInline.serviceModule,
-          serviceModuleCode: this.editModuleId
-        }
-        editServiceModule(info).then(res => {
-          this.$Message.success({
-            content: res.data.message
-          })
-          this.getServiceTypeInfo()
-        }).catch(error => console.log(error))
-      } catch (error) {
-        this.modalAddOrUpdate = false
-      } finally {
-        this.modalAddOrUpdate = false
-      }
     },
     handleSubmitType () {
       console.log(this.selectValue)
@@ -348,17 +289,20 @@ export default {
           content: res.data.message
         })
         this.getServiceTypeInfo()
+        this.addServiceType.url = null
+        this.selectedModuleAdd = null
+        this.allType = []
       }).catch(error => console.log(error))
     },
     cancelAddNewService () {
       this.addNewServiceType = false
     },
-    addNewServiceTypeClick () {
+    addNewServiceTypeClick (index) {
       const info = {
-        'serviceModuleCode': this.selectedModuleAdd,
-        'serviceTypeCode': this.addServiceType.serviceTypeCode,
-        'serviceUrl': this.addServiceType.url,
-        'serviceType': this.addServiceType.serviceType
+        serviceModuleCode: this.selectedModuleAdd,
+        serviceTypeCode: this.addServiceType.serviceTypeCode,
+        serviceUrl: this.addServiceType.url,
+        serviceType: this.addServiceType.serviceType
       }
       editServiceType(info).then(res => {
         this.$Message.success({
@@ -367,7 +311,6 @@ export default {
         this.getServiceTypeInfo()
         this.addNewServiceType = false
       }).catch(() => {
-        this.addNewServiceType = false
       })
     },
     cancelAddOrUpdate (name) {
@@ -377,17 +320,8 @@ export default {
     cancelAddOrUpdateType () {
       this.modalAddOrUpdateType = false
     },
-    editModule (index) {
-      this.editModuleId = this.confData[index].serviceModuleCode
-      this.formInline.serviceModule = this.confData[index].serviceModule
-      this.formInline.serviceType = this.confData[index].serviceType
-      this.showType = 'edit'
-      this.detailTitle = '编辑模块'
-      this.modalAddOrUpdate = true
-    },
     editType (index) {
       this.selectedType = this.confData[index].serviceTypeCode
-      console.log(this.confData[index])
       this.selectValue = this.confData[index].serviceModuleCode
       this.id = this.confData[index].id
       this.formInline.serviceModule = this.confData[index].serviceModuleCode
@@ -398,11 +332,6 @@ export default {
       this.detailTitle = '编辑服务类型'
       this.judgeEditType = 'edit'
       this.modalAddOrUpdateType = true
-    },
-    delModule (index) {
-      this.editModuleId = this.confData[index].serviceModuleCode
-      this.modalDelete = true
-      this.judgedeleteType = 'module'
     },
     delType (index) {
       this.deleteServiceTypeCode = this.confData[index].serviceTypeCode
@@ -443,8 +372,8 @@ export default {
     },
     getServiceTypeInfo () {
       const info = {
-        pageSize: 10000,
-        currentPage: 1
+        pageSize: this.pageSize,
+        currentPage: this.pageNum
       }
       getServiceTypeInfo(info).then(res => {
         console.log(res)

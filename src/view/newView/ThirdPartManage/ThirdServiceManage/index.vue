@@ -22,6 +22,7 @@
 
 <template>
   <div class="user-content">
+          <h1 style="margin:10px 10px 10px 10px">第三方管理-第三服务管理</h1>
     <div class="content-button">
 <span style="padding:10px 10px 10px 10px ">厂商名称</span>
 <Select label="" v-model.trim="manufacturerName" style="width:150px; margin-right:20px;" clearable >
@@ -247,7 +248,10 @@ export default {
     onpagesizechange (e) {
       const info = {
         pageSize: e,
-        currentPage: this.pageNum
+        currentPage: this.pageNum,
+        manufacturerCode: this.manufacturerName,
+        serviceTypeCode: this.serviceType,
+        serviceModuleCode: this.serviceModule
       }
       getThirdService(info).then(res => {
         this.confData = res.data.data.records
@@ -257,7 +261,10 @@ export default {
     changePage (e) {
       const info = {
         pageSize: this.pageSize,
-        currentPage: e
+        currentPage: e,
+        manufacturerCode: this.manufacturerName,
+        serviceTypeCode: this.serviceType,
+        serviceModuleCode: this.serviceModule
       }
       getThirdService(info).then(res => {
         this.confData = res.data.data.records

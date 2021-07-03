@@ -30,7 +30,7 @@ export default {
   },
   data () {
     return {
-      userAvatar: require('@/assets/images/sample.jpg')
+      userAvatar: require('@/assets/images/user.svg')
     }
   },
   methods: {
@@ -38,6 +38,7 @@ export default {
       'handleLogOut'
     ]),
     logout () {
+      console.log(sessionStorage)
       sessionStorage.clear()
       if (sessionStorage.length === 0) {
         this.handleLogOut().then(() => {

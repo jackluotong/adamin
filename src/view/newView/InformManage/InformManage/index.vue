@@ -144,7 +144,7 @@ export default {
       ],
       total: 0, // 总数
       pageNum: 1, // 第几页
-      pageSize: 30, // 每页几条数据
+      pageSize: 10, // 每页几条数据
       noticeType: '',
       sceneType: '',
       content: '',

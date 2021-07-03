@@ -68,12 +68,14 @@
          <div>
             <Checkbox-group
                 v-model="checkData"
+                @on-change="selected"
             >
                 <Checkbox
                     v-for="(item, index) in checkList"
                     :key="index"
                     :label="item.roleCode"
                     :value="item.roleName"
+                    :label-in-value="true"
                     size="large"
                     ref="checkBox"
                     >{{ item.roleName }}</Checkbox
@@ -92,28 +94,6 @@
 import { getInfoUser, getInfoRole, roleConnect } from '@/api/data'
 export default {
   data () {
-    function getByteLen (val) {
-      var len = 0
-      for (var i = 0, len1 = val.length; i < len1; i++) {
-        var length = val.charCodeAt(i)
-        if (length >= 0 && length <= 128) {
-          len += 1
-        } else {
-          len += 3
-        }
-      }
-      return len
-    }
-
-    const validateuserCode = (rule, value, callback) => {
-      if (!value) {
-        callback(new Error('请输入参数键名'))
-      } else if (getByteLen(value) > 64) {
-        callback(new Error('字符串长度不能超过64'))
-      } else {
-        callback()
-      }
-    }
     return {
       permission: sessionStorage.getItem('permission'),
       getCheckBox: [],
@@ -135,11 +115,6 @@ export default {
         userCode: '',
         checkList: '',
         roleName: ''
-      },
-      ruleInline: {
-        userCode: [
-          { required: true, validator: validateuserCode, trigger: 'blur' }
-        ]
       },
       confData: [ ],
       columns: [
@@ -166,10 +141,21 @@ export default {
     }
   },
   methods: {
+    selected (e) {
+      let array = []
+      for (let i = 0; i < this.checkData.length; i++) {
+        if (this.checkData[i] !== '') {
+          array.push(this.checkData[i])
+        }
+      }
+      console.log(array)
+    },
     onpagesizechange (e) {
       const info = {
         pageSize: e,
-        currentPage: this.pageNum
+        currentPage: this.pageNum,
+        userCode: this.userCode
+
       }
       getInfoUser(info).then(res => {
         const data = res.data.data.records
@@ -180,7 +166,9 @@ export default {
     changePage (e) {
       const info = {
         pageSize: this.pageSize,
-        currentPage: e
+        currentPage: e,
+        userCode: this.userCode
+
       }
       getInfoUser(info).then(res => {
         const data = res.data.data.records
@@ -210,10 +198,17 @@ export default {
       })
     },
     handleSubmitAddOrUpdate (index) {
+      let array = []
+      for (let i = 0; i < this.checkData.length; i++) {
+        if (this.checkData[i] !== '') {
+          array.push(this.checkData[i])
+        }
+      }
       const info = {
         userCode: this.formInline.userCode,
-        roles: this.checkData
+        roles: array
       }
+      console.log(info)
       roleConnect(info).then(res => {
         this.modalAddOrUpdate = false
         this.getInfoUser()
@@ -251,6 +246,12 @@ export default {
             roleName,
             roleCode
           })
+        } else {
+          array.push({
+            userCode: item.userCode,
+            roleName,
+            roleCode
+          })
         }
       })
       return array
@@ -266,6 +267,7 @@ export default {
         const total = res.data.data.total
         this.confData = this.translate(data)
         this.total = total
+        console.log(data)
       }).catch(err => { console.log(err) })
     }
 

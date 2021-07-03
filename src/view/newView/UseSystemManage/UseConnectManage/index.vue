@@ -12,15 +12,15 @@
                 :key="index"
                 :value="item.serviceModuleCode">{{ item.serviceModule}}</Option>
             </Select>
-            <Button type="primary" icon="md-refresh" @click="reset()">重置</Button>
-
-            <Button
+             <Button
                 type="primary"
                 icon="md-search"
                 @click="search()"
                 style="margin:0 10px 0 20px"
                 >查询</Button
             >
+            <Button type="primary" icon="md-refresh" @click="reset()">重置</Button>
+
             <Button
             type="primary"
             icon="md-add"
@@ -219,8 +219,8 @@ export default {
       ruleInline: {
         serviceType: [
           {
-            // required: true,
-            // validator: validateConfValue,
+            required: true,
+            message: '请输入选择类型',
             trigger: 'blur'
           }
         ]
@@ -263,9 +263,12 @@ export default {
   },
   methods: {
     onpagesizechange (e) {
-      const info = {
+      const info = {// this.applicationCode, this.applicationName, this.selectedModule
         pageSize: e,
-        currentPage: this.pageNum
+        currentPage: this.pageNum,
+        applicationCode: this.applicationCode,
+        applicationName: this.applicationName,
+        serviceModuleCode: this.selectedModule
       }
       getInfoConnect(info).then(res => {
         this.renderPage(res.data.data.records, res.data.data.total)
@@ -274,7 +277,10 @@ export default {
     changePage (e) {
       const info = {
         pageSize: this.pageSize,
-        currentPage: e
+        currentPage: e,
+        applicationCode: this.applicationCode,
+        applicationName: this.applicationName,
+        serviceModuleCode: this.selectedModule
       }
       console.log(e)
       getInfoConnect(info).then(res => {
@@ -298,7 +304,7 @@ export default {
     addSetting () {
       this.reset()
       this.showType = 'add'
-      this.detailTitle = '新增模块'
+      this.detailTitle = '新增服务关联'
       this.modalEdit = true
     },
     handleSubmitAddOrUpdate (index) {

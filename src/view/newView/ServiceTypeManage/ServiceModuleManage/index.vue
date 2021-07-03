@@ -101,9 +101,9 @@ export default {
       }
       return len
     }
-    const validateserviceModule = function (rule, value, callback) {
+    const validateserviceModule = (rule, value, callback) => {
       if (!value) {
-        callback(new Error('请输入角色名称'))
+        callback(new Error('请输入模块名称'))
       } else if (getByteLen(value) > 128) {
         callback(new Error('字符串长度不能超过128'))
       } else {
@@ -156,7 +156,8 @@ export default {
     onpagesizechange (e) {
       const info = {
         pageSize: e,
-        currentPage: this.pageNum
+        currentPage: this.pageNum,
+        serviceModule: this.serviceModule
       }
       inquireServiceModule(info).then(res => {
         this.renderPage(res.data.data.records, res.data.data.total)
@@ -165,7 +166,8 @@ export default {
     changePage (e) {
       const info = {
         pageSize: this.pageSize,
-        currentPage: e
+        currentPage: e,
+        serviceModule: this.serviceModule
       }
       inquireServiceModule(info).then(res => {
         this.renderPage(res.data.data.records, res.data.data.total)

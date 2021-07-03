@@ -33,8 +33,8 @@
         <h1 style="margin:10px 10px 10px 10px">权重管理-权重管理</h1>
         <div class="content-button">
             <span style="padding:10px">服务模块</span>
-            <Select v-model.trim="selectedModule" style="width:200px">
-                <Option v-for="(item,id) in modulesOption" :key="id" :value="item.serviceModuleCode">
+            <Select v-model.trim="selectedModule" style="width:200px" clearable>
+                <Option v-for="(item,id) in modulesOption" :key="id" :value="item.serviceModule">
                     {{ item.serviceModule }}
                 </Option>
             </Select>
@@ -491,7 +491,9 @@ export default {
     onpagesizechange (e) {
       const info = {
         pageSize: e,
-        currentPage: this.pageNum
+        currentPage: this.pageNum,
+        serviceModule: this.selectedModule
+
       }
       getWeight(info).then(res => {
         this.renderPage(res.data.data.records, res.data.data.total, 1)
@@ -500,7 +502,9 @@ export default {
     changePage (e) {
       const info = {
         pageSize: this.pageSize,
-        currentPage: e
+        currentPage: e,
+        serviceModule: this.selectedModule
+
       }
       getWeight(info).then(res => {
         this.renderPage(res.data.data.records, res.data.data.total, 1)
@@ -516,9 +520,11 @@ export default {
       searchManufacture(info).then(res => {
         console.log(res)
         this.checkList = res.data.data
+        console.log(this.checkList)
       })
     },
     selectedModuleClick (e) {
+      console.log(e)
       serarchTypeByModule(e).then(res => {
         this.typeOption = res.data.data
       }).catch(err => this.$Message.info(err))
@@ -529,10 +535,11 @@ export default {
         currentPage: this.pageNum,
         pageSize: this.pageSize
       }
+      console.log(info)
       getWeight(info).then(res => {
+        console.log(res)
         this.confData = res.data.data.records
         this.total = res.data.data.total
-        this.selectedModule = null
       }).catch(error => {
         this.$Message.error({
           content: error
@@ -540,16 +547,16 @@ export default {
       })
     },
     reset () {
-      this.useSelected = null
-      this.selectedModuleType = null
-      this.checkedData = null
-      this.inputValue = null
-      this.selectedWeight = null
-      this.selectedModuleTwo = null
+      this.useSelected = ''
+      this.selectedModuleType = ''
+      this.checkedData = []
+      this.inputValue = ''
+      this.selectedWeight = ''
+      this.selectedModuleTwo = ''
     },
     addSetting () {
       this.inputValue = null
-      this.detailTitle = '新增阈值管理'
+      this.detailTitle = '新增权重管理'
       this.modalAdd = true
     },
     handleSubmitAddOrUpdate (index) {
@@ -563,6 +570,7 @@ export default {
             weightType: this.selectedWeight,
             serviceModuleCode: this.selectedModuleTwo
           }
+          console.log(info)
           addWeight(info).then(res => {
             this.$Message.success({
               content: res.data.message

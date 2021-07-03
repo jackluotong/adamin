@@ -56,7 +56,7 @@
                         @click="editModule(index)"
                       v-show="permission.includes('tripartite:provider:edit')"
 
-                    >编辑模块</Button>
+                    >编辑</Button>
                      <Button
                         type="error"
                         size="small"
@@ -216,7 +216,8 @@ export default {
     onpagesizechange (e) {
       const info = {
         pageSize: e,
-        currentPage: this.pageNum
+        currentPage: this.pageNum,
+        manufacturerName: this.manufacturerName
       }
       getManufacture(info).then(res => {
         this.confData = res.data.data.records
@@ -226,7 +227,9 @@ export default {
     changePage (e) {
       const info = {
         pageSize: this.pageSize,
-        currentPage: e
+        currentPage: e,
+        manufacturerName: this.manufacturerName
+
       }
       getManufacture(info).then(res => {
         this.confData = res.data.data.records

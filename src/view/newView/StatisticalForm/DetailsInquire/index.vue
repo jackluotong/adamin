@@ -180,7 +180,14 @@ export default {
     onpagesizechange (e) {
       const info = {
         pageSize: e,
-        currentPage: this.pageNum
+        currentPage: this.pageNum,
+        applicationCode: this.applicationCode,
+        serviceTypeCode: this.serviceTypeSelected,
+        manufacturerCode: this.manufactureSelected,
+        applicationName: this.applicationName,
+        serviceModuleCode: this.serviceModuleSelected,
+        startTime: this.time === null ? '' : this.time[0],
+        endTime: this.time === null ? '' : this.time[1]
       }
       getThirdService(info).then(res => {
         this.confData = res.data.data.records
@@ -190,7 +197,14 @@ export default {
     changePage (e) {
       const info = {
         pageSize: this.pageSize,
-        currentPage: e
+        currentPage: e,
+        applicationCode: this.applicationCode,
+        serviceTypeCode: this.serviceTypeSelected,
+        manufacturerCode: this.manufactureSelected,
+        applicationName: this.applicationName,
+        serviceModuleCode: this.serviceModuleSelected,
+        startTime: this.time === null ? '' : this.time[0],
+        endTime: this.time === null ? '' : this.time[1]
       }
       getThirdService(info).then(res => {
         this.confData = res.data.data.records
@@ -207,7 +221,7 @@ export default {
          pageSize: 10,
          applicationCode: this.applicationCode,
          serviceTypeCode: this.serviceTypeSelected,
-         manufacturerCode: '',
+         manufacturerCode: this.manufactureSelected,
          applicationName: this.applicationName,
          serviceModuleCode: this.serviceModuleSelected,
          startTime: this.time === null ? '' : this.time[0],
@@ -224,6 +238,11 @@ export default {
       this.endDate = date[1]
     },
     reset () {
+      this.applicationCode = null
+      this.serviceTypeSelected = null
+      this.applicationName = null
+      this.serviceModuleSelected = null
+      this.manufactureSelected = null
     },
     exportExel () {
       const titleArr = []

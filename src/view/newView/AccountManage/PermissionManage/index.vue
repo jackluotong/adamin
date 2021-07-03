@@ -124,8 +124,6 @@
         <FormItem label="AuthParentCode" prop="AuthParentCode" style="width:270px;" v-show="false">
           <Input  v-model.trim="formInline.AuthParentCode" />
         </FormItem>
-        <FormItem>
-        </FormItem>
       </Form>
       <div slot="footer">
         <Button type="primary" ghost size="large" @click="()=>{modalAddOrUpdate=false}">返回</Button>
@@ -153,57 +151,8 @@
 import { getAuthTree, createParent, deletePermission, editPermission } from '@/api/data'
 export default {
   data () {
-    // const test = Object.prototype.toString
-    function getByteLen (val) {
-      var len = 0
-      for (var i = 0, len1 = val.length; i < len1; i++) {
-        var length = val.charCodeAt(i)
-        if (length >= 0 && length <= 128) {
-          len += 1
-        } else {
-          len += 3
-        }
-      }
-      return len
-    }
-    const validAuthCode = function (rule, value, callback) {
-      if (!value) {
-        callback(new Error('请输入权限编码'))
-      } else if (getByteLen(value) > 128) {
-        callback(new Error('字符串长度不能超过128'))
-      } else {
-        callback()
-      }
-    }
-    const validAuthName = (rule, value, callback) => {
-      if (!value) {
-        callback(new Error('请输入权限名称'))
-      } else if (getByteLen(value) > 64) {
-        callback(new Error('字符串长度不能超过64'))
-      } else {
-        callback()
-      }
-    }
-    /*    const AuthSeq = (rule, value, callback) => {
-      if (!value) {
-        callback(new Error('请输入角色code'))
-      } else if (test.call(value) !== '[object Number]') {
-        callback(new Error('请输入数字'))
-      } else {
-        callback()
-      }
-    } */
-    const AuthLevel = (rule, value, callback) => {
-      if (!value) {
-        callback(new Error('请输入权限等级使用数字（1,2,3）'))
-      } else if (value !== '1' && value !== '2' && value !== '3') {
-        console.log(value)
-        callback(new Error('请输入权限数字（1,2,3）'))
-      } else {
-        callback()
-      }
-    }
     return {
+      mail: '',
       permission: sessionStorage.getItem('permission'),
       modalDelete: false,
       addNewModal: false,
@@ -237,16 +186,16 @@ export default {
       deleteId: '',
       ruleInline: {
         AuthCode: [
-          { required: true, validator: validAuthCode, trigger: 'blur' }
+          { required: true, message: '请输入权限编码' }
         ],
         AuthName: [
-          { required: true, validator: validAuthName, trigger: 'blur' }
+          { required: true, message: '请输入权限名称', trigger: 'blur' }
         ],
         AuthSeq: [
           { required: true, trigger: 'blur', type: 'number', message: '请以数字形式输入权限序号' }
         ],
         AuthLevel: [
-          { required: true, trigger: 'blur', validator: AuthLevel }
+          { required: true, trigger: 'blur', type: 'number', message: '请以数字形式输入权限等级（1,2,3）' }
         ]
         /*  AuthParentCode: [
           { required: true, validator: AuthParentCode, trigger: 'blur' }

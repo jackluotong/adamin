@@ -8,6 +8,8 @@
       <Input v-model.trim="applicationCode" />
       <Button type="primary" icon="md-search" @click="search()" style="margin:0 10px 0 20px">查询</Button>
       <Button type="primary" icon="md-add" @click="addSetting()" v-show="permission.includes('application:manage:add')">应用注册</Button>
+      <Button type="primary" icon="md-search" @click="reset()" style="margin:0 10px 0 20px">重置</Button>
+
     </div>
     <Table highlight-row stripe :columns="columns" :data="confData" style="margin-top: 5px">
       <template slot-scope="{ row, index }" slot="action">
@@ -204,7 +206,9 @@ export default {
     onpagesizechange (e) {
       const info = {
         pageSize: e,
-        currentPage: this.pageNum
+        currentPage: this.pageNum,
+        applicationCode: this.applicationCode,
+        applicationName: this.applicationName
 
       }
       getInfo(info).then(res => {
@@ -214,7 +218,9 @@ export default {
     changePage (e) {
       const info = {
         pageSize: this.pageSize,
-        currentPage: e
+        currentPage: e,
+        applicationCode: this.applicationCode,
+        applicationName: this.applicationName
       }
       getInfo(info).then(res => {
         this.renderPage(res.data.data.records, res.data.data.total)
@@ -235,6 +241,8 @@ export default {
       })
     },
     reset () {
+      this.applicationCode = null
+      this.applicationName = null
       this.formInline.applicationName = null
       this.formInline.applicationCode = null
       this.formInline.contactMobile = null

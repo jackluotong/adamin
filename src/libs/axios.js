@@ -62,7 +62,6 @@ class HttpRequest {
           break
         case Res.FORBIDDEN:
           Message.error(res.data.message)
-          console.log(this)
           router.push({
             name: 'login'
           })

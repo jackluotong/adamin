@@ -111,27 +111,6 @@ import { TreeSelect } from 'ant-design-vue'
 const SHOW_PARENT = TreeSelect.SHOW_PARENT
 export default {
   data () {
-    function getByteLen (val) {
-      var len = 0
-      for (var i = 0, len1 = val.length; i < len1; i++) {
-        var length = val.charCodeAt(i)
-        if (length >= 0 && length <= 128) {
-          len += 1
-        } else {
-          len += 3
-        }
-      }
-      return len
-    }
-    const validateroleName = function (rule, value, callback) {
-      if (!value) {
-        callback(new Error('请输入角色名称'))
-      } else if (getByteLen(value) > 128) {
-        callback(new Error('字符串长度不能超过128'))
-      } else {
-        callback()
-      }
-    }
     return {
       getEl: '',
       checkedData: [],
@@ -160,11 +139,11 @@ export default {
         confValue: '',
         confDescribtion: ''
       },
-      ruleInline: {
+      /*  ruleInline: {
         roleName: [
           { required: true, validator: validateroleName, trigger: 'blur' }
         ]
-      },
+      }, */
       confData: [],
       columns: [
         {
@@ -234,7 +213,7 @@ export default {
       this.modalAddOrUpdate = true
     },
     handleSubmitAddOrUpdate (index) {
-      console.log(this.$refs.tree.getCheckedNodes())
+    //   console.log(this.$refs.tree.getCheckedNodes(), this.$refs[index].validate())
       this.$refs[index].validate((valid) => {
         if (valid) {
           if (this.showType === 'edit') {

@@ -22,6 +22,7 @@
 <template>
   <div class="user-content">
     <div class="content-button">
+                <h1 style="margin:10px 10px 10px 10px">阈值管理-服务阈值管理</h1>
 <span style="padding:10px 10px 10px 10px ">厂商名称</span>
 <Select label="" v-model.trim="manufacturerName" style="width:150px; margin-right:20px;" clearable >
         <Option v-for="(item,id) in manufacturerOption" :key="id" :value="item.manufacturerCode">{{item.manufacturerName}}</Option>
@@ -228,8 +229,10 @@ export default {
     onpagesizechange (e) {
       const info = {
         pageSize: e,
-        currentPage: this.pageNum
-
+        currentPage: this.pageNum,
+        manufacturerCode: this.manufacturerName,
+        serviceTypeCode: this.serviceModule,
+        serviceModuleCode: this.serviceModule
       }
       getServiceThreShold(info).then(res => {
         this.renderPage(res.data.data.records, res.data.data.total)
@@ -238,7 +241,10 @@ export default {
     changePage (e) {
       const info = {
         pageSize: this.pageSize,
-        currentPage: e
+        currentPage: e,
+        manufacturerCode: this.manufacturerName,
+        serviceTypeCode: this.serviceModule,
+        serviceModuleCode: this.serviceModule
       }
       getServiceThreShold(info).then(res => {
         this.renderPage(res.data.data.records, res.data.data.total)
@@ -309,8 +315,6 @@ export default {
             this.$Message.error({
               content: error
             })
-            this.getServiceThreShold()
-            this.modalCheck = false
           })
           break
         case 'edit':
@@ -324,7 +328,6 @@ export default {
             this.$Message.error({
               content: error
             })
-            this.modalCheck = false
           })
           break
         default:
@@ -340,7 +343,9 @@ export default {
         serviceTypeCode: serviceTypeCode,
         serviceModuleCode: serviceModuleCode
       }
+      console.log(info)
       getServiceThreShold(info).then(res => {
+        console.log(res)
         this.renderPage(res.data.data.records, res.data.data.total)
       })
     },

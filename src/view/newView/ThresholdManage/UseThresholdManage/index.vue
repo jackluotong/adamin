@@ -46,6 +46,13 @@
                 v-show="permission.includes('threshold:application:add')"
                 >新增阈值</Button
             >
+             <Button
+                type="primary"
+                icon="md-reset"
+                @click="reset()"
+                style="margin:0 10px 0 20px"
+                >重置</Button
+            >
         </div>
         <Table
             highlight-row
@@ -226,9 +233,9 @@ export default {
           label: '应用定制阈值'
         }
       ],
-      total: 0, // 总数
-      pageNum: 1, // 第几页
-      pageSize: 30, // 每页几条数据
+      total: 0,
+      pageNum: 1,
+      pageSize: 10,
       applicationName: '',
       applicationCode: '',
       timesThreshold: '',
@@ -281,11 +288,11 @@ export default {
           key: 'applicationCode',
           align: 'center'
         },
-        /*  {
-          title: '服务模块',
-          key: 'serviceModule',
+        {
+          title: '服务类型',
+          key: 'serviceType',
           align: 'center'
-        }, */
+        },
         {
           title: '次数阈值（每分钟）',
           key: 'timesThreshold',
@@ -332,8 +339,9 @@ export default {
     onpagesizechange (e) {
       const info = {
         pageSize: e,
-        currentPage: this.pageNum
-
+        currentPage: this.pageNum,
+        applicationName: this.applicationName,
+        applicationCode: this.applicationCode
       }
       getUseThreShold(info).then(res => {
         this.renderPage(res.data.data.records, res.data.data.total)
@@ -342,7 +350,9 @@ export default {
     changePage (e) {
       const info = {
         pageSize: this.pageSize,
-        currentPage: e
+        currentPage: e,
+        applicationName: this.applicationName,
+        applicationCode: this.applicationCode
       }
       getUseThreShold(info).then(res => {
         this.renderPage(res.data.data.records, res.data.data.total)
@@ -353,10 +363,11 @@ export default {
       this.editId = this.confData[index].id
     },
     search () {
-
+      this.getUseThreShold(this.applicationCode, this.applicationName)
     },
     reset () {
-
+      this.applicationName = null
+      this.applicationCode = null
     },
     addSetting () {
       this.reset()
@@ -417,6 +428,8 @@ export default {
       this.modalEdit = false
     },
     edit (index) {
+      console.log(this.confData[index])
+      this.formInline.serviceTypeCode = this.confData[index].serviceTypeCode
       this.editId = this.confData[index].id
       this.formInline.id = this.confData[index].id
       this.formInline.applicationName = this.confData[index].applicationName
@@ -463,13 +476,16 @@ export default {
       this.confData = data
       this.total = total
     },
-    getUseThreShold () {
+    getUseThreShold (code, name) {
       const info = {
-        applicationCode: '',
+        applicationName: name,
+        applicationCode: code,
         pageSize: this.pageSize,
         currentPage: this.pageNum
       }
+      console.log(info)
       getUseThreShold(info).then(res => {
+        console.log(res)
         this.renderPage(res.data.data.records, res.data.data.total)
       })
     }
