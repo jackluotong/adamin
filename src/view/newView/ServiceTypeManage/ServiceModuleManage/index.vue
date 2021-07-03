@@ -62,7 +62,7 @@
      :mask-closable='false'
      v-bind:title="detailTitle"
      class-name="vertical-center-modal">
-      <Form ref="formInline" :model="formInline" :rules="ruleInline" inline>
+      <Form ref="formInline" :model="formInline"  inline>
         <FormItem label="服务模块" prop="serviceModule" style="width:270px;">
           <Input v-model.trim="formInline.serviceModule"/>
         </FormItem>

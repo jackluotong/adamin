@@ -61,7 +61,7 @@
      :mask-closable='false'
      v-bind:title="detailTitle"
      class-name="vertical-center-modal">
-      <Form ref="formInline" :model="formInline" :rules="ruleInline" inline>
+      <Form ref="formInline" :model="formInline"  inline>
         <FormItem label="角色名称" prop="roleName" style="width:270px;">
           <Input v-model.trim="formInline.roleName"/>
         </FormItem>

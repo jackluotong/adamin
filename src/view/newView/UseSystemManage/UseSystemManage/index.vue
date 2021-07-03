@@ -48,7 +48,7 @@
       :closable="false"
       v-bind:title="detailTitle"
     >
-      <Form ref="formInline" :model="formInline" :rules='ruleInline'>
+      <Form ref="formInline" :model="formInline" >
         <div style="display:inline-table">
         <div v-show="isHaveKey">
           <FormItem label="应用名称" prop="applicationName" style="width:270px;">

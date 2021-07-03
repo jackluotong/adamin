@@ -84,7 +84,7 @@
             :closable="false"
             v-bind:title="detailTitle"
         >
-            <Form ref="formInline" :model="formInline" :rules="ruleInline" inline>
+            <Form ref="formInline" :model="formInline"  inline>
                  <FormItem label="厂商名称" prop="manufacturerName" style="width:270px;">
                     <Input v-model.trim="formInline.manufacturerName" />
                 </FormItem>

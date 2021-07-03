@@ -66,7 +66,7 @@
             :closable="false"
             v-bind:title="detailTitle"
         >
-            <Form ref="formInline" :model="formInline" :rules='ruleInline'>
+            <Form ref="formInline" :model="formInline" >
                 <div style="display:inline-table">
                     <FormItem
                         label="应用名称"

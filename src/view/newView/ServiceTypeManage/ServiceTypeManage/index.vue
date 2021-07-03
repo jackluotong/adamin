@@ -33,7 +33,7 @@
      />
      <!-- 新增服务类型 -->
      <Modal v-model.trim="addNewServiceType" width="600" :mask-closable="false" :closable="false" v-bind:title="detailTitle">
-      <Form  :model="formInline"  :rules="ruleInline" ref="formInline" >
+      <Form  :model="formInline"   ref="formInline" >
         <div style="display:inline-table">
         <FormItem label="服务模块" prop="serviceModule" style="width:270px;">
         <Select v-model.trim="selectedModuleAdd" style="width:200px" @on-change='selectedModuleAddClick' clearable >

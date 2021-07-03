@@ -57,7 +57,7 @@
      @on-page-size-change='onpagesizechange'
       />
      <Modal v-model.trim="modalAddOrUpdate" width="600" :mask-closable="false" :closable="true" v-bind:title="detailTitle">
-      <Form ref="formInline" :model="formInline" :rules="ruleInline" inline>
+      <Form ref="formInline" :model="formInline"  inline>
         <FormItem label="用户code:" style="width:270px;">
             <span style=" font-size: 30px;
       font-weight: 400;
