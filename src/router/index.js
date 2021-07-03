@@ -7,7 +7,6 @@ import {
   setTitle
 } from '@/libs/util'
 // import config from '@/config'
-import { Message } from '_element-ui@2.15.2@element-ui'
 // const { homeName } = config
 
 Vue.use(Router)
@@ -33,7 +32,6 @@ router.beforeEach((to, from, next) => {
   } else {
     if (sessionStorage.getItem('permission') === null) {
       if (to.name !== LOGIN_PAGE_NAME) {
-        Message.info('请重新登录目前没权限')
         next({
           name: LOGIN_PAGE_NAME
         })
