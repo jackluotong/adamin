@@ -1,34 +1,37 @@
 <template>
     <div class="user-content">
         <h1 style="margin:10px 10px 10px 10px">应用系统管理-应用关联服务管理</h1>
-        <div class="content-button">
+        <div style="display:flex">
             <span style="padding:10px">应用名称</span>
-            <Input v-model.trim="applicationName" />
+            <Input v-model.trim="applicationName" style="width:150px; margin-right:20px;"/>
             <span style="padding:10px">应用简称</span>
-            <Input v-model.trim="applicationCode" />
+            <Input v-model.trim="applicationCode" style="width:150px; margin-right:20px;"/>
             <span style="padding:10px">服务模块</span>
-            <Select v-model.trim="selectedModule" style="width:200px" >
+            <Select v-model.trim="selectedModule" style="width:150px; margin-right:20px;" >
                 <Option v-for="(item,index) in moduleOptions"
                 :key="index"
                 :value="item.serviceModuleCode">{{ item.serviceModule}}</Option>
             </Select>
-             <Button
+            </div>
+            <div style="display:flex">
+ <Button
                 type="primary"
                 icon="md-search"
                 @click="search()"
                 style="margin:0 10px 0 20px"
                 >查询</Button
             >
-            <Button type="primary" icon="md-refresh" @click="reset()">重置</Button>
-
+            <Button type="primary" icon="md-refresh" @click="reset()"  style="margin:0 10px 0 20px">重置</Button>
             <Button
+            style="margin:0 10px 0 20px"
             type="primary"
             icon="md-add"
             @click="addSetting()"
             v-show="permission.includes('application:service:connect')"
                 >服务关联</Button
             >
-        </div>
+            </div>
+
         <Table
             highlight-row
             stripe

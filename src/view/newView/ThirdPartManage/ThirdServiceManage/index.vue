@@ -23,21 +23,19 @@
 <template>
   <div class="user-content">
           <h1 style="margin:10px 10px 10px 10px">第三方管理-第三服务管理</h1>
-    <div class="content-button">
+    <div style="display:flex">
 <span style="padding:10px 10px 10px 10px ">厂商名称</span>
 <Select label="" v-model.trim="manufacturerName" style="width:150px; margin-right:20px;" clearable >
         <Option v-for="(item,id) in manufacturerOption" :key="id" :value="item.manufacturerCode">{{item.manufacturerName}}</Option>
       </Select>
-<span style="padding:10px 10px 10px 10px " >服务模块</span>
+      <span style="padding:10px 10px 10px 10px ">服务模块</span>
  <Select label="" v-model.trim="serviceModule" style="width:150px; margin-right:20px;" @on-change='selectedModuleClickShow' clearable >
         <Option v-for="(item,id) in moduleOption" :key="id" :value="item.serviceModuleCode">{{item.serviceModule}}</Option>
       </Select>
-<div style="padding:10px 10px 10px 10px ">
 <span style="padding:10px 10px 10px 0 ">服务类型</span>
       <Select label="" v-model.trim="serviceType" style="width:150px;margin-right:20px" clearable >
         <Option v-for="(item,id) of typeOption" :key="id" :value="item.serviceTypeCode">{{item.serviceType}}</Option>
       </Select>
-</div>
 </div>
 <div style="">
       <Button type="primary" icon="md-search" @click="search()" style="margin:10px">查询</Button>

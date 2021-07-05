@@ -25,7 +25,8 @@ class HttpRequest {
       headers: {
         'X-Token': getToken(),
         'X-Requested-With': 'XMLHttpRequest',
-        responseType: 'blob'
+        responseType: 'blob',
+        'Cache-Control': 'public'
       }
     }
     return config

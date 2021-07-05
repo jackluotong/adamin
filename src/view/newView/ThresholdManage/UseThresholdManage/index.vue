@@ -30,30 +30,30 @@
 <template>
     <div class="user-content">
         <h1 style="margin:10px 10px 10px 10px">阈值管理-应用阈值管理</h1>
-        <div class="content-button">
+        <div style="display:flex">
             <span style="padding:10px">应用名称</span>
-            <Input v-model.trim="applicationName" />
+            <Input v-model.trim="applicationName" style="width:150px; margin-right:20px;"/>
             <span style="padding:10px">应用简称</span>
-            <Input v-model.trim="applicationCode" />
-            <Button
+            <Input v-model.trim="applicationCode" style="width:150px; margin-right:20px;"/>
+        </div>
+        <Button
                 type="primary"
                 icon="md-search"
                 @click="search()"
                 style="margin:0 10px 0 20px"
                 >查询</Button
             >
-            <Button type="primary" icon="md-add" @click="addSetting()"
+         <Button type="primary" icon="md-add" @click="addSetting()"
                 v-show="permission.includes('threshold:application:add')"
                 >新增阈值</Button
             >
              <Button
                 type="primary"
-                icon="md-reset"
+                icon="md-search"
                 @click="reset()"
                 style="margin:0 10px 0 20px"
                 >重置</Button
             >
-        </div>
         <Table
             highlight-row
             stripe
@@ -61,7 +61,7 @@
             :data="confData"
             style="margin-top: 5px"
         >
-            <template slot-scope="{ row, index }" slot="action">
+            <template slot-scope="{ index }" slot="action">
                 <div>
                     <Button
                         type="primary"
