@@ -6,7 +6,7 @@ import axios from '@/libs/api.request'
 // #region
 export const getInfoUser = (info) => {
   return axios.request({
-    url: '/dcenter/userInfo/list',
+    url: '/dadmin/userInfo/list',
     method: 'post',
     data: info
   })
@@ -16,7 +16,7 @@ export const getInfoUser = (info) => {
 */
 export const roleConnect = (info) => {
   return axios.request({
-    url: '/dcenter/userRoleRelation/bind ',
+    url: '/dadmin/userRoleRelation/bind ',
     method: 'post',
     data: info
   })
@@ -34,7 +34,7 @@ export const roleConnect = (info) => {
 */
 export const getInfoRole = (info) => {
   return axios.request({
-    url: '/dcenter/roleInfo/query',
+    url: '/dadmin/roleInfo/query',
     method: 'post',
     data: info
   })
@@ -44,7 +44,7 @@ export const getInfoRole = (info) => {
 */
 export const getAuthTree = () => {
   return axios.request({
-    url: '/dcenter/authInfo/query',
+    url: '/dadmin/authInfo/query',
     method: 'get'
   })
 }
@@ -53,7 +53,7 @@ export const getAuthTree = () => {
 */
 export const editRole = (info) => {
   return axios.request({
-    url: '/dcenter/roleInfo/createOrUpdate',
+    url: '/dadmin/roleInfo/createOrUpdate',
     method: 'post',
     data: info
   })
@@ -63,7 +63,7 @@ export const editRole = (info) => {
 */
 export const deleteRole = (info) => {
   return axios.request({
-    url: `/dcenter/roleInfo/remove/${info}`,
+    url: `/dadmin/roleInfo/remove/${info}`,
     method: 'get'
   })
 }
@@ -77,7 +77,7 @@ export const deleteRole = (info) => {
 // #region
 export const createParent = (info) => {
   return axios.request({
-    url: '/dcenter/authInfo/create',
+    url: '/dadmin/authInfo/create',
     data: info,
     method: 'post'
   })
@@ -85,7 +85,7 @@ export const createParent = (info) => {
 
 export const editPermission = (info) => {
   return axios.request({
-    url: '/dcenter/authInfo/update',
+    url: '/dadmin/authInfo/update',
     data: info,
     method: 'post'
   })
@@ -93,7 +93,7 @@ export const editPermission = (info) => {
 
 export const deletePermission = (info) => {
   return axios.request({
-    url: '/dcenter/authInfo/remove/' + info,
+    url: '/dadmin/authInfo/remove/' + info,
     method: 'get'
   })
 }
@@ -111,7 +111,7 @@ export const deletePermission = (info) => {
     */
 export const getServiceTypeInfo = (info) => {
   return axios.request({
-    url: '/dcenter/type/select/ServiceType',
+    url: '/dadmin/type/select/ServiceType',
     data: info,
     method: 'post'
   })
@@ -123,7 +123,7 @@ export const getServiceTypeInfo = (info) => {
 
 export const serarchTypeByModule = (info) => {
   return axios.request({
-    url: `/dcenter/type/findTypeName/${info}`,
+    url: `/dadmin/type/findTypeName/${info}`,
     data: info,
     method: 'get'
   })
@@ -135,7 +135,7 @@ export const serarchTypeByModule = (info) => {
 
 export const editServiceModule = (info) => {
   return axios.request({
-    url: '/dcenter/type/edit/ServiceModule',
+    url: '/dadmin/type/edit/ServiceModule',
     data: info,
     method: 'post'
   })
@@ -145,7 +145,7 @@ export const editServiceModule = (info) => {
 */
 export const editServiceType = (info) => {
   return axios.request({
-    url: '/dcenter/type/edit/ServiceType',
+    url: '/dadmin/type/edit/ServiceType',
     data: info,
     method: 'post'
   })
@@ -156,7 +156,7 @@ export const editServiceType = (info) => {
 */
 export const inquireServiceModule = (info) => {
   return axios.request({
-    url: '/dcenter/type/select/ServiceModule',
+    url: '/dadmin/type/select/ServiceModule',
     method: 'post',
     data: info
   })
@@ -167,7 +167,7 @@ export const inquireServiceModule = (info) => {
 */
 export const deletModule = (info) => {
   return axios.request({
-    url: `/dcenter/type/del/ServiceModule/${info}`,
+    url: `/dadmin/type/del/ServiceModule/${info}`,
     method: 'get'
   })
 }
@@ -177,7 +177,7 @@ export const deletModule = (info) => {
 */
 export const deleteType = (id, code) => {
   return axios.request({
-    url: `/dcenter/type/del/ServiceType/${id}/${code}`,
+    url: `/dadmin/type/del/ServiceType/${id}/${code}`,
     method: 'get'
   })
 }
@@ -188,7 +188,7 @@ export const deleteType = (id, code) => {
 
 export const getAllServiceType = () => {
   return axios.request({
-    url: '/dcenter/type/serviceTypes',
+    url: '/dadmin/type/serviceTypes',
     method: 'get'
   })
 }

@@ -227,11 +227,12 @@ export default {
       }).catch(err => this.$Message.info(err))
     },
     onpagesizechange (e) {
+      this.pageSize = e
       const info = {
         pageSize: e,
         currentPage: this.pageNum,
         manufacturerCode: this.manufacturerName,
-        serviceTypeCode: this.serviceModule,
+        serviceTypeCode: this.serviceType,
         serviceModuleCode: this.serviceModule
       }
       getServiceThreShold(info).then(res => {
@@ -243,7 +244,7 @@ export default {
         pageSize: this.pageSize,
         currentPage: e,
         manufacturerCode: this.manufacturerName,
-        serviceTypeCode: this.serviceModule,
+        serviceTypeCode: this.serviceType,
         serviceModuleCode: this.serviceModule
       }
       getServiceThreShold(info).then(res => {
@@ -254,6 +255,9 @@ export default {
       this.getServiceThreShold(this.manufacturerName, this.serviceType, this.serviceModule)
     },
     reset () {
+      for (let key in this.formInline) {
+        delete this.formInline[key]
+      }
     },
     edit (index) {
       this.formInline.id = this.confData[index].id
@@ -311,6 +315,7 @@ export default {
             })
             this.getServiceThreShold()
             this.modalCheck = false
+            this.reset()
           }).catch(error => {
             this.$Message.error({
               content: error

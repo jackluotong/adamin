@@ -2,7 +2,7 @@ import axios from '@/libs/api.request'
 
 export const getUseThreShold = (info) => {
   return axios.request({
-    url: '/dcenter/applicationThreshold/query',
+    url: '/dadmin/applicationThreshold/query',
     method: 'post',
     data: info
   })
@@ -10,7 +10,7 @@ export const getUseThreShold = (info) => {
 
 export const addUseThreShold = (info) => {
   return axios.request({
-    url: '/dcenter/applicationThreshold/create',
+    url: '/dadmin/applicationThreshold/create',
     method: 'post',
     data: info
   })
@@ -18,7 +18,7 @@ export const addUseThreShold = (info) => {
 
 export const editUseThreShold = (info) => {
   return axios.request({
-    url: '/dcenter/applicationThreshold/update',
+    url: '/dadmin/applicationThreshold/update',
     method: 'post',
     data: info
   })
@@ -26,7 +26,7 @@ export const editUseThreShold = (info) => {
 
 export const deleteUseThreShold = (info) => {
   return axios.request({
-    url: `/dcenter/applicationThreshold/remove/${info}`,
+    url: `/dadmin/applicationThreshold/remove/${info}`,
     method: 'get',
     data: info
   })
@@ -34,7 +34,7 @@ export const deleteUseThreShold = (info) => {
 
 export const cancelUseThreShold = (info) => {
   return axios.request({
-    url: `/dcenter/applicationThreshold/fuseCancellation/${info}`,
+    url: `/dadmin/applicationThreshold/fuseCancellation/${info}`,
     method: 'get',
     data: info
   })
@@ -47,7 +47,7 @@ export const cancelUseThreShold = (info) => {
 
 export const getServiceThreShold = (info) => {
   return axios.request({
-    url: '/dcenter/serviceThreshold/query',
+    url: '/dadmin/serviceThreshold/query',
     method: 'post',
     data: info
   })
@@ -55,7 +55,7 @@ export const getServiceThreShold = (info) => {
 
 export const addServiceThreShold = (info) => {
   return axios.request({
-    url: '/dcenter/serviceThreshold/create',
+    url: '/dadmin/serviceThreshold/create',
     method: 'post',
     data: info
   })
@@ -63,7 +63,7 @@ export const addServiceThreShold = (info) => {
 
 export const editServiceThreShold = (info) => {
   return axios.request({
-    url: '/dcenter/serviceThreshold/update',
+    url: '/dadmin/serviceThreshold/update',
     method: 'post',
     data: info
   })
@@ -71,7 +71,7 @@ export const editServiceThreShold = (info) => {
 
 export const deleteServiceThreShold = (info) => {
   return axios.request({
-    url: '/dcenter/serviceThreshold/remove/',
+    url: '/dadmin/serviceThreshold/remove/',
     method: 'post',
     data: info
   })
@@ -83,7 +83,7 @@ export const deleteServiceThreShold = (info) => {
 
 export const getAllApp = () => {
   return axios.request({
-    url: '/dcenter/application/queryAppAll',
+    url: '/dadmin/application/queryAppAll',
     method: 'get'
   })
 }

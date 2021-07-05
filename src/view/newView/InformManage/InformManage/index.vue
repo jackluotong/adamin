@@ -223,6 +223,7 @@ export default {
   },
   methods: {
     onpagesizechange (e) {
+      this.pageSize = e
       const info = {
         pageSize: e,
         currentPage: this.pageNum

@@ -337,6 +337,7 @@ export default {
   },
   methods: {
     onpagesizechange (e) {
+      this.pageSize = e
       const info = {
         pageSize: e,
         currentPage: this.pageNum,
@@ -354,7 +355,9 @@ export default {
         applicationName: this.applicationName,
         applicationCode: this.applicationCode
       }
+      console.log(info)
       getUseThreShold(info).then(res => {
+        console.log(res)
         this.renderPage(res.data.data.records, res.data.data.total)
       })
     },
@@ -389,6 +392,9 @@ export default {
                 this.modalEdit = false
                 this.getUseThreShold()
                 this.$refs[index].resetFields()
+                for (let key in this.formInline) {
+                  delete this.formInline[key]
+                }
               })
               .catch(err => {
                 console.log(err)

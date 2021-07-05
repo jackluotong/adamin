@@ -242,7 +242,6 @@ export default {
                 return item.authCode
               })
             }
-            console.log(info)
             editRole(info).then(res => {
               this.$Message['success']({
                 background: true,
@@ -250,6 +249,8 @@ export default {
               })
               this.modalAddOrUpdate = false
               this.renderPangeAgain()
+              this.checkedData = []
+              this.formInline.roleName = null
             }).catch(err => {
               console.log(err)
             })

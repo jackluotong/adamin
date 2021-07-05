@@ -126,7 +126,7 @@
                     type="primary"
                     size="large"
                     @click="handleSubmitAddOrUpdate('formInline')"
-                    >新增</Button
+                    >保存</Button
                 >
             </div>
         </Modal>
@@ -263,6 +263,8 @@ export default {
   },
   methods: {
     onpagesizechange (e) {
+      this.pageSize = e
+
       const info = {// this.applicationCode, this.applicationName, this.selectedModule
         pageSize: e,
         currentPage: this.pageNum,
@@ -324,7 +326,9 @@ export default {
                 content: res.data.message
               })
               this.modalEdit = false
-              this.$refs[index].resetFields()
+              this.selectedAppName = null
+              this.selectedModule = null
+              this.selectedType = null
             })
             .catch(err => {
               console.log(err)

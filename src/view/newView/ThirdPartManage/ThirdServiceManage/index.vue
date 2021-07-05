@@ -246,6 +246,8 @@ export default {
   },
   methods: {
     onpagesizechange (e) {
+      this.pageSize = e
+
       const info = {
         pageSize: e,
         currentPage: this.pageNum,
@@ -368,6 +370,7 @@ export default {
         pageSize: this.pageSize
       }
       getThirdService(info).then(res => {
+        console.log(res)
         this.renderPage(res.data.data.records, res.data.data.total)
       })
     },

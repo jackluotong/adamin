@@ -1,29 +1,53 @@
+ <style lang="less" scoped="scoped">
+    .user-content {
+        .content-button {
+            padding: 5px;
+            .ivu-select-single {
+                width: 150px;
+            }
+            .ivu-input-type {
+                        width: 150px;
+                        margin-left: 10px;
+                        }
+                        .ivu-btn {
+                        margin-left: 10px;
+                    }
+                    .ivu-btn-info {
+                    background: #2d8cf0;
+                    border-color: #2d8cf0;
+                }
+            }
+    }
+
+</style>
+
 <template>
     <div class="user-content">
         <h1 style="margin:10px 10px 10px 10px">应用系统管理-明细查询</h1>
-        <div class="content-button" >
+        <div style="display:flex">
             <span style="padding:10px">应用名称</span>
-            <Input v-model.trim="applicationName" />
+            <Input v-model.trim="applicationName"  style="width:150px; margin-right:20px;"/>
             <span style="padding:10px">应用简称</span>
-            <Input v-model.trim="applicationCode" />
+            <Input v-model.trim="applicationCode" style="width:150px; margin-right:20px;" />
             <span style="padding:10px 10px 10px 10px ">厂商名称</span>
             <Select label="" v-model.trim="manufactureSelected" style="width:150px; margin-right:20px;" >
                 <Option v-for="(item,id) of manufacturerOption" :key="id" :value="item.manufacturerCode">{{item.manufacturerName}}</Option>
             </Select>
+             </div>
+             <div style="display:flex">
             <span style="padding:10px 10px 10px 10px ">服务模块</span>
             <Select label="" v-model.trim="serviceModuleSelected" style="width:150px; margin-right:20px;">
                 <Option v-for="(item,id) in serviceModuleOption" :key="id" :value="item.serviceModuleCode">{{item.serviceModule}}</Option>
             </Select>
-                <span style="padding:10px 10px 10px 0 ">服务类型</span>
+                <span style="padding:10px 10px 10px 10px ">服务类型</span>
                 <Select label="" v-model.trim="serviceTypeSelected" style="width:150px;margin-right:20px">
                     <Option v-for="(item,id) in serviceTypeOption" :key="id" :value="item.serviceTypeCode">{{item.serviceType}}</Option>
                 </Select>
-             </div>
-            <div style="display:flex">
-                <span style="padding:10px 18px">请求时间</span>
+
+                <span style="padding:10px 10px 10px 10px">请求时间</span>
                 <Row>
                 <Col span="12">
-                    <Date-picker type="daterange" placement="bottom-end" placeholder="选择日期" style="width: 200px" @on-change='selectTime' v-model="selectedDate"></Date-picker>
+                    <Date-picker type="daterange" placement="bottom-end" placeholder="选择日期" style="width: 150px" @on-change='selectTime' v-model="selectedDate"></Date-picker>
                 </Col>
                 </Row>
             </div>
@@ -32,8 +56,8 @@
             <Button type="primary" icon="md-search" @click="search()" style="margin:10px">查询</Button>
                   <Button type="primary" icon="md-refresh" @click="reset()">重置</Button>
             <Button type="primary" icon="md-refresh" @click="exportExel()" style="margin:10px" :loading="exportLoading"
-                                    v-show="permission.includes('statistic:detail:export')"
->按条件导出</Button>
+                v-show="permission.includes('statistic:detail:export')"
+            >按条件导出</Button>
 
         </div>
 
@@ -52,10 +76,9 @@
 </template>
 
 <script>
-import { getInfoDetails } from '@/api/detailsInquire'
+import { getInfoDetails, exportTable } from '@/api/detailsInquire'
 import { getManufacture } from '@/api/thirdPart'
 import { getServiceTypeInfo, inquireServiceModule } from '@/api/data'
-import excel from '@/libs/excel'
 export default {
   data () {
     return {
@@ -75,12 +98,6 @@ export default {
       showDetailModal: false,
       showDetailContent: '',
       modalCheck: false,
-      /*  formInline: {
-        manufacturerName: '',
-        serviceModule: '',
-        serviceType: '',
-        serviceStatus: '',
-      }, */
       manufacturerOption: [],
       serviceModuleOption: [],
       serviceTypeOption: [],
@@ -129,7 +146,31 @@ export default {
           title: '请求参数',
           key: 'reqParam',
           width: 200,
-          align: 'center'
+          align: 'center',
+          render: (h, params) => {
+            return h('div', [
+              h('Tooltip', {
+                props: {
+                  placement: 'top',
+                  transfer: true
+                },
+                style: {
+                  display: 'inline-block',
+                  width: params.column._width * 0.9 + 'px',
+                  overflow: 'hidden',
+                  textOverflow: 'ellipsis',
+                  whiteSpace: 'nowrap'
+                }
+              }, [params.row.reqParam, h('span', {
+                slot: 'content',
+                style: {
+                  whiteSpace: 'normal',
+                  wordBreak: 'break-all'
+                }
+              }, params.row.reqParam)
+              ])
+            ])
+          }
         },
         {
           title: '请求时间',
@@ -141,7 +182,33 @@ export default {
           title: '返回参数',
           key: 'resParam',
           width: 150,
-          align: 'center'
+          align: 'center',
+          render: (h, params) => {
+            return h('div', [
+              h('Tooltip', {
+                props: {
+                  placement: 'top',
+                  transfer: true
+                },
+                style: {
+                  display: 'inline-block',
+                  width: '100%',
+                  overflow: 'hidden',
+                  textOverflow: 'ellipsis',
+                  whiteSpace: 'nowrap',
+                  borderColor: '1px',
+                  borderWidth: 'red'
+                }
+              }, [params.row.resParam, h('span', {
+                slot: 'content',
+                style: {
+                  whiteSpace: 'normal',
+                  wordBreak: 'break-all'
+                }
+              }, params.row.resParam)
+              ])
+            ])
+          }
         },
         {
           title: '返回时间',
@@ -153,7 +220,33 @@ export default {
           title: '请求厂商参数',
           key: 'reqManufacParam',
           width: 150,
-          align: 'center'
+          align: 'center',
+          render: (h, params) => {
+            return h('div', [
+              h('Tooltip', {
+                props: {
+                  placement: 'top',
+                  transfer: true
+                },
+                style: {
+                  display: 'inline-block',
+                  width: '100%',
+                  overflow: 'hidden',
+                  textOverflow: 'ellipsis',
+                  whiteSpace: 'nowrap',
+                  borderColor: '1px',
+                  borderWidth: 'red'
+                }
+              }, [params.row.reqManufacParam, h('span', {
+                slot: 'content',
+                style: {
+                  whiteSpace: 'normal',
+                  wordBreak: 'break-all'
+                }
+              }, params.row.reqManufacParam)
+              ])
+            ])
+          }
         },
         {
           title: '请求厂商时间',
@@ -165,7 +258,33 @@ export default {
           title: '厂商返回参数',
           key: 'resManufacParam',
           width: 150,
-          align: 'center'
+          align: 'center',
+          render: (h, params) => {
+            return h('div', [
+              h('Tooltip', {
+                props: {
+                  placement: 'top',
+                  transfer: true
+                },
+                style: {
+                  display: 'inline-block',
+                  width: '100%',
+                  overflow: 'hidden',
+                  textOverflow: 'ellipsis',
+                  whiteSpace: 'nowrap',
+                  borderColor: '1px',
+                  borderWidth: 'red'
+                }
+              }, [params.row.resManufacParam, h('span', {
+                slot: 'content',
+                style: {
+                  whiteSpace: 'normal',
+                  wordBreak: 'break-all'
+                }
+              }, params.row.resManufacParam)
+              ])
+            ])
+          }
         },
         {
           title: '厂商返回时间',
@@ -178,6 +297,7 @@ export default {
   },
   methods: {
     onpagesizechange (e) {
+      this.pageSize = e
       const info = {
         pageSize: e,
         currentPage: this.pageNum,
@@ -227,7 +347,6 @@ export default {
          startTime: this.time === null ? '' : this.time[0],
          endTime: this.time === null ? '' : this.time[1]
        }
-      console.log(info)
       getInfoDetails(info).then(res => {
         console.log(res)
         this.renderPage(res.data.data.records, res.data.data.total)
@@ -245,30 +364,23 @@ export default {
       this.manufactureSelected = null
     },
     exportExel () {
-      const titleArr = []
-      const keyArr = []
-      if (this.columns.length) {
-        for (let i = 0; i < this.columns.length; i++) {
-          titleArr.push(this.columns[i].title)
-          keyArr.push(this.columns[i].key)
-        }
-      } else {
-        this.$Message('表格为空')
-      }
-      //   let newArr = this.columns.map((item, index) => { return Object.assign({}, { '': item.title }) })
       if (this.confData.length) {
         this.exportLoading = true
-        const params = {
-          title: titleArr,
-          key: keyArr,
-          data: this.confData,
-          autoWidth: true,
-          filename: '分类列表'
+        const info = {
+          applicationCode: this.applicationCode,
+          serviceTypeCode: this.serviceTypeSelected,
+          manufacturerCode: this.manufactureSelected,
+          applicationName: this.applicationName,
+          serviceModuleCode: this.serviceModuleSelected,
+          startTime: this.time === null ? '' : this.time[0],
+          endTime: this.time === null ? '' : this.time[1]
         }
-        excel.export_array_to_excel(params)
-        this.exportLoading = false
+        exportTable(JSON.stringify(info)).then(res => {
+          this.exportLoading = false
+        })
       } else {
         this.$Message.info('表格数据不能为空！')
+        this.exportLoading = false
       }
     },
     cancel () {
@@ -280,7 +392,6 @@ export default {
         pageSize: this.pageSize
       }
       getInfoDetails(info).then(res => {
-        console.log(res)
         this.renderPage(res.data.data.records, res.data.data.total)
       }).catch(error => {
         this.$Message.error({
@@ -301,7 +412,6 @@ export default {
     this.getInfo()
     getManufacture(info).then(res => {
       this.manufacturerOption = res.data.data.records
-      console.log(res)
     })
     getServiceTypeInfo(info).then(res => {
       this.serviceTypeOption = res.data.data.records
@@ -312,24 +422,3 @@ export default {
   }
 }
 </script>
- <style lang="less" scoped="scoped">
-                    .user-content {
-                        .content-button {
-                            padding: 5px;
-                            .ivu-select-single {
-                                width: 150px;
-                            }
-                            .ivu-input-type {
-                                width: 150px;
-                                margin-left: 10px;
-                            }
-                            .ivu-btn {
-                                margin-left: 10px;
-                            }
-                            .ivu-btn-info {
-                                background: #2d8cf0;
-                                border-color: #2d8cf0;
-                            }
-                        }
-                    }
-                </style>

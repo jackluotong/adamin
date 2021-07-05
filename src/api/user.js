@@ -6,7 +6,7 @@ export const login = ({ userName, password }) => {
     'wordPass': password
   }
   return axios.request({
-    url: '/dcenter/login/login',
+    url: '/dadmin/login/login',
     data,
     method: 'post'
   })
@@ -14,14 +14,14 @@ export const login = ({ userName, password }) => {
 
 export const getUserInfo = (token) => {
   return axios.request({
-    url: '/dcenter/admin/userInfo/getUserInfoByToken/' + token,
+    url: '/dadmin/admin/userInfo/getUserInfoByToken/' + token,
     method: 'get'
   })
 }
 
 export const logout = () => {
   return axios.request({
-    url: '/dcenter/login/logout/',
+    url: '/dadmin/login/logout/',
     method: 'get'
   })
 }

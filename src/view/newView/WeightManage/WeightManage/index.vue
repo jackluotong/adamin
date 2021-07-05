@@ -162,7 +162,6 @@
                     >{{ item.manufacturerName }}</Checkbox
                 >
               </Checkbox-group>
-
                 <FormItem
                  v-show="checkList.length>0"
                 label='权重'
@@ -489,6 +488,7 @@ export default {
       console.log(e, this.editObj.checkedDataEdit)
     },
     onpagesizechange (e) {
+      this.pageSize = e
       const info = {
         pageSize: e,
         currentPage: this.pageNum,

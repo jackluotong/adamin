@@ -1,4 +1,5 @@
 import Cookies from 'js-cookie'
+
 // cookie保存的天数
 import config from '@/config'
 import { forEach, hasOneOf, objEqual } from '@/libs/tools'
@@ -420,4 +421,53 @@ export const setTitle = (routeItem, vm) => {
   const pageTitle = showTitle(handledRoute, vm)
   const resTitle = pageTitle ? `${title} - ${pageTitle}` : title
   window.document.title = resTitle
+}
+/**
+ * export
+ */
+
+export const exportHandler = (data) => {
+  let self = this
+  let params = {
+    name: data.name,
+    Id: data.id
+  }
+  // 请求接口
+  axios({
+    method: 'get',
+    url: '/export/file',
+    params: params,
+    responseType: 'blob' // 定义接口响应的格式,很重要
+  }).then(response => {
+    if (!response || !response.data) {
+      self.$message({
+        type: 'error',
+        message: '导出失败！'
+      })
+      return
+    }
+    let blob = new Blob([response.data])// response.data为后端传的流文件
+    let downloadFilename = data.name + '.zip'// 设置导出的文件名
+    if (window.navigator && window.navigator.msSaveOrOpenBlob) {
+      // 兼容ie浏览器
+      window.navigator.msSaveOrOpenBlob(blob, downloadFilename)
+    } else {
+      // 谷歌,火狐等浏览器
+      let url = window.URL.createObjectURL(blob)
+      let downloadElement = document.createElement('a')
+      downloadElement.style.display = 'none'
+      downloadElement.href = url
+      downloadElement.download = downloadFilename
+      document.body.appendChild(downloadElement)
+      downloadElement.click()
+      document.body.removeChild(downloadElement)
+      window.URL.revokeObjectURL(url)
+    }
+    self.$message({ type: 'success', message: '导出成功！' })
+  }).catch(err => {
+    self.$message({
+      type: 'error',
+      message: `导出失败！${err}`
+    })
+  })
 }
