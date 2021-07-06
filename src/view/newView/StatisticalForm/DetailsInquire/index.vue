@@ -397,7 +397,7 @@ export default {
     },
     exportExel () {
       if (this.confData.length) {
-        // this.exportLoading = true
+        this.exportLoading = true
         const info = {
           applicationCode: this.applicationCode,
           serviceTypeCode: this.serviceTypeSelected,
@@ -407,8 +407,9 @@ export default {
           startTime: this.time === null ? '' : this.time[0],
           endTime: this.time === null ? '' : this.time[1]
         }
-        console.log(JSON.stringify(info).replace(/{/, '').replace(/}/, ''))
-        window.open(`https://wxcs.internal.manulife-sinochem.com/dev/giq/dadmin/requestRecord/export/${JSON.stringify(info)}`)
+        let a = encodeURI(JSON.stringify(info))
+        window.open(`https://wxcs.internal.manulife-sinochem.com/dev/giq/dadmin/requestRecord/export?requestJson=${a}`)
+        this.exportLoading = false
       } else {
         this.$Message.info('表格数据不能为空！')
         this.exportLoading = false
