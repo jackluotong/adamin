@@ -164,6 +164,11 @@ export default {
       confData: [],
       columns: [
         {
+          type: 'index',
+          width: 60,
+          aligin: 'center'
+        },
+        {
           title: '通知类型',
           key: 'noticeType',
           tooltip: true,
@@ -257,9 +262,6 @@ export default {
         })
         this.getInfo()
       }).catch(() => {
-        this.$Message.error({
-          content: res.data.message
-        })
       })
     },
     cancelAddOrUpdateType () {

@@ -99,29 +99,29 @@
      v-bind:title="detailTitle">
       <Form ref="formInline" :model="formInline"  inline>
         <div v-show="showType==='edit'?false:true">
-        <FormItem label="权限编码" prop="AuthCode" style="width:270px;">
+        <FormItem label="权限编码"  style="width:270px;">
           <Input v-model.trim="formInline.AuthCode"/>
         </FormItem>
-        <FormItem label="权限顺序" prop="AuthSeq" style="width:270px;">
+        <FormItem label="权限顺序" style="width:270px;">
           <Input  v-model.number="formInline.AuthSeq"/>
         </FormItem>
-        <FormItem label="权限等级" prop="AuthLevel" style="width:270px;">
-          <Input  v-model.trim="formInline.AuthLevel"/>
+        <FormItem label="权限等级"  style="width:270px;">
+          <Input  v-model.number="formInline.AuthLevel"/>
         </FormItem>
          </div>
-          <FormItem label="权限名称" prop="AuthName" style="width:270px;">
+          <FormItem label="权限名称"  style="width:270px;">
           <Input  v-model.trim="formInline.AuthName"/>
         </FormItem>
-        <FormItem label="地址" prop="Url" style="width:270px;">
+        <FormItem label="地址"  style="width:270px;">
           <Input  v-model.trim="formInline.Url"/>
         </FormItem>
-        <FormItem label="控制中心" prop="Controller" style="width:270px;">
+        <FormItem label="控制中心"  style="width:270px;">
           <Input  v-model.trim="formInline.Controller"/>
         </FormItem>
-        <FormItem label="方法" prop="Method" style="width:270px;">
+        <FormItem label="方法"  style="width:270px;">
           <Input  v-model.trim="formInline.Method"/>
         </FormItem>
-        <FormItem label="AuthParentCode" prop="AuthParentCode" style="width:270px;" v-show="false">
+        <FormItem label="AuthParentCode"  style="width:270px;" v-show="false">
           <Input  v-model.trim="formInline.AuthParentCode" />
         </FormItem>
       </Form>
@@ -183,24 +183,7 @@ export default {
         id: ''
       },
       fatherCode: '',
-      deleteId: '',
-      ruleInline: {
-        AuthCode: [
-          { required: true, message: '请输入权限编码' }
-        ],
-        AuthName: [
-          { required: true, message: '请输入权限名称', trigger: 'blur' }
-        ],
-        AuthSeq: [
-          { required: true, trigger: 'blur', type: 'number', message: '请以数字形式输入权限序号' }
-        ],
-        AuthLevel: [
-          { required: true, trigger: 'blur', type: 'number', message: '请以数字形式输入权限等级（1,2,3）' }
-        ]
-        /*  AuthParentCode: [
-          { required: true, validator: AuthParentCode, trigger: 'blur' }
-        ] */
-      }
+      deleteId: ''
     }
   },
   methods: {
@@ -208,15 +191,18 @@ export default {
     },
     handleNodeClick (e) {
       this.deleteId = e.authCode
-      this.fatherCode = e.authCode
-      this.formInline.AuthName = e.authName
-      this.formInline.Controller = e.controller
-      this.formInline.Url = e.url
-      this.formInline.Method = e.method
-      this.formInline.AuthCode = e.authCode
-      this.formInline.AuthSeq = e.authSeq
-      this.formInline.AuthLevel = e.authLevel
-      this.formInline.id = e.id
+      if (this.showType === 'add son') {
+        this.fatherCode = e.authCode
+      } else if (this.showType === 'edit') {
+        this.formInline.AuthName = e.authName
+        this.formInline.Controller = e.controller
+        this.formInline.Url = e.url
+        this.formInline.Method = e.method
+        this.formInline.AuthCode = e.authCode
+        this.formInline.AuthSeq = e.authSeq
+        this.formInline.AuthLevel = e.authLevel
+        this.formInline.id = e.id
+      }
     },
     toTree (data) {
       let treeData = []
@@ -242,12 +228,13 @@ export default {
       return treeData
     },
     append (data) {
-      this.claer(this.formInline)
       this.showType = 'add son'
       if (data.authLevel === 3) {
         this.$Message.error('最多可以添加三级！')
         this.modalAddOrUpdate = false
       } else {
+        this.claer(this.formInline)
+        console.log(this.formInline)
         this.modalAddOrUpdate = true
       }
     },
@@ -256,10 +243,6 @@ export default {
     },
     remove (node, data) {
       this.modalDelete = true
-      /* const parent = node.parent
-      const children = parent.data.children || parent.data
-      const index = children.findIndex((d) => d.id === data.id)
-      children.splice(index, 1) */
     },
     editNode (node, data) {
       this.modalAddOrUpdate = true
@@ -268,7 +251,7 @@ export default {
     },
     claer (obj) {
       for (let key in obj) {
-        delete obj[key]
+        obj[key] = ''
       }
     },
     addSetting () {
@@ -277,65 +260,59 @@ export default {
       this.detailTitle = '新增全局配置信息'
       this.modalAddOrUpdate = true
     },
-    handleSubmitAddOrUpdate (index) {
-      this.$refs[index].validate((valid) => {
-        if (valid) {
-          if (this.showType === 'add') {
-            const info = {
-              authCode: this.formInline.AuthCode,
-              authName: this.formInline.AuthName,
-              authSeq: this.formInline.AuthSeq,
-              authLevel: this.formInline.AuthLevel,
-              authParentCode: '0',
-              url: this.formInline.Url,
-              Controller: this.formInline.Controller,
-              method: this.formInline.Method
-            }
-            createParent(info).then(res => {
-              this.getAuthTree()
-              this.$Message.success({
-                content: res.data.message
-              })
-              this.modalAddOrUpdate = false
-            })
-          } else if (this.showType === 'add son') {
-            const info = {
-              authCode: this.formInline.AuthCode,
-              authName: this.formInline.AuthName,
-              authSeq: this.formInline.AuthSeq,
-              authLevel: this.formInline.AuthLevel,
-              authParentCode: this.fatherCode,
-              url: this.formInline.Url,
-              Controller: this.formInline.Controller,
-              method: this.formInline.Method
-            }
-            createParent(info).then(res => {
-              this.getAuthTree()
-              this.$Message.success({
-                content: res.data.message
-              })
-              this.modalAddOrUpdate = false
-            })
-          } else if (this.showType === 'edit') {
-            const info = {
-              id: this.formInline.id,
-              authName: this.formInline.AuthName,
-              url: this.formInline.Url,
-              controller: this.formInline.Controller,
-              method: this.formInline.Method
-            }
-            editPermission(info).then(res => {
-              this.getAuthTree()
-              this.$Message.success({
-                content: res.data.message
-              })
-              this.modalAddOrUpdate = false
-            })
-          }
-        } else {
-          this.$Message.info('请输入正确的参数！')
+    handleSubmitAddOrUpdate () {
+      if (this.showType === 'add') {
+        const info = {
+          authCode: this.formInline.AuthCode,
+          authName: this.formInline.AuthName,
+          authSeq: this.formInline.AuthSeq,
+          authLevel: this.formInline.AuthLevel,
+          authParentCode: '0',
+          url: this.formInline.Url,
+          Controller: this.formInline.Controller,
+          method: this.formInline.Method
         }
-      })
+        createParent(info).then(res => {
+          this.getAuthTree()
+          this.$Message.success({
+            content: res.data.message
+          })
+          this.modalAddOrUpdate = false
+        })
+      } else if (this.showType === 'add son') {
+        const info = {
+          authCode: this.formInline.AuthCode,
+          authName: this.formInline.AuthName,
+          authSeq: this.formInline.AuthSeq,
+          authLevel: this.formInline.AuthLevel,
+          authParentCode: this.fatherCode,
+          url: this.formInline.Url,
+          Controller: this.formInline.Controller,
+          method: this.formInline.Method
+        }
+        createParent(info).then(res => {
+          this.getAuthTree()
+          this.$Message.success({
+            content: res.data.message
+          })
+          this.modalAddOrUpdate = false
+        })
+      } else if (this.showType === 'edit') {
+        const info = {
+          id: this.formInline.id,
+          authName: this.formInline.AuthName,
+          url: this.formInline.Url,
+          controller: this.formInline.Controller,
+          method: this.formInline.Method
+        }
+        editPermission(info).then(res => {
+          this.getAuthTree()
+          this.$Message.success({
+            content: res.data.message
+          })
+          this.modalAddOrUpdate = false
+        })
+      }
     },
 
     edit (index) {

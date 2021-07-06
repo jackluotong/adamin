@@ -87,3 +87,16 @@ export const getAllApp = () => {
     method: 'get'
   })
 }
+export const searchByCode = (code) => {
+  return axios.request({
+    url: '/dadmin/type/findTypeByProvider/' + code,
+    method: 'get'
+  })
+}
+
+export const searchByApp = (code) => {
+  return axios.request({
+    url: '/dadmin/type/findTypeByApplication/' + code,
+    method: 'get'
+  })
+}

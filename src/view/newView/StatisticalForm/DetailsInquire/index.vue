@@ -76,7 +76,7 @@
 </template>
 
 <script>
-import { getInfoDetails, exportTable } from '@/api/detailsInquire'
+import { getInfoDetails } from '@/api/detailsInquire'
 import { getManufacture } from '@/api/thirdPart'
 import { getServiceTypeInfo, inquireServiceModule } from '@/api/data'
 export default {
@@ -94,16 +94,21 @@ export default {
       pageSize: 10,
       manufactureSelected: '',
       serviceModuleSelected: '',
-      serviceTypeSelected: ' ',
+      serviceTypeSelected: '',
       showDetailModal: false,
       showDetailContent: '',
       modalCheck: false,
       manufacturerOption: [],
       serviceModuleOption: [],
       serviceTypeOption: [],
-      confData: [ ],
+      confData: [],
       operatingTime: [],
       columns: [
+        {
+          type: 'index',
+          width: 60,
+          aligin: 'center'
+        },
         {
           title: '应用名称',
           key: 'applicationName',
@@ -140,7 +145,33 @@ export default {
           title: '服务类型',
           key: 'serviceType',
           width: 100,
-          align: 'center'
+          align: 'center',
+          render: (h, params) => {
+            return h('div', [
+              h('Tooltip', {
+                props: {
+                  placement: 'top',
+                  transfer: true
+                },
+                style: {
+                  display: 'inline-block',
+                  width: '100%',
+                  overflow: 'hidden',
+                  textOverflow: 'ellipsis',
+                  whiteSpace: 'nowrap',
+                  borderColor: '1px',
+                  borderWidth: 'red'
+                }
+              }, [params.row.serviceType, h('span', {
+                slot: 'content',
+                style: {
+                  whiteSpace: 'normal',
+                  wordBreak: 'break-all'
+                }
+              }, params.row.serviceType)
+              ])
+            ])
+          }
         },
         {
           title: '请求参数',
@@ -309,7 +340,7 @@ export default {
         startTime: this.time === null ? '' : this.time[0],
         endTime: this.time === null ? '' : this.time[1]
       }
-      getThirdService(info).then(res => {
+      getInfoDetails(info).then(res => {
         this.confData = res.data.data.records
         this.total = res.data.data.total
       })
@@ -326,7 +357,7 @@ export default {
         startTime: this.time === null ? '' : this.time[0],
         endTime: this.time === null ? '' : this.time[1]
       }
-      getThirdService(info).then(res => {
+      getInfoDetails(info).then(res => {
         this.confData = res.data.data.records
         this.total = res.data.data.total
       })
@@ -347,6 +378,7 @@ export default {
          startTime: this.time === null ? '' : this.time[0],
          endTime: this.time === null ? '' : this.time[1]
        }
+      console.log(info)
       getInfoDetails(info).then(res => {
         console.log(res)
         this.renderPage(res.data.data.records, res.data.data.total)
@@ -365,7 +397,7 @@ export default {
     },
     exportExel () {
       if (this.confData.length) {
-        this.exportLoading = true
+        // this.exportLoading = true
         const info = {
           applicationCode: this.applicationCode,
           serviceTypeCode: this.serviceTypeSelected,
@@ -375,9 +407,8 @@ export default {
           startTime: this.time === null ? '' : this.time[0],
           endTime: this.time === null ? '' : this.time[1]
         }
-        exportTable(JSON.stringify(info)).then(res => {
-          this.exportLoading = false
-        })
+        console.log(JSON.stringify(info).replace(/{/, '').replace(/}/, ''))
+        window.open(`https://wxcs.internal.manulife-sinochem.com/dev/giq/dadmin/requestRecord/export/${JSON.stringify(info)}`)
       } else {
         this.$Message.info('表格数据不能为空！')
         this.exportLoading = false

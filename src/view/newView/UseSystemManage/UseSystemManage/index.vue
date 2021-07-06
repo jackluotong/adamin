@@ -1,3 +1,33 @@
+<style lang="less" scoped>
+.user-content {
+  .content-button {
+    padding: 5px;
+    display: inline;
+    .ivu-select-single {
+      width: 150px;
+    }
+    .ivu-input-type {
+      width: 150px;
+      margin-left: 10px;
+    }
+    .ivu-btn {
+      margin-left: 10px;
+    }
+    .ivu-btn-info {
+      background: #2d8cf0;
+      border-color: #2d8cf0;
+    }
+  }
+}
+.ivu-modal-confirm-body {
+  padding-left: 42px;
+  font-size: 14px;
+  color: #515a6e;
+  position: relative;
+  word-break: break-all;
+}
+</style>
+
 <template>
   <div class="user-content">
     <h1 style="margin:10px 10px 10px 10px">应用系统管理-应用系统管理</h1>
@@ -12,7 +42,7 @@
 
     </div>
     <Table highlight-row stripe :columns="columns" :data="confData" style="margin-top: 5px">
-      <template slot-scope="{ row, index }" slot="action">
+      <template slot-scope="{ index }" slot="action">
         <div>
           <Button
             type="primary"
@@ -54,7 +84,6 @@
           <FormItem label="应用名称" prop="applicationName" style="width:270px;">
               <Input v-model.trim="formInline.applicationName" style="width:auto"/>
           </FormItem>
-
         <FormItem label="应用简称" prop="applicationCode" style="width:270px;">
           <Input v-model.trim="formInline.applicationCode" style="width:auto"/>
         </FormItem>
@@ -88,44 +117,6 @@
 import { editInfo, getInfo } from '@/api/useSystem'
 export default {
   data () {
-    function getByteLen (val) {
-      var len = 0
-      for (var i = 0, len1 = val.length; i < len1; i++) {
-        var length = val.charCodeAt(i)
-        if (length >= 0 && length <= 128) {
-          len += 1
-        } else {
-          len += 3
-        }
-      }
-      return len
-    }
-    const validateapplicationName = function (rule, value, callback) {
-      if (!value) {
-        callback(new Error('请输入参数名称'))
-      } else if (getByteLen(value) > 128) {
-        callback(new Error('字符串长度不能超过128'))
-      } else {
-        callback()
-      }
-    }
-    const validateapplicationCode = (rule, value, callback) => {
-      if (!value) {
-        callback(new Error('请输入参数键名'))
-      } else if (getByteLen(value) > 64) {
-        callback(new Error('字符串长度不能超过64'))
-      } else {
-        callback()
-      }
-    }
-    const validateConfValue = (rule, value, callback) => {
-      if (!value) {
-        callback(new Error('请输入参数键名'))
-      } else {
-        callback()
-      }
-    }
-
     return {
       current: 1,
       permission: sessionStorage.getItem('permission'),
@@ -151,23 +142,14 @@ export default {
         aeskey: '',
         id: ''
       },
-      ruleInline: {
-        applicationName: [
-          { required: true, validator: validateapplicationName, trigger: 'blur' }
-        ],
-        applicationCode: [
-          { required: true, validator: validateapplicationCode, trigger: 'blur' }
-        ],
-        contactMail: [
-          { required: true, validator: validateConfValue, trigger: 'blur' }
-        ],
-        contactMobile: [
-          { required: true, validator: validateConfValue, trigger: 'blur' }
-        ]
-      },
       confData: [
       ],
       columns: [
+        {
+          type: 'index',
+          width: 60,
+          aligin: 'center'
+        },
         {
           title: '应用名称',
           key: 'applicationName',
@@ -205,7 +187,6 @@ export default {
   methods: {
     onpagesizechange (e) {
       this.pageSize = e
-
       const info = {
         pageSize: e,
         currentPage: this.pageNum,
@@ -306,6 +287,7 @@ export default {
                 this.$refs['formInline'].resetFields()
                 this.modalEdit = false
                 this.getInfo()
+                location.reload()
               })
               .catch(err => {
                 console.log(err)
@@ -317,7 +299,6 @@ export default {
       })
     },
     cancelAddOrUpdate (name) {
-      // 取消新增
       this.$refs[name].resetFields()
       this.modalEdit = false
     },
@@ -326,6 +307,7 @@ export default {
     },
     edit (index) {
       this.isHavaShow = false
+      this.isHaveKey = true
       this.formInline.id = this.confData[index].id
       this.formInline.applicationName = this.confData[index].applicationName
       this.formInline.applicationCode = this.confData[index].applicationCode
@@ -348,7 +330,6 @@ export default {
             content: res.data.message
           })
           this.modalDelete = false
-          this.confPageList()
         })
         .catch(err => {
           console.log(err)
@@ -376,32 +357,3 @@ export default {
   }
 }
 </script>
-<style lang="less" scoped>
-.user-content {
-  .content-button {
-    padding: 5px;
-    display: inline;
-    .ivu-select-single {
-      width: 150px;
-    }
-    .ivu-input-type {
-      width: 150px;
-      margin-left: 10px;
-    }
-    .ivu-btn {
-      margin-left: 10px;
-    }
-    .ivu-btn-info {
-      background: #2d8cf0;
-      border-color: #2d8cf0;
-    }
-  }
-}
-.ivu-modal-confirm-body {
-  padding-left: 42px;
-  font-size: 14px;
-  color: #515a6e;
-  position: relative;
-  word-break: break-all;
-}
-</style>

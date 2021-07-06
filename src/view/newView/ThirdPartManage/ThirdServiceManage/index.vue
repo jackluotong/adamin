@@ -29,7 +29,7 @@
         <Option v-for="(item,id) in manufacturerOption" :key="id" :value="item.manufacturerCode">{{item.manufacturerName}}</Option>
       </Select>
       <span style="padding:10px 10px 10px 10px ">服务模块</span>
- <Select label="" v-model.trim="serviceModule" style="width:150px; margin-right:20px;" @on-change='selectedModuleClickShow' clearable >
+ <Select label="" v-model.trim="serviceModule" style="width:150px; margin-right:20px;"  clearable >
         <Option v-for="(item,id) in moduleOption" :key="id" :value="item.serviceModuleCode">{{item.serviceModule}}</Option>
       </Select>
 <span style="padding:10px 10px 10px 0 ">服务类型</span>
@@ -40,7 +40,7 @@
 <div style="">
       <Button type="primary" icon="md-search" @click="search()" style="margin:10px">查询</Button>
       <Button type="primary" icon="md-refresh" @click="addNew()" style="margin:10px"
-                                        v-show="permission.includes('tripartite:service:add')"
+        v-show="permission.includes('tripartite:service:add')"
 >新增服务</Button>
 
 </div>
@@ -60,7 +60,7 @@
     <Page :total='total' :page-size='pageSize' :show-total="true" show-sizer style="text-align: center;margin-top: 5px"
             @on-change='changePage'
             @on-page-size-change='onpagesizechange'/>
-    <Modal v-model="modalCheck" width="30%" height="40%"  :mask-closable="false" :closable="true" title="详情" >
+    <Modal v-model="modalCheck" width="30%" height="40%"   v-bind:title="titleDetail" >
       <Form :model="formInline"  inline>
         <FormItem  label="厂商名称" style="width:300px;" >
             <Select label="" v-model.trim="formInline.manufacturerCode" style="width:150px; margin-right:20px;">
@@ -73,7 +73,7 @@
          </Select>
            </FormItem>
         <FormItem label="服务类型" style="width:300px;" >
-            <Select label="" v-model.trim="formInline.serviceTypeCode" style="width:150px;margin-right:20px">
+            <Select  v-model.trim="formInline.serviceTypeCode" style="width:150px;margin-right:20px">
         <Option v-for="(item,id) of typeOption" :key="id" :value="item.serviceTypeCode">{{item.serviceType}}</Option>
              </Select>
             </FormItem><br>
@@ -100,11 +100,12 @@
 
 <script>
 import { getThirdService, getManufacture, toggle, addThirdService, deleteThirdService, editThirdService } from '@/api/thirdPart'
-import { inquireServiceModule, serarchTypeByModule } from '@/api/data'
+import { inquireServiceModule, serarchTypeByModule, getServiceTypeInfo } from '@/api/data'
 
 export default {
   data () {
     return {
+      titleDetail: '',
       permission: sessionStorage.getItem('permission'),
       deleteServiceTypeCode: '',
       deleteId: '',
@@ -135,6 +136,11 @@ export default {
       ],
       confData: [ ],
       columns: [
+        {
+          type: 'index',
+          width: 60,
+          aligin: 'center'
+        },
         {
           title: '厂商名称',
           key: 'manufacturerName',
@@ -211,7 +217,7 @@ export default {
                           content: res.data.message
                         })
                       }).catch(error => {
-                        this.$Message.error(error)
+                        console.log(error)
                       })
                     }
                   }
@@ -231,7 +237,7 @@ export default {
                         content: res.data.message
                       })
                     }).catch(error => {
-                      this.$Message.error(error)
+                      console.log(error)
                     })
                   }
                 }
@@ -271,17 +277,13 @@ export default {
         this.total = res.data.data.total
       })
     },
-    selectedModuleClickShow (e) {
-      serarchTypeByModule(e).then(res => {
-        this.typeOption = res.data.data
-      }).catch(err => this.$Message.info(err))
-    },
     search () {
       this.getThirdService(this.manufacturerName, this.serviceType, this.serviceModule)
     },
     reset () {
     },
     edit (index) {
+      console.log(this.confData[index])
       this.formInline.id = this.confData[index].id
       this.formInline.manufacturerCode = this.confData[index].manufacturerCode
       this.formInline.serviceTypeCode = this.confData[index].serviceTypeCode
@@ -289,13 +291,18 @@ export default {
       this.formInline.manufacturerUrl = this.confData[index].manufacturerUrl
       this.modalCheck = true
       this.showType = 'edit'
+      this.titleDetail = '编辑第三方服务'
     },
     addNew () {
       this.modalCheck = true
       this.showType = 'add'
+      this.titleDetail = '新增第三方服务'
     },
     cancel () {
       this.modalCheck = false
+      for (let key in this.formInline) {
+        delete this.formInline[key]
+      }
     },
     deleteService (index) {
       this.deleteId = this.confData[index].id
@@ -313,9 +320,7 @@ export default {
         })
         this.getThirdService()
       }).catch(error => {
-        this.$Message.error({
-          content: error
-        })
+        console.log(error)
       })
       this.modalDelete = false
     },
@@ -330,14 +335,15 @@ export default {
             this.$Message.success({
               content: res.data.message
             })
-          }).catch(error => {
-            this.$Message.error({
-              content: error
-            })
+            this.getThirdService()
             this.modalCheck = false
+            for (let key in this.formInline) {
+              delete this.formInline[key]
+            }
+          }).catch(error => {
+            console.log(error)
           })
-          this.getThirdService()
-          this.modalCheck = false
+
           break
         case 'edit':
           console.log(this.formInline)
@@ -348,11 +354,11 @@ export default {
             this.getThirdService()
             this.modalCheck = false
           }).catch((error) => {
-            this.$Message.error({
-              content: error
-            })
-            this.modalCheck = false
+            console.log(error)
           })
+          for (let key in this.formInline) {
+            delete this.formInline[key]
+          }
           break
         default:
           this.$Message.error('请检查类型！')
@@ -379,13 +385,13 @@ export default {
     selectedModuleClick (e) {
       serarchTypeByModule(e).then(res => {
         this.typeOption = res.data.data
-      }).catch(err => this.$Message.info(err))
+      }).catch(err => console.log(err))
     }
 
   },
   created () {
     const info = {
-      pageSize: 10000,
+      pageSize: 2 * 56,
       currentPage: 1
     }
     this.getThirdService()
@@ -394,6 +400,9 @@ export default {
     })
     inquireServiceModule(info).then(res => {
       this.moduleOption = res.data.data.records
+    })
+    getServiceTypeInfo(info).then(res => {
+      this.typeOption = res.data.data.records
     })
   }
 }

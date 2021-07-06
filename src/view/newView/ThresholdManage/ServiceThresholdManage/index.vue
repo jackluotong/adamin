@@ -31,7 +31,7 @@
  <Select label="" v-model.trim="serviceModule" style="width:150px; margin-right:20px;" clearable >
         <Option v-for="(item,id) in moduleOption" :key="id" :value="item.serviceModuleCode">{{item.serviceModule}}</Option>
       </Select>
-<span style="padding:10px 10px 10px 0 ">服务类型</span>
+<span style="padding:10px 10px 10px 10px ">服务类型</span>
       <Select label="" v-model.trim="serviceType" style="width:150px;margin-right:20px" clearable >
         <Option v-for="(item,id) of typeOption" :key="id" :value="item.serviceTypeCode">{{item.serviceType}}</Option>
       </Select>
@@ -39,7 +39,7 @@
 <div style="">
       <Button type="primary" icon="md-search" @click="search()" style="margin:10px">查询</Button>
       <Button type="primary" icon="md-refresh" @click="addNew()" style="margin:10px"
-                      v-show="permission.includes('threshold:service:add')"
+      v-show="permission.includes('threshold:service:add')"
 >新增阈值</Button>
 
 </div>
@@ -62,15 +62,16 @@
       <Form :model="formInline"  inline>
           <div v-if="isShow">
         <FormItem  label="厂商名称" style="width:300px;" >
-            <Select label="" v-model.trim="formInline.manufacturerCode" style="width:150px; margin-right:20px;" clearable >
+            <Select label="" v-model.trim="formInline.manufacturerCode" style="width:150px; margin-right:20px;" clearable
+            @on-change='selectedModuleClick'>
               <Option v-for="(item,id) in manufacturerOption" :key="id" :value="item.manufacturerCode">{{item.manufacturerName}}</Option>
             </Select>
         </FormItem><br>
-        <FormItem label="服务模块" style="width:300px;" >
+        <!-- <FormItem label="服务模块" style="width:300px;" >
            <Select label="" v-model.trim="formInline.serviceModuleCode" style="width:150px; margin-right:20px;"  @on-change='selectedModuleClick' clearable >
         <Option v-for="(item,id) in moduleOption" :key="id" :value="item.serviceModuleCode">{{item.serviceModule}}</Option>
          </Select>
-           </FormItem>
+           </FormItem> -->
         <FormItem label="服务类型" style="width:300px;" >
             <Select label="" v-model.trim="formInline.serviceTypeCode" style="width:150px;margin-right:20px" clearable >
         <Option v-for="(item,id) of typeOptionConnect" :key="id" :value="item.serviceTypeCode">{{item.serviceType}}</Option>
@@ -105,8 +106,8 @@
 </template>
 
 <script>
-import { getServiceTypeInfo, inquireServiceModule, serarchTypeByModule } from '@/api/data'
-import { getServiceThreShold, addServiceThreShold, editServiceThreShold } from '@/api/thresholdManage'
+import { getServiceTypeInfo, inquireServiceModule } from '@/api/data'
+import { getServiceThreShold, addServiceThreShold, editServiceThreShold, searchByCode } from '@/api/thresholdManage'
 import { getManufacture } from '@/api/thirdPart'
 export default {
   data () {
@@ -143,6 +144,11 @@ export default {
       typeOptionConnect: [ ],
       confData: [ ],
       columns: [
+        {
+          type: 'index',
+          width: 60,
+          aligin: 'center'
+        },
         {
           title: '厂商名称',
           key: 'manufacturerName',
@@ -220,9 +226,9 @@ export default {
   },
   methods: {
     selectedModuleClick (e) {
-      serarchTypeByModule(e).then(res => {
+      searchByCode(e).then(res => {
         this.typeOptionConnect = res.data.data
-      }).catch(err => this.$Message.info(err))
+      }).catch(err)
     },
     onpagesizechange (e) {
       this.pageSize = e
@@ -288,11 +294,7 @@ export default {
         this.$Message.success({
           content: res.data.message
         })
-      }).catch(error => {
-        this.$Message.error({
-          content: error
-        })
-      })
+      }).catch()
       this.modalDelete = false
     },
     cancelDelete () {
@@ -314,11 +316,7 @@ export default {
             this.getServiceThreShold()
             this.modalCheck = false
             this.reset()
-          }).catch(error => {
-            this.$Message.error({
-              content: error
-            })
-          })
+          }).catch()
           break
         case 'edit':
           editServiceThreShold(infoEdit).then(res => {
@@ -327,11 +325,7 @@ export default {
             })
             this.getServiceThreShold()
             this.modalCheck = false
-          }).catch((error) => {
-            this.$Message.error({
-              content: error
-            })
-          })
+          }).catch()
           break
         default:
           this.$Message.error('请检查类型！')
@@ -360,14 +354,12 @@ export default {
   created () {
     this.getServiceThreShold()
     const info = {
-      pageSize: this.pageSize,
+      pageSize: 100000000,
       currentPage: this.pageNum
     }
     getManufacture(info).then(res => {
       this.manufacturerOption = res.data.data.records
-    }).catch(error => {
-      this.$Message.info(error)
-    })
+    }).catch()
     inquireServiceModule(info).then(res => {
       this.moduleOption = res.data.data.records
     })

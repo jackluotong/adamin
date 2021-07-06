@@ -148,16 +148,6 @@ export default[
     component: Main,
     children: [
       {
-        path: '/ServiceTypeManage',
-        name: 'ServiceTypeManage',
-        meta: {
-          icon: 'ios-folder-open-outline',
-          title: '服务类型管理',
-          access: 'serviceType:serviceType',
-          hideInMenu: false
-        },
-        component: () => import ('@/view/newView/ServiceTypeManage/ServiceTypeManage')
-      }, {
         path: '/ServiceModuleManage',
         name: 'ServiceModuleManage',
         meta: {
@@ -167,6 +157,17 @@ export default[
           hideInMenu: false
         },
         component: () => import ('@/view/newView/ServiceTypeManage/ServiceModuleManage')
+      },
+      {
+        path: '/ServiceTypeManage',
+        name: 'ServiceTypeManage',
+        meta: {
+          icon: 'ios-folder-open-outline',
+          title: '服务类型管理',
+          access: 'serviceType:serviceType',
+          hideInMenu: false
+        },
+        component: () => import ('@/view/newView/ServiceTypeManage/ServiceTypeManage')
       }
     ]
   }, {

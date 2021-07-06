@@ -36,6 +36,9 @@ export default {
   mounted () {
     let all = sessionStorage.getItem('permission').split(',')
     console.log(all.length)
+  },
+  created () {
+    // this.$router.go(0)
   }
 }
 </script>

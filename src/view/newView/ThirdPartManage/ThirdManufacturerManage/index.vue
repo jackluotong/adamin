@@ -184,6 +184,11 @@ export default {
       confData: [ ],
       columns: [
         {
+          type: 'index',
+          width: 60,
+          aligin: 'center'
+        },
+        {
           title: '厂商名称',
           key: 'manufacturerName',
           tooltip: true,
@@ -267,9 +272,7 @@ export default {
                 this.modalAddOrUpdate = false
                 this.reset(this.formInline)
               }).catch(error => {
-                this.$Message.info({
-                  content: error
-                })
+                console.log(error)
               })
               break
             case 'edit':
@@ -282,9 +285,7 @@ export default {
                 this.modalAddOrUpdate = false
                 this.reset(this.formInline)
               }).catch(error => {
-                this.$Message.info({
-                  content: error
-                })
+                console.log(error)
               })
               break
             default:

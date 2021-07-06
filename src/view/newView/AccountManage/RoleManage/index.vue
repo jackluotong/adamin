@@ -58,7 +58,6 @@
      v-model.trim="modalAddOrUpdate"
      width="600"
      height="1000"
-     :mask-closable='false'
      v-bind:title="detailTitle"
      class-name="vertical-center-modal">
       <Form ref="formInline" :model="formInline"  inline>
@@ -139,13 +138,13 @@ export default {
         confValue: '',
         confDescribtion: ''
       },
-      /*  ruleInline: {
-        roleName: [
-          { required: true, validator: validateroleName, trigger: 'blur' }
-        ]
-      }, */
       confData: [],
       columns: [
+        {
+          type: 'index',
+          width: 60,
+          aligin: 'center'
+        },
         {
           title: '角色名称',
           key: 'roleName',

@@ -30,7 +30,6 @@ export default {
     handleSubmit ({ userName, password }) {
       this.$Loading.start()
       this.handleLogin({ userName, password }).then(res => {
-        // location.reload()
         setTimeout(() => {
           this.$router.push({
             name: this.$config.homeName

@@ -10,7 +10,7 @@ export const getInfoDetails = (info) => {
 
 export const exportTable = (info) => {
   return axios.request({
-    url: '/dadmin/requestRecord/export' + info,
+    url: `/dadmin/requestRecord/export/${info}`,
     method: 'get'
   })
 }

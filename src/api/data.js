@@ -16,11 +16,23 @@ export const getInfoUser = (info) => {
 */
 export const roleConnect = (info) => {
   return axios.request({
-    url: '/dadmin/userRoleRelation/bind ',
+    url: '/dadmin/userRoleRelation/bind',
     method: 'post',
     data: info
   })
 }
+
+/*
+    user add
+*/
+export const userAdd = (info) => {
+  return axios.request({
+    url: '/dadmin/userInfo/create',
+    method: 'post',
+    data: info
+  })
+}
+
 // #endregion
 
 /*

@@ -36,7 +36,8 @@
       <span style="padding:10px">用户code</span>
       <Input v-model.trim="userCode" @on-enter="enter"/>
       <Button type="primary" icon="md-search" @click="search()" style="margin:0 10px 0 20px">查询</Button>
-                        <Button type="primary" icon="md-refresh" @click="reset()">重置</Button>
+      <Button type="primary" icon="md-refresh" @click="reset()">重置</Button>
+      <Button type="primary" icon="md-refresh" @click="addUser()" v-show="permission.includes('account:user:add')">新增用户</Button>
 
     </div>
     <Table highlight-row stripe :columns="columns" :data="confData" style="margin-top: 5px">
@@ -87,14 +88,34 @@
         <Button type="primary" size="large" @click="handleSubmitAddOrUpdate('formInline')">保存</Button>
       </div>
      </Modal>
+
+     <Modal v-model.trim="modalAddUser" width="600" :mask-closable="false" :closable="true" title="新增用户">
+         <span>
+             姓名
+         </span>
+         <Input type="text"  v-model.trim="userName"/>
+         <span>
+             电话号码
+         </span>
+        <Input type="text" v-model.trim=" phone"/>
+         <div>
+        </div>
+      <div slot="footer">
+        <Button type="primary" ghost size="large" @click="cancelUser()">返回</Button>
+        <Button type="primary" size="large" @click="submitUser()">保存</Button>
+      </div>
+     </Modal>
   </div>
 </template>
 
 <script>
-import { getInfoUser, getInfoRole, roleConnect } from '@/api/data'
+import { getInfoUser, getInfoRole, roleConnect, userAdd } from '@/api/data'
 export default {
   data () {
     return {
+      userName: '',
+      phone: '',
+      modalAddUser: false,
       permission: sessionStorage.getItem('permission'),
       getCheckBox: [],
       checkData: [],
@@ -119,6 +140,17 @@ export default {
       confData: [ ],
       columns: [
         {
+          type: 'index',
+          width: 60,
+          aligin: 'center'
+        },
+        {
+          title: '用户名',
+          key: 'userName',
+          width: 300,
+          align: 'center'
+        },
+        {
           title: '用户code',
           key: 'userCode',
           width: 300,
@@ -141,6 +173,39 @@ export default {
     }
   },
   methods: {
+    addUser () {
+      this.modalAddUser = true
+    },
+    submitUser () {
+      if (this.phone) {
+        let rule = /1[3,4,5,7,8][0-9]{9}$/
+        if (rule.test(this.phone) === true & this.userName !== '') {
+          const info = {
+            userName: this.userName,
+            phone: this.phone
+          }
+          userAdd(info).then(res => {
+            console.log(res)
+            this.$Message.info({
+              content: res.data.message
+            })
+            this.getInfoUser()
+            this.modalAddUser = false
+          })
+        } else {
+          this.$Message.info('输入正确的手机号码')
+        }
+      } else {
+        this.$Message.info('请输入正确的信息')
+      }
+      this.userName = null
+      this.phone = null
+    },
+    cancelUser () {
+      this.modalAddUser = false
+      this.userName = null
+      this.phone = null
+    },
     selected (e) {
       let array = []
       for (let i = 0; i < this.checkData.length; i++) {
@@ -234,27 +299,33 @@ export default {
     },
     translate (arr) {
       let array = []
+      console.log(arr)
       arr.map((item) => {
         let roleName = ''
         let roleCode = ''
+        let userName = ''
         if (item.roles.length !== 0) {
           item.roles.map((i, t) => {
             roleName = i.roleName + ',' + roleName
             roleCode = i.roleCode + ',' + roleCode
+            userName = i.userName
           })
           array.push({
             userCode: item.userCode,
             roleName,
-            roleCode
+            roleCode,
+            userName
           })
         } else {
           array.push({
             userCode: item.userCode,
             roleName,
-            roleCode
+            roleCode,
+            userName
           })
         }
       })
+      console.log(array)
       return array
     },
     getInfoUser () {

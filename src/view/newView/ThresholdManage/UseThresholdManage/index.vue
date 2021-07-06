@@ -31,16 +31,16 @@
     <div class="user-content">
         <h1 style="margin:10px 10px 10px 10px">阈值管理-应用阈值管理</h1>
         <div style="display:flex">
-            <span style="padding:10px">应用名称</span>
+            <span style="padding:10px 10px 10px 10px">应用名称</span>
             <Input v-model.trim="applicationName" style="width:150px; margin-right:20px;"/>
-            <span style="padding:10px">应用简称</span>
+            <span style="padding:10px 10px 10px 10px">应用简称</span>
             <Input v-model.trim="applicationCode" style="width:150px; margin-right:20px;"/>
         </div>
         <Button
                 type="primary"
                 icon="md-search"
                 @click="search()"
-                style="margin:0 10px 0 20px"
+                style="margin:10px"
                 >查询</Button
             >
          <Button type="primary" icon="md-add" @click="addSetting()"
@@ -51,7 +51,7 @@
                 type="primary"
                 icon="md-search"
                 @click="reset()"
-                style="margin:0 10px 0 20px"
+                style="margin:10px"
                 >重置</Button
             >
         <Table
@@ -102,35 +102,36 @@
             v-bind:title="detailTitle"
         >
     <Form ref="formInline" :model="formInline">
-        <FormItem label="服务类型" style="width:300px;" >
-            <Select label="" v-model.trim="formInline.serviceTypeCode" style="width:150px;margin-right:20px" clearable>
-                   <Option v-for="(item,id) of typeOption" :key="id" :value="item.serviceTypeCode">{{item.serviceType}}</Option>
-            </Select>
-        </FormItem><br>
          <FormItem label="应用名称" style="width:300px;" >
-            <Select label="" v-model.trim="formInline.applicationCode" style="width:150px;margin-right:20px" clearable>
+            <Select label="" v-model.trim="formInline.applicationCode" style="width:150px;margin-right:20px" clearable filterable
+            @on-change='searchType'
+            >
                    <Option v-for="(item,index) of appOption" :key="index" :value="item.applicationCode">{{item.applicationName}}</Option>
             </Select>
         </FormItem><br>
          <FormItem label="应用简称" style="width:300px;" >
-            <Select label="" v-model.trim="formInline.applicationCode" style="width:150px;margin-right:20px" clearable>
+            <Select label="" v-model.trim="formInline.applicationCode" style="width:150px;margin-right:20px" clearable filterable>
                    <Option v-for="(item,index) of appOption" :key="index" :value="item.applicationCode">{{item.applicationCode}}</Option>
             </Select>
         </FormItem><br>
-
+ <FormItem label="服务类型" style="width:300px;" >
+            <Select label="" v-model.trim="formInline.serviceTypeCode" style="width:150px;margin-right:20px" clearable filterable>
+                   <Option v-for="(item,id) of typeOption" :key="id" :value="item.serviceTypeCode">{{item.serviceType}}</Option>
+            </Select>
+        </FormItem><br>
                 <FormItem
                     label="次数阈值（每分钟）"
                     prop="timesThreshold"
-                    style="width:270px;"
+                    style="width:300px;"
                 >
-                     <Input v-model.number="formInline.timesThreshold"/>
+                     <Input v-model.number="formInline.timesThreshold" style="width:150px;margin-right:20px"/>
                 </FormItem>
                  <FormItem
                     label="次数阈值（每小时）"
                     prop="hoursThreshold"
-                    style="width:270px;"
+                    style="width:300px;"
                 >
-                <Input v-model.number="formInline.hoursThreshold"/>
+                <Input v-model.number="formInline.hoursThreshold" style="width:150px;margin-right:20px"/>
                 </FormItem>
             </Form>
             <div slot="footer">
@@ -171,49 +172,10 @@
 </template>
 
 <script>
-import { getAllApp, getUseThreShold, editUseThreShold, addUseThreShold, deleteUseThreShold, cancelUseThreShold } from '@/api/thresholdManage'
-import { getServiceTypeInfo } from '@/api/data'
+import { getAllApp, getUseThreShold, editUseThreShold, addUseThreShold, deleteUseThreShold, searchByApp } from '@/api/thresholdManage'
 
 export default {
   data () {
-    function getByteLen (val) {
-      var len = 0
-      for (var i = 0, len1 = val.length; i < len1; i++) {
-        var length = val.charCodeAt(i)
-        if (length >= 0 && length <= 128) {
-          len += 1
-        } else {
-          len += 3
-        }
-      }
-      return len
-    }
-    const validateapplicationName = function (rule, value, callback) {
-      if (!value) {
-        callback(new Error('请输入参数名称'))
-      } else if (getByteLen(value) > 128) {
-        callback(new Error('字符串长度不能超过128'))
-      } else {
-        callback()
-      }
-    }
-    const validateapplicationCode = (rule, value, callback) => {
-      if (!value) {
-        callback(new Error('请输入参数键名'))
-      } else if (getByteLen(value) > 64) {
-        callback(new Error('字符串长度不能超过64'))
-      } else {
-        callback()
-      }
-    }
-    const validateConfValue = (rule, value, callback) => {
-      if (!value) {
-        callback(new Error('请输入参数键名'))
-      } else {
-        callback()
-      }
-    }
-
     return {
       fusingId: '',
       permission: sessionStorage.getItem('permission'),
@@ -252,66 +214,81 @@ export default {
         id: '',
         serviceTypeCode: ''
       },
-      ruleInline: {
-        applicationName: [
-          {
-            required: true,
-            validator: validateapplicationName,
-            trigger: 'blur'
-          }
-        ],
-        applicationCode: [
-          {
-            required: true,
-            validator: validateapplicationCode,
-            trigger: 'blur'
-          }
-        ],
-        confValue: [
-          {
-            required: true,
-            validator: validateConfValue,
-            trigger: 'blur'
-          }
-        ]
-      },
       confData: [],
       columns: [
+        {
+          type: 'index',
+          width: 60,
+          aligin: 'center'
+        },
         {
           title: '应用名称',
           key: 'applicationName',
           tooltip: true,
-          align: 'center'
+          align: 'center',
+          width: 300
         },
         {
           title: '应用简称',
           key: 'applicationCode',
-          align: 'center'
+          align: 'center',
+          width: 300
         },
         {
           title: '服务类型',
           key: 'serviceType',
-          align: 'center'
+          align: 'center',
+          width: 60,
+          render: (h, params) => {
+            return h('div', [
+              h('Tooltip', {
+                props: {
+                  placement: 'top',
+                  transfer: true
+                },
+                style: {
+                  display: 'inline-block',
+                  width: '100%',
+                  overflow: 'hidden',
+                  textOverflow: 'ellipsis',
+                  whiteSpace: 'nowrap',
+                  borderColor: '1px',
+                  borderWidth: 'red'
+                }
+              }, [params.row.serviceType, h('span', {
+                slot: 'content',
+                style: {
+                  whiteSpace: 'normal',
+                  wordBreak: 'break-all'
+                }
+              }, params.row.serviceType)
+              ])
+            ])
+          }
         },
         {
           title: '次数阈值（每分钟）',
           key: 'timesThreshold',
-          align: 'center'
+          align: 'center',
+          width: 300
         },
         {
           title: '次数阈值（每小时）',
           key: 'hoursThreshold',
-          align: 'center'
+          align: 'center',
+          width: 300
         },
         {
           title: '阈值类型',
           key: 'thresholdType',
-          align: 'center'
+          align: 'center',
+          width: 300
         },
         {
           title: '操作',
           slot: 'action',
-          align: 'center'
+          align: 'center',
+          width: 300
         },
         {
           title: '熔断',
@@ -336,6 +313,13 @@ export default {
     }
   },
   methods: {
+    searchType () {
+      console.log('111')
+      searchByApp(this.formInline.applicationCode).then(res => {
+        console.log(res)
+        this.typeOption = res.data.data
+      })
+    },
     onpagesizechange (e) {
       this.pageSize = e
       const info = {
@@ -475,7 +459,6 @@ export default {
         })
         .catch(err => {
           console.log(err)
-          this.modalDelete = false
         })
     },
     renderPage (data, total) {
@@ -498,15 +481,10 @@ export default {
   },
   created () {
     this.getUseThreShold()
-    const info = {
-      pageSize: this.pageSize,
-      currentPage: this.pageNum
-    }
-    getServiceTypeInfo(info).then(res => {
-      this.typeOption = res.data.data.records
-    }).catch(error => {
-      this.$Message.info(error)
-    })
+    /*     const info = {
+      pageSize: 1000000,
+      currentPage: 1
+    } */
     getAllApp().then(res => {
       this.appOption = res.data.data
     }).catch(error => {

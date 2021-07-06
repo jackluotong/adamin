@@ -231,6 +231,11 @@ export default {
       confData: [],
       columns: [
         {
+          type: 'index',
+          width: 60,
+          aligin: 'center'
+        },
+        {
           title: '应用名称',
           key: 'applicationName',
           tooltip: true,
@@ -389,13 +394,12 @@ export default {
   },
   created () {
     const info = {
-      pageSize: this.pageSize,
+      pageSize: 1000000,
       currentPage: this.pageNum,
       applicationCode: this.applicationCode,
       applicationName: this.applicationName
     }
     this.getInfo()
-
     getInfo(info).then(res => {
       this.appData = res.data.data.records
     })

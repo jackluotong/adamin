@@ -111,7 +111,7 @@
                     prop="confName"
                     style="width:270px;"
                 >
-                   <Select v-model.trim="selectedModuleTwo" style="width:200px" @on-change='selectedModuleClick'>
+                   <Select v-model.trim="selectedModuleTwo" style="width:200px" @on-change='selectedModuleClick' clearable>
                 <Option v-for="(item,id) in modulesOption" :key="id" :value="item.serviceModuleCode">
                     {{ item.serviceModule }}
                 </Option>
@@ -122,7 +122,7 @@
                     prop="confName"
                     style="width:270px;"
                 >
-                   <Select v-model.trim="selectedModuleType" style="width:200px" @on-change='selectedTypeClick'>
+                   <Select v-model.trim="selectedModuleType" style="width:200px" @on-change='selectedTypeClick' clearable>
                 <Option v-for="(item,id) in typeOption" :key="id" :value="item.serviceTypeCode" >
                     {{ item.serviceType }}
                 </Option>
@@ -133,7 +133,7 @@
                         prop="useName"
                         style="width:270px;"
                     >
-                         <Select v-model.trim="selectedWeight" style="width:200px">
+                         <Select v-model.trim="selectedWeight" style="width:200px" clearable>
                             <Option v-for="(item,index) in weightOptions" :key="index" :value='item.id'>{{ item.value }}</Option>
                          </Select>
                 </FormItem>
@@ -263,47 +263,9 @@
 <script>
 import { inquireServiceModule, serarchTypeByModule } from '@/api/data'
 import { getWeight, searchManufacture, addWeight, deleteWeight, editWeight } from '@/api/weightManage'
-import { getManufacture } from '@/api/thirdPart'
 import { getAllApp } from '@/api/thresholdManage'
 export default {
   data () {
-    function getByteLen (val) {
-      var len = 0
-      for (var i = 0, len1 = val.length; i < len1; i++) {
-        var length = val.charCodeAt(i)
-        if (length >= 0 && length <= 128) {
-          len += 1
-        } else {
-          len += 3
-        }
-      }
-      return len
-    }
-    const validateuseName = function (rule, value, callback) {
-      if (!value) {
-        callback(new Error('请输入参数名称'))
-      } else if (getByteLen(value) > 128) {
-        callback(new Error('字符串长度不能超过128'))
-      } else {
-        callback()
-      }
-    }
-    const validateuseCalled = (rule, value, callback) => {
-      if (!value) {
-        callback(new Error('请输入参数键名'))
-      } else if (getByteLen(value) > 64) {
-        callback(new Error('字符串长度不能超过64'))
-      } else {
-        callback()
-      }
-    }
-    const validateConfValue = (rule, value, callback) => {
-      if (!value) {
-        callback(new Error('请输入参数键名'))
-      } else {
-        callback()
-      }
-    }
     return {
       editObj: {
         serviceTypeEdit: '',
@@ -350,33 +312,15 @@ export default {
         contactPhone: '',
         contactEmails: ''
       },
-      ruleInline: {
-        useName: [
-          {
-            required: true,
-            validator: validateuseName,
-            trigger: 'blur'
-          }
-        ],
-        useCalled: [
-          {
-            required: true,
-            validator: validateuseCalled,
-            trigger: 'blur'
-          }
-        ],
-        confValue: [
-          {
-            required: true,
-            validator: validateConfValue,
-            trigger: 'blur'
-          }
-        ]
-      },
       flag: '',
       confData: [],
       showWeightAbnormalData: [],
       columnsShowAbnormalWeight: [
+        {
+          type: 'index',
+          width: 60,
+          align: 'center'
+        },
         {
           type: 'index',
           width: 60,
@@ -398,7 +342,7 @@ export default {
           key: 'weightType',
           align: 'center',
           render: (h, params) => {
-            if (params.row.weightType === '1') { return h('span', '应用权重') } else if (params.row.weightType === '2') { return h('span', '通用权重') } else { return h('span', '参数错误') }
+            if (params.row.weightType === '2') { return h('span', '应用权重') } else if (params.row.weightType === '1') { return h('span', '通用权重') } else { return h('span', '参数错误') }
           }
         },
         { title: '服务类型',
@@ -438,7 +382,7 @@ export default {
           key: 'weightType',
           align: 'center',
           render: (h, params) => {
-            if (params.row.weightType === '1') { return h('span', '应用权重') } else if (params.row.weightType === '2') { return h('span', '通用权重') } else { return h('span', '参数错误') }
+            if (params.row.weightType === '2') { return h('span', '应用权重') } else if (params.row.weightType === '1') { return h('span', '通用权重') } else { return h('span', '参数错误') }
           }
         },
         { title: '所属应用',
@@ -474,14 +418,14 @@ export default {
     }
   },
   methods: {
-    getManufacture () {
+    getManufacture (serviceTypeCode) {
       const info = {
         currentPage: 1,
-        pageSize: 100000
+        pageSize: 100000,
+        serviceTypeCode: serviceTypeCode
       }
-      getManufacture(info).then(res => {
-        console.log(res)
-        this.editObj.checkListEdit = res.data.data.records
+      searchManufacture(info).then(res => {
+        this.editObj.checkListEdit = res.data.data
       })
     },
     selectedEdit (e) {
@@ -524,27 +468,24 @@ export default {
       })
     },
     selectedModuleClick (e) {
-      console.log(e)
       serarchTypeByModule(e).then(res => {
         this.typeOption = res.data.data
-      }).catch(err => this.$Message.info(err))
+      }).catch()
     },
     search () {
       const info = {
         serviceModule: this.selectedModule,
         currentPage: this.pageNum,
-        pageSize: this.pageSize
+        pageSize: this.pageSize,
+        abnormalWeightType: 1
       }
       console.log(info)
       getWeight(info).then(res => {
         console.log(res)
         this.confData = res.data.data.records
         this.total = res.data.data.total
-      }).catch(error => {
-        this.$Message.error({
-          content: error
-        })
-      })
+      }).catch(
+      )
     },
     reset () {
       this.useSelected = ''
@@ -578,11 +519,7 @@ export default {
             this.getWeight(1, 1)
             this.reset()
             this.modalAdd = false
-          }).catch(error => {
-            this.$Message.error({
-              content: error
-            })
-          })
+          }).catch()
         } else {
           this.$Message.error('请检查参数是否有误!')
         }
@@ -618,6 +555,7 @@ export default {
       this.modalAdd = false
     },
     edit (index, row) {
+      this.getManufacture(this.confData[index].serviceTypeCode)
       this.editObj.checkedDataEdit = row.weightRatioKey.replace(new RegExp(/(:)/g), ',').split(',')
       this.modalEdit = true
       this.editObj.moduleEdit = row.serviceModule
@@ -641,11 +579,7 @@ export default {
       deleteWeight(this.deleteOject).then(res => {
         this.getWeight(1, 1)
         this.modalDelete = false
-      }).catch(error => {
-        this.$Message.error({
-          content: error
-        })
-      })
+      }).catch()
       this.modalDelete = false
     },
     cancelDelete () {
@@ -685,7 +619,7 @@ export default {
   },
   created () {
     this.getWeight(1, 1)
-    this.getManufacture()
+    // this.getManufacture()
     const infoModule = {
       pageSize: 10000,
       currentPage: 1

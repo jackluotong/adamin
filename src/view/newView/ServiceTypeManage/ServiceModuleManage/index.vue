@@ -138,8 +138,20 @@ export default {
       confData: [],
       columns: [
         {
+          type: 'index',
+          width: 60,
+          aligin: 'center'
+        },
+        {
           title: '服务模块',
           key: 'serviceModule',
+          tooltip: true,
+          width: 300,
+          align: 'center'
+        },
+        {
+          title: '服务模块Code',
+          key: 'serviceModuleCode',
           tooltip: true,
           width: 300,
           align: 'center'

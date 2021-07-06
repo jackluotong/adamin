@@ -54,6 +54,11 @@ export default {
       confData: [],
       columns: [
         {
+          type: 'index',
+          width: 60,
+          aligin: 'center'
+        },
+        {
           title: '应用名称',
           key: 'applicationName',
           tooltip: true,

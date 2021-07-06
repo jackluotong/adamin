@@ -8,9 +8,6 @@
       <Input v-model.trim="serviceType" />
       <Button type="primary" icon="md-search" @click="search()" style="margin:0 10px 0 20px">查询</Button>
       <Button type="primary" icon="md-refresh" @click="reset()">重置</Button>
-     <!--  <Button type="primary" icon="md-add" @click="addSetting()"
-      v-show="permission.includes('serviceType:manage:addModule')"
-      >新增模块</Button> -->
       <Button type="primary" icon="md-add" @click="addSettingType()"
             v-show="permission.includes('serviceType:serviceType:add')"
 >新增服务类型</Button>
@@ -35,8 +32,8 @@
      <Modal v-model.trim="addNewServiceType" width="600" :mask-closable="false" :closable="false" v-bind:title="detailTitle">
       <Form  :model="formInline"   ref="formInline" >
         <div style="display:inline-table">
-        <FormItem label="服务模块" prop="serviceModule" style="width:270px;">
-        <Select v-model.trim="selectedModuleAdd" style="width:200px" @on-change='selectedModuleAddClick' clearable >
+        <FormItem label="服务模块"  style="width:270px;">
+        <Select v-model.trim="selectedModuleAdd"  @on-change='selectedModuleAddClick' clearable >
             <Option v-for="(item,id) in allModulesOption"
             :key="id"
             :value="item.serviceModuleCode"
@@ -44,17 +41,12 @@
         </Select>
           </FormItem>
        </div>
-          <FormItem label="服务类型" prop="serviceType" style="width:270px;">
-        <Select style="width:200px" @on-change='selectedTypeAdd'
-        :label-in-value="true"
-        v-model="selectedT"
-        clearable>
-            <Option v-for="(item,index) in allType"
-            :key="index"
-            :value="item.serviceTypeCode"
-            >{{item.serviceType}}</Option>
-        </Select>
-          </FormItem>
+        <FormItem label="服务类型" style="width:270px;">
+            <Input v-model.trim="addServiceType.serviceType"/>
+        </FormItem>
+         <FormItem label="服务类型Code" style="width:270px;">
+            <Input v-model.trim="addServiceType.serviceTypeCode"/>
+        </FormItem>
         <FormItem label="服务地址"  style="width:270px;">
                   <Input v-model.trim="addServiceType.url"/>
         </FormItem>
@@ -68,9 +60,8 @@
     <Modal v-model.trim="modalAddOrUpdateType" width="600" :mask-closable="false" :closable="false" v-bind:title="detailTitle">
       <Form ref="formInline" :model="formInline"  >
         <div style="display:inline-table">
-        <FormItem label="服务模块" prop="serviceModule" style="width:270px;">
+        <FormItem label="服务模块"  style="width:270px;">
         <Select v-model.trim="selectValue"
-         style="width:200px"
          @on-change='selectModule'
          clearable >
             <Option v-for="(item,id) in allModulesOption"
@@ -80,20 +71,13 @@
         </Select>
         </FormItem>
        </div>
-           <FormItem label="服务类型" prop="serviceTypeAdd" style="width:270px;">
-        <Select
-        @on-change='selectedTypeEdit'
-        :label-in-value="true"
-        style="width:200px"
-        clearable
-        v-model="selectedType">
-            <Option v-for="(item,index) in allType"
-            :key="index"
-            :value="item.serviceTypeCode"
-            >{{item.serviceType}}</Option>
-        </Select>
+           <FormItem label="服务类型"  style="width:270px;">
+            <Input v-model.trim="formInline.serviceType"/>
           </FormItem>
-        <FormItem label="服务地址" prop="serviceAddress" style="width:270px;">
+          <FormItem label="服务类型Code"  style="width:270px;">
+            <Input v-model.trim="formInline.serviceCode"/>
+          </FormItem>
+        <FormItem label="服务地址"  style="width:270px;">
                   <Input v-model.trim="formInline.serviceAddress"/>
         </FormItem>
       </Form>
@@ -159,18 +143,14 @@ export default {
         serviceAddress: '',
         serviceCode: '',
         editId: ''
-
-      },
-      ruleInline: {
-        serviceModule: [
-          { required: true, trigger: 'blur', message: '请选择模块' }
-        ],
-        serviceType: [
-          { required: true, trigger: 'blur', message: '请选择类型' }
-        ]
       },
       confData: [],
       columns: [
+        {
+          type: 'index',
+          width: 60,
+          aligin: 'center'
+        },
         {
           title: '服务模块',
           key: 'serviceModule',
@@ -185,6 +165,13 @@ export default {
           align: 'center'
         },
         {
+          title: '服务类型Code',
+          key: 'serviceTypeCode',
+          tooltip: true,
+          width: 300,
+          align: 'center'
+        },
+        {
           title: '统一对外服务地址',
           key: 'serviceUrl',
           width: 300,
@@ -193,7 +180,8 @@ export default {
         {
           title: '操作',
           slot: 'action',
-          align: 'center'
+          align: 'center',
+          width: 300
         }
       ]
 
@@ -229,7 +217,6 @@ export default {
       }).catch(err => this.$Message.info(err)) */
     },
     selectModule (e) {
-      console.log(e)
       serarchTypeByModule(e).then(res => {
         this.allServiceType = res.data.data
       }).catch(err => this.$Message.info(err))
@@ -268,13 +255,6 @@ export default {
     addSettingType () {
       this.detailTitle = '新增服务类型'
       this.addNewServiceType = true
-      const info = {
-        pageSize: 10000,
-        currentPage: 1
-      }
-      inquireServiceModule(info).then(res => {
-        this.allModulesOption = res.data.data.records
-      })
     },
     handleSubmitType () {
       console.log(this.selectValue)
@@ -292,26 +272,36 @@ export default {
         this.getServiceTypeInfo()
         this.addServiceType.url = null
         this.selectedModuleAdd = null
-        this.allType = []
+        this.modalAddOrUpdateType = false
       }).catch(error => console.log(error))
     },
     cancelAddNewService () {
       this.addNewServiceType = false
     },
-    addNewServiceTypeClick (index) {
+    addNewServiceTypeClick () {
       const info = {
         serviceModuleCode: this.selectedModuleAdd,
         serviceTypeCode: this.addServiceType.serviceTypeCode,
         serviceUrl: this.addServiceType.url,
         serviceType: this.addServiceType.serviceType
       }
+      console.log(info)
       editServiceType(info).then(res => {
         this.$Message.success({
           content: res.data.message
         })
         this.getServiceTypeInfo()
         this.addNewServiceType = false
-      }).catch(() => {
+        for (let key in this.addServiceType) {
+          delete this.addServiceType[key]
+        }
+        this.selectedModuleAdd = null
+      }).catch((err) => {
+        for (let key in this.addServiceType) {
+          delete this.addServiceType[key]
+        }
+        this.selectedModuleAdd = null
+        console.log(err)
       })
     },
     cancelAddOrUpdate (name) {
@@ -386,9 +376,6 @@ export default {
       this.confData = data
       this.total = total
     },
-    async fetchData () {
-
-    },
     async getAllModuleOptions () {
       const info = {
         pageSize: 10000,
@@ -408,11 +395,6 @@ export default {
 
   },
   watch: {
-    /*  serviceModule () {
-      delay(() => {
-        this.fetchData()
-      }, 300)
-    } */
   }
 }
 </script>
