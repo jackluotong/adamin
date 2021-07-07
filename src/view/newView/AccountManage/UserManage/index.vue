@@ -303,25 +303,24 @@ export default {
       arr.map((item) => {
         let roleName = ''
         let roleCode = ''
-        let userName = ''
         if (item.roles.length !== 0) {
           item.roles.map((i, t) => {
             roleName = i.roleName + ',' + roleName
             roleCode = i.roleCode + ',' + roleCode
-            userName = i.userName
           })
           array.push({
             userCode: item.userCode,
+            userName: item.userName,
             roleName,
-            roleCode,
-            userName
+            roleCode
+
           })
         } else {
           array.push({
             userCode: item.userCode,
             roleName,
             roleCode,
-            userName
+            userName: item.userName
           })
         }
       })

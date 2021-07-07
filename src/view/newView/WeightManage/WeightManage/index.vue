@@ -316,11 +316,7 @@ export default {
       confData: [],
       showWeightAbnormalData: [],
       columnsShowAbnormalWeight: [
-        {
-          type: 'index',
-          width: 60,
-          align: 'center'
-        },
+
         {
           type: 'index',
           width: 60,
@@ -560,7 +556,8 @@ export default {
       this.modalEdit = true
       this.editObj.moduleEdit = row.serviceModule
       this.editObj.serviceTypeEdit = row.serviceType
-      this.editObj.weightEit = row.weightType
+      //   this.editObj.weightEit = row.weightType
+      row.weightType === 2 ? this.editObj.weightEit = '通用权重' : this.editObj.weightEit = '应用用权重'
       this.editObj.usingEdit = row.applicationCode
       this.inputValue = row.weightRatioValue
       this.editObj.serviceTypeCode = row.serviceTypeCode
