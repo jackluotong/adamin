@@ -105,8 +105,8 @@
         <FormItem label="权限顺序" style="width:270px;">
           <Input  v-model.number="formInline.AuthSeq"/>
         </FormItem>
-        <FormItem label="权限等级"  style="width:270px;">
-          <Input  v-model.number="formInline.AuthLevel"/>
+        <FormItem label="权限等级"  style="width:270px;" >
+          <Input  v-model.number="formInline.AuthLevel" placeholder="权限等级为1,2,3"/>
         </FormItem>
          </div>
           <FormItem label="权限名称"  style="width:270px;">
@@ -290,6 +290,7 @@ export default {
           Controller: this.formInline.Controller,
           method: this.formInline.Method
         }
+        console.log(info)
         createParent(info).then(res => {
           this.getAuthTree()
           this.$Message.success({

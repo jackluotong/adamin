@@ -17,10 +17,10 @@
           <div>
             <Button type="primary" size="small" style="margin-right: 5px" @click="editType(index)"
                   v-show="permission.includes('serviceType:serviceType:edit')"
-                >编辑类型</Button>
+                >编辑</Button>
             <Button type="error" size="small" style="margin-right: 5px" @click="delType(index)"
                   v-show="permission.includes('serviceType:serviceType:delete')"
-                >删除类型</Button>
+                >删除</Button>
           </div>
         </template>
      </Table>
@@ -265,7 +265,7 @@ export default {
         serviceUrl: this.formInline.serviceAddress,
         id: this.formInline.editId
       }
-      editServiceType(info).then(res => {
+      editServiceType('/dadmin/type/update/type', info).then(res => {
         this.$Message.success({
           content: res.data.message
         })
@@ -286,7 +286,7 @@ export default {
         serviceType: this.addServiceType.serviceType
       }
       console.log(info)
-      editServiceType(info).then(res => {
+      editServiceType('/dadmin/type/create/type', info).then(res => {
         this.$Message.success({
           content: res.data.message
         })

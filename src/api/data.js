@@ -145,9 +145,9 @@ export const serarchTypeByModule = (info) => {
     edit service module
 */
 
-export const editServiceModule = (info) => {
+export const editServiceModule = (url, info) => {
   return axios.request({
-    url: '/dadmin/type/edit/ServiceModule',
+    url: url,
     data: info,
     method: 'post'
   })
@@ -155,16 +155,16 @@ export const editServiceModule = (info) => {
 /*
     edit service type
 */
-export const editServiceType = (info) => {
+export const editServiceType = (url, info) => {
   return axios.request({
-    url: '/dadmin/type/edit/ServiceType',
+    url: url,
     data: info,
     method: 'post'
   })
 }
 
 /*
-    inquire service type
+    inquire service module
 */
 export const inquireServiceModule = (info) => {
   return axios.request({

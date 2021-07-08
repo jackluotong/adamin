@@ -22,7 +22,7 @@
 
 <template>
   <div class="user-content">
-          <h1 style="margin:10px 10px 10px 10px">第三方管理-第三服务管理</h1>
+          <h1 style="margin:10px 10px 10px 10px">第三方服务管理-第三方服务管理</h1>
     <div style="display:flex">
 <span style="padding:10px 10px 10px 10px ">厂商名称</span>
 <Select label="" v-model.trim="manufacturerName" style="width:150px; margin-right:20px;" clearable >
@@ -48,9 +48,10 @@
     <Table highlight-row stripe :columns="columns" :data="confData" style="margin-top: 5px">
        <template slot-scope="{ row, index }" slot="action">
           <div>
-            <Button type="info" size="small" style="margin-right: 5px" @click="edit(index)"
+ <!--            <Button type="info" size="small" style="margin-right: 5px" @click="edit(index)"
             v-show="permission.includes('tripartite:service:edit')"
->编辑</Button>
+            :disabled='serviceStatus===0?true:false'
+>编辑</Button> -->
             <Button type="error" size="small" style="margin-right: 5px" @click="deleteService(index)"
              v-show="permission.includes('tripartite:service:delete')"
 >删除</Button>
@@ -60,22 +61,29 @@
     <Page :total='total' :page-size='pageSize' :show-total="true" show-sizer style="text-align: center;margin-top: 5px"
             @on-change='changePage'
             @on-page-size-change='onpagesizechange'/>
-    <Modal v-model="modalCheck" width="30%" height="40%"   v-bind:title="titleDetail" >
+    <Modal v-model="modalCheck" width="30%" height="40%"
+       v-bind:title="titleDetail"
+       :mask-closable="false"
+       :closable="false" >
       <Form :model="formInline"  inline>
         <FormItem  label="厂商名称" style="width:300px;" >
-            <Select label="" v-model.trim="formInline.manufacturerCode" style="width:150px; margin-right:20px;">
+            <Select label="" v-model.trim="formInline.manufacturerCode" style="width:150px; margin-right:20px;" :disabled="showType==='edit'?true:false">
               <Option v-for="(item,id) in manufacturerOption" :key="id" :value="item.manufacturerCode">{{item.manufacturerName}}</Option>
             </Select>
         </FormItem><br>
         <FormItem label="服务模块" style="width:300px;" >
-           <Select label="" v-model.trim="formInline.serviceModuleCode" @on-change='selectedModuleClick' style="width:150px; margin-right:20px;">
+           <Select label="" v-model.trim="formInline.serviceModuleCode" @on-change='selectedModuleClick' style="width:150px; margin-right:20px;" :disabled="showType==='edit'?true:false">
         <Option v-for="(item,id) in moduleOption" :key="id" :value="item.serviceModuleCode">{{item.serviceModule}}</Option>
          </Select>
            </FormItem>
         <FormItem label="服务类型" style="width:300px;" >
-            <Select  v-model.trim="formInline.serviceTypeCode" style="width:150px;margin-right:20px">
+            <Select  v-model.trim="formInline.serviceTypeCode" style="width:150px;margin-right:20px"
+            not-found-text='暂无数据'
+            v-if="showType==='add'?true:false">
         <Option v-for="(item,id) of typeOption" :key="id" :value="item.serviceTypeCode">{{item.serviceType}}</Option>
              </Select>
+             <Input style="width:150px;margin-right:20px"  v-model.trim="formInline.serviceType" disabled v-if="showType==='edit'?true:false">
+             </Input>
             </FormItem><br>
         <FormItem label="厂商接口地址" style="width:100%;" >
         <Input  v-model.trim="formInline.manufacturerUrl" style="width:auto"/>
@@ -105,9 +113,11 @@ import { inquireServiceModule, serarchTypeByModule, getServiceTypeInfo } from '@
 export default {
   data () {
     return {
+      serviceStatus: '',
       titleDetail: '',
       permission: sessionStorage.getItem('permission'),
       deleteServiceTypeCode: '',
+      deleteManufacturerCode: '',
       deleteId: '',
       modalDelete: false,
       showType: '',
@@ -125,7 +135,8 @@ export default {
         serviceTypeCode: '',
         serviceModuleCode: '',
         manufacturerUrl: '',
-        id: ''
+        id: '',
+        serviceType: ''
       },
       manufacturerOption: [ ],
       moduleOption: [ ],
@@ -190,26 +201,51 @@ export default {
         },
         {
           title: '编辑',
-          slot: 'action',
           align: 'center',
-          width: 300
+          width: 150,
+          render: (h, params) => {
+            if (params.row.serviceStatus === 0) {
+              return h('Button',
+                {
+                  on: {
+                    click: () => {
+                      this.modalCheck = true
+                      this.formInline.id = params.row.id
+                      this.formInline.manufacturerCode = params.row.manufacturerCode
+                      this.formInline.serviceTypeCode = params.row.serviceTypeCode
+                      this.formInline.serviceModuleCode = params.row.serviceModuleCode
+                      this.formInline.manufacturerUrl = params.row.manufacturerUrl
+                      this.formInline.serviceType = params.row.serviceType
+                      this.showType = 'edit'
+                      this.titleDetail = '编辑第三方服务'
+                    }
+                  }
+                }
+                , '编辑')
+            }
+          }
+        },
+        {
+          title: '删除',
+          slot: 'action',
+          aligin: 'center',
+          width: 60
         },
         {
           title: '服务生效/失效',
           key: 'serviceStatus',
-          width: 300,
+          width: 150,
           render: (h, params) => {
             if (params.row.serviceStatus === 0) {
               return h('Button',
-                // { style: { background: '#ccc' } }, v-show="permission.includes('tripartite:service: switch')"
-
                 {
                   on: {
                     click: () => {
                       const info = {
                         id: params.row.id,
                         serviceTypeCode: params.row.serviceTypeCode,
-                        status: 1
+                        status: 1,
+                        manufacturerCode: params.row.manufacturerCode
                       }
                       toggle(info).then(res => {
                         this.getThirdService()
@@ -284,35 +320,40 @@ export default {
     },
     edit (index) {
       console.log(this.confData[index])
+      this.serviceStatus = this.confData[index].serviceStatus
       this.formInline.id = this.confData[index].id
       this.formInline.manufacturerCode = this.confData[index].manufacturerCode
       this.formInline.serviceTypeCode = this.confData[index].serviceTypeCode
       this.formInline.serviceModuleCode = this.confData[index].serviceModuleCode
       this.formInline.manufacturerUrl = this.confData[index].manufacturerUrl
+      this.formInline.serviceType = this.confData[index].serviceType
       this.modalCheck = true
       this.showType = 'edit'
       this.titleDetail = '编辑第三方服务'
     },
     addNew () {
+      for (let key in this.formInline) {
+        this.formInline[key] = ''
+      }
       this.modalCheck = true
       this.showType = 'add'
       this.titleDetail = '新增第三方服务'
     },
     cancel () {
       this.modalCheck = false
-      for (let key in this.formInline) {
-        delete this.formInline[key]
-      }
     },
     deleteService (index) {
       this.deleteId = this.confData[index].id
       this.deleteServiceTypeCode = this.confData[index].serviceTypeCode
+      this.deleteManufacturerCode = this.confData[index].manufacturerCode
       this.modalDelete = true
+      console.log(this.confData[index])
     },
     handleSubmitDelete () {
       const info = {
         id: this.deleteId,
-        serviceTypeCode: this.deleteServiceTypeCode
+        serviceTypeCode: this.deleteServiceTypeCode,
+        manufacturerCode: this.deleteManufacturerCode
       }
       deleteThirdService(info).then(res => {
         this.$Message.success({
@@ -337,9 +378,6 @@ export default {
             })
             this.getThirdService()
             this.modalCheck = false
-            for (let key in this.formInline) {
-              delete this.formInline[key]
-            }
           }).catch(error => {
             console.log(error)
           })
@@ -356,9 +394,6 @@ export default {
           }).catch((error) => {
             console.log(error)
           })
-          for (let key in this.formInline) {
-            delete this.formInline[key]
-          }
           break
         default:
           this.$Message.error('请检查类型！')
@@ -384,7 +419,13 @@ export default {
     },
     selectedModuleClick (e) {
       serarchTypeByModule(e).then(res => {
-        this.typeOption = res.data.data
+        console.log(res)
+        if (res.data.data.length !== 0) {
+          this.typeOption = res.data.data
+        } else {
+          this.typeOption = []
+          this.formInline.serviceTypeCode = ''
+        }
       }).catch(err => console.log(err))
     }
 

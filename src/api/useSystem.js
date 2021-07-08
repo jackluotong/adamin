@@ -10,9 +10,9 @@ export const getInfo = (info) => {
   })
 }
 
-export const editInfo = (info) => {
+export const editInfo = (url, info) => {
   return axios.request({
-    url: '/dadmin/application/edit/system',
+    url: url,
     method: 'post',
     data: info
   })
@@ -40,6 +40,13 @@ export const addConnect = (info) => {
 export const cancelConnect = (info) => {
   return axios.request({
     url: `/dadmin/application/disassociation/system/${info}`,
+    method: 'get'
+  })
+}
+
+export const deleteSystem = (id, code) => {
+  return axios.request({
+    url: `/dadmin/application/del/system/${id}/${code}`,
     method: 'get'
   })
 }

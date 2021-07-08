@@ -24,9 +24,7 @@ class HttpRequest {
       baseURL: this.baseUrl,
       headers: {
         'X-Token': getToken(),
-        'X-Requested-With': 'XMLHttpRequest',
-        responseType: 'blob',
-        'Cache-Control': 'public'
+        'X-Requested-With': 'XMLHttpRequest'
       }
     }
     return config

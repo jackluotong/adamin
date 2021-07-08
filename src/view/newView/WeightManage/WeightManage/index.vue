@@ -316,7 +316,11 @@ export default {
       confData: [],
       showWeightAbnormalData: [],
       columnsShowAbnormalWeight: [
-
+        {
+          type: 'index',
+          width: 60,
+          align: 'center'
+        },
         {
           type: 'index',
           width: 60,
@@ -465,7 +469,12 @@ export default {
     },
     selectedModuleClick (e) {
       serarchTypeByModule(e).then(res => {
-        this.typeOption = res.data.data
+        if (res.data.data.length !== 0) {
+          this.typeOption = res.data.data
+        } else {
+          this.typeOption = []
+          this.selectedModuleType = ''
+        }
       }).catch()
     },
     search () {
@@ -551,16 +560,21 @@ export default {
       this.modalAdd = false
     },
     edit (index, row) {
+      console.log(row.weightRatioKey, row.weightType)
       this.getManufacture(this.confData[index].serviceTypeCode)
       this.editObj.checkedDataEdit = row.weightRatioKey.replace(new RegExp(/(:)/g), ',').split(',')
-      this.modalEdit = true
       this.editObj.moduleEdit = row.serviceModule
       this.editObj.serviceTypeEdit = row.serviceType
-      //   this.editObj.weightEit = row.weightType
-      row.weightType === 2 ? this.editObj.weightEit = '通用权重' : this.editObj.weightEit = '应用用权重'
+      this.editObj.weightEit = this.confData[index].weightType
+      if (this.confData[index].weightType === '2') {
+        this.editObj.weightEit = '通用权重'
+      } else if (this.confData[index].weightType === '1') {
+        this.editObj.weightEit = '应用权重'
+      }
       this.editObj.usingEdit = row.applicationCode
       this.inputValue = row.weightRatioValue
       this.editObj.serviceTypeCode = row.serviceTypeCode
+      this.modalEdit = true
     },
     lookAbnormalWeight (index) {
       this.showWeightAbnormal = true
@@ -607,11 +621,7 @@ export default {
       getWeight(info).then(res => {
         console.log(res)
         this.renderPage(res.data.data.records, res.data.data.total, flag)
-      }).catch(error => {
-        this.$Message.error({
-          content: error
-        })
-      })
+      }).catch()
     }
   },
   created () {

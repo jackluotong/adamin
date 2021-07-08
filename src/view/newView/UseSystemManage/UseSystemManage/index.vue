@@ -51,8 +51,15 @@
             @click="edit(index)"
             v-show="permission.includes('application:manage:edit')"
           >编辑</Button>
+           <Button
+            type="error"
+            size="small"
+            style="margin-right: 5px"
+            @click="deleteClcik(index)"
+            v-show="permission.includes('application:manage:del')"
+          >删除</Button>
          <Button
-            type="primary"
+            type="info"
             size="small"
             style="margin-right: 5px"
             @click="lookConfig(index)"
@@ -110,14 +117,25 @@
         <Button type="primary" size="large" @click="handleSubmitAddOrUpdate('formInline')" v-show="!isHavaShow">保存</Button>
       </div>
     </Modal>
+     <Modal v-model.trim="modalDelete" width="450" title="删除参数配置提示">
+            <div>
+                <p>确定删除该参数配置吗？</p>
+            </div>
+            <div slot="footer">
+                <Button type="text" @click="cancelDelete" size="large">取消</Button>
+                <Button type="primary" @click="handleSubmitDelete" size="large">确定</Button>
+            </div>
+        </Modal>
   </div>
 </template>
 
 <script>
-import { editInfo, getInfo } from '@/api/useSystem'
+import { editInfo, getInfo, deleteSystem } from '@/api/useSystem'
 export default {
   data () {
     return {
+      id: '',
+      code: '',
       current: 1,
       permission: sessionStorage.getItem('permission'),
       isHavaShow: false,
@@ -185,6 +203,12 @@ export default {
     }
   },
   methods: {
+    deleteClcik (index) {
+      console.log(this.confData[index])
+      this.id = this.confData[index].id
+      this.code = this.confData[index].applicationCode
+      this.modalDelete = true
+    },
     onpagesizechange (e) {
       this.pageSize = e
       const info = {
@@ -192,7 +216,6 @@ export default {
         currentPage: this.pageNum,
         applicationCode: this.applicationCode,
         applicationName: this.applicationName
-
       }
       getInfo(info).then(res => {
         this.renderPage(res.data.data.records, res.data.data.total)
@@ -257,7 +280,7 @@ export default {
               contactMobile: this.formInline.contactMobile,
               contactMail: this.formInline.contactMail
             }
-            editInfo(info)
+            editInfo('/dadmin/application/create', info)
               .then(res => {
                 this.$Message['success']({
                   background: true,
@@ -278,7 +301,7 @@ export default {
               contactMobile: this.formInline.contactMobile,
               contactMail: this.formInline.contactMail
             }
-            editInfo(info)
+            editInfo('/dadmin/application/update', info)
               .then(res => {
                 this.$Message['success']({
                   background: true,
@@ -287,7 +310,6 @@ export default {
                 this.$refs['formInline'].resetFields()
                 this.modalEdit = false
                 this.getInfo()
-                location.reload()
               })
               .catch(err => {
                 console.log(err)
@@ -316,14 +338,14 @@ export default {
       this.formInline.aesiv = this.confData[index].aesiv
       this.formInline.aeskey = this.confData[index].aeskey
       this.showType = 'edit'
-      this.detailTitle = '编辑模块'
+      this.detailTitle = '编辑系统'
       this.modalEdit = true
     },
     cancelDelete () {
       this.modalDelete = false
     },
     handleSubmitDelete () {
-      confDelete(this.id)
+      deleteSystem(this.id, this.code)
         .then(res => {
           this.$Message['success']({
             background: true,

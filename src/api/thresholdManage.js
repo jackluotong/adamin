@@ -71,9 +71,8 @@ export const editServiceThreShold = (info) => {
 
 export const deleteServiceThreShold = (info) => {
   return axios.request({
-    url: '/dadmin/serviceThreshold/remove/',
-    method: 'post',
-    data: info
+    url: '/dadmin/serviceThreshold/remove/' + info,
+    method: 'get'
   })
 }
 

@@ -300,8 +300,13 @@ export default {
     selectedAppNameClick (e) { },
     selectedModuleClick (e) {
       serarchTypeByModule(e).then(res => {
-        this.typeOption = res.data.data
-      }).catch(err => this.$Message.info(err))
+        if (res.data.data.length !== 0) {
+          this.typeOption = res.data.data
+        } else {
+          this.typeOption = []
+          this.selectedType = ''
+        }
+      }).catch(err => console.log(err))
     },
     search () {
       this.getInfo(this.applicationCode, this.applicationName, this.selectedModule)

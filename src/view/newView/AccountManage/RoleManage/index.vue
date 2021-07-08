@@ -59,6 +59,8 @@
      width="600"
      height="1000"
      v-bind:title="detailTitle"
+     :closable='false'
+     :mask-closable='false'
      class-name="vertical-center-modal">
       <Form ref="formInline" :model="formInline"  inline>
         <FormItem label="角色名称" prop="roleName" style="width:270px;">
@@ -81,8 +83,8 @@
             ref="tree"
             empty-text='暂无权限列表'
             @check-change="getCheckedKeys"
-            check-strictly
             >
+                        <!-- check-strictly -->
             </el-tree>
          </div>
         </FormItem>
@@ -212,7 +214,7 @@ export default {
       this.modalAddOrUpdate = true
     },
     handleSubmitAddOrUpdate (index) {
-    //   console.log(this.$refs.tree.getCheckedNodes(), this.$refs[index].validate())
+      console.log(this.$refs.tree.getCheckedNodes())
       this.$refs[index].validate((valid) => {
         if (valid) {
           if (this.showType === 'edit') {
@@ -254,14 +256,15 @@ export default {
               console.log(err)
             })
           }
+        //   this.$router.go(0)
         } else {
           this.$Message.error('请检查参数配置！')
         }
       })
     },
     cancelAddOrUpdate (name) {
-      this.$refs[name].resetFields()
       this.modalAddOrUpdate = false
+      this.$router.go(0)
     },
     edit (index) {
       this.checkedData = null

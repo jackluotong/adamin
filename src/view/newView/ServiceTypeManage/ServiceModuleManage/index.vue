@@ -207,6 +207,7 @@ export default {
       this.showType = 'add'
       this.detailTitle = '新增全局配置信息'
       this.modalAddOrUpdate = true
+      this.formInline.serviceModule = ''
     },
     handleSubmitAddOrUpdate (index) {
       this.$refs[index].validate((valid) => {
@@ -217,7 +218,7 @@ export default {
               serviceModule: this.formInline.serviceModule
             }
             console.log(info)
-            editServiceModule(info).then(res => {
+            editServiceModule('/daamin/type/update/module', info).then(res => {
               this.getInfo()
               this.$Message['success']({
                 background: true,
@@ -230,7 +231,7 @@ export default {
             const info = {
               serviceModule: this.formInline.serviceModule
             }
-            editServiceModule(info).then(res => {
+            editServiceModule('/dadmin/type/create/module', info).then(res => {
               this.$Message['success']({
                 background: true,
                 content: res.data.message

@@ -52,6 +52,12 @@
              @click="edit(index)"
                       v-show="permission.includes('threshold:service:edit')"
              >编辑</Button>
+              <Button type="error"
+            size="small"
+             style="margin-right: 5px"
+             @click="deleteClick(index)"
+                      v-show="permission.includes('threshold:service:del')"
+             >删除</Button>
           </div>
         </template>
     </Table>
@@ -107,7 +113,7 @@
 
 <script>
 import { getServiceTypeInfo, inquireServiceModule } from '@/api/data'
-import { getServiceThreShold, addServiceThreShold, editServiceThreShold, searchByCode } from '@/api/thresholdManage'
+import { getServiceThreShold, addServiceThreShold, editServiceThreShold, searchByCode, deleteServiceThreShold } from '@/api/thresholdManage'
 import { getManufacture } from '@/api/thirdPart'
 export default {
   data () {
@@ -276,21 +282,21 @@ export default {
       this.isShow = true
       this.modalCheck = true
       this.showType = 'add'
+      for (let key in this.formInline) {
+        this.formInline[key] = ''
+      }
     },
     cancel () {
       this.modalCheck = false
     },
-    deleteService (index) {
+    deleteClick (index) {
       this.deleteId = this.confData[index].id
       this.deleteServiceTypeCode = this.confData[index].serviceTypeCode
       this.modalDelete = true
     },
     handleSubmitDelete () {
-      const info = {
-        id: this.deleteId,
-        serviceTypeCode: this.deleteServiceTypeCode
-      }
-      deleteThirdService(info).then(res => {
+      deleteServiceThreShold(this.deleteId).then(res => {
+        this.getServiceThreShold()
         this.$Message.success({
           content: res.data.message
         })

@@ -105,17 +105,23 @@
          <FormItem label="应用名称" style="width:300px;" >
             <Select label="" v-model.trim="formInline.applicationCode" style="width:150px;margin-right:20px" clearable filterable
             @on-change='searchType'
+            :disabled="showType==='edit'?true:false"
             >
                    <Option v-for="(item,index) of appOption" :key="index" :value="item.applicationCode">{{item.applicationName}}</Option>
             </Select>
         </FormItem><br>
          <FormItem label="应用简称" style="width:300px;" >
-            <Select label="" v-model.trim="formInline.applicationCode" style="width:150px;margin-right:20px" clearable filterable>
+            <Select label="" v-model.trim="formInline.applicationCode" style="width:150px;margin-right:20px" clearable filterable
+                        :disabled="showType==='edit'?true:false">
                    <Option v-for="(item,index) of appOption" :key="index" :value="item.applicationCode">{{item.applicationCode}}</Option>
             </Select>
         </FormItem><br>
  <FormItem label="服务类型" style="width:300px;" >
-            <Select label="" v-model.trim="formInline.serviceTypeCode" style="width:150px;margin-right:20px" clearable filterable>
+     <Input style="width:150px;margin-right:20px"   v-show="showType==='edit'?true:false" v-model.trim="formInline.serviceType"
+     disabled/>
+            <Select label="" v-model.trim="formInline.serviceTypeCode" style="width:150px;margin-right:20px"
+             clearable filterable
+                v-show="showType==='add'?true:false">
                    <Option v-for="(item,id) of typeOption" :key="id" :value="item.serviceTypeCode">{{item.serviceType}}</Option>
             </Select>
         </FormItem><br>
@@ -212,7 +218,8 @@ export default {
         hoursThreshold: '',
         timesThreshold: '',
         id: '',
-        serviceTypeCode: ''
+        serviceTypeCode: '',
+        serviceType: ''
       },
       confData: [],
       columns: [
@@ -352,12 +359,16 @@ export default {
     search () {
       this.getUseThreShold(this.applicationCode, this.applicationName)
     },
-    reset () {
+    reset (obj) {
       this.applicationName = null
       this.applicationCode = null
+      for (let key in obj) {
+        obj[key] = ''
+      }
     },
     addSetting () {
-      this.reset()
+      this.reset(this.formInline)
+
       this.showType = 'add'
       this.detailTitle = '新增阈值'
       this.modalEdit = true
@@ -376,9 +387,6 @@ export default {
                 this.modalEdit = false
                 this.getUseThreShold()
                 this.$refs[index].resetFields()
-                for (let key in this.formInline) {
-                  delete this.formInline[key]
-                }
               })
               .catch(err => {
                 console.log(err)
@@ -426,6 +434,7 @@ export default {
       this.formInline.applicationCode = this.confData[index].applicationCode
       this.formInline.hoursThreshold = this.confData[index].hoursThreshold
       this.formInline.timesThreshold = this.confData[index].timesThreshold
+      this.formInline.serviceType = this.confData[index].serviceType
       this.showType = 'edit'
       this.detailTitle = '编辑阈值'
       this.modalEdit = true
