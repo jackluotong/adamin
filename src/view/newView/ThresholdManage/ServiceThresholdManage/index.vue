@@ -233,7 +233,12 @@ export default {
   methods: {
     selectedModuleClick (e) {
       searchByCode(e).then(res => {
-        this.typeOptionConnect = res.data.data
+        if (res.data.data.length !== 0) {
+          this.typeOptionConnect = res.data.data
+        } else {
+          this.typeOptionConnect = []
+          this.formInline.serviceTypeCode = ''
+        }
       }).catch(err)
     },
     onpagesizechange (e) {

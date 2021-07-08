@@ -219,8 +219,9 @@
                         <Input class="inputClasee" v-model.trim="editObj.serviceTypeEdit" readonly/>
             <span style="padding:10px">权重类型</span>
                         <Input class="inputClasee" v-model.trim="editObj.weightEit" readonly/>
-            <span style="padding:10px">所属应用</span>
-                        <Input class="inputClasee" v-model.trim="editObj.usingEdit" readonly/>
+            <span style="padding:10px" v-show="this.editObj.weightEit==='通用权重'?false:true">所属应用</span>
+                        <Input class="inputClasee" v-model.trim="editObj.usingEdit" v-show="this.editObj.weightEit==='通用权重'?false:true"
+                        readonly/>
             <div style="display:flex,flex-direction:row,justify-content:flex-start">
             <Checkbox-group
                 v-model="editObj.checkedDataEdit"
@@ -536,7 +537,7 @@ export default {
         serviceTypeCode: this.editObj.serviceTypeCode,
         weightRatioKey: this.editObj.checkedDataEdit.join(':'),
         weightRatioValue: this.inputValue,
-        weightType: this.editObj.weightEit
+        weightType: this.editObj.weightEit === '通用权重' ? 1 : 2
       }
       console.log(info)
       editWeight(info).then(res => {
@@ -565,10 +566,10 @@ export default {
       this.editObj.checkedDataEdit = row.weightRatioKey.replace(new RegExp(/(:)/g), ',').split(',')
       this.editObj.moduleEdit = row.serviceModule
       this.editObj.serviceTypeEdit = row.serviceType
-      this.editObj.weightEit = this.confData[index].weightType
-      if (this.confData[index].weightType === '2') {
+      //   this.editObj.weightEit = this.confData[index].weightType
+      if (this.confData[index].weightType === '1') {
         this.editObj.weightEit = '通用权重'
-      } else if (this.confData[index].weightType === '1') {
+      } else if (this.confData[index].weightType === '2') {
         this.editObj.weightEit = '应用权重'
       }
       this.editObj.usingEdit = row.applicationCode

@@ -83,8 +83,8 @@
             ref="tree"
             empty-text='暂无权限列表'
             @check-change="getCheckedKeys"
+            check-strictly
             >
-                        <!-- check-strictly -->
             </el-tree>
          </div>
         </FormItem>
@@ -256,7 +256,7 @@ export default {
               console.log(err)
             })
           }
-        //   this.$router.go(0)
+          this.$router.go(0)
         } else {
           this.$Message.error('请检查参数配置！')
         }

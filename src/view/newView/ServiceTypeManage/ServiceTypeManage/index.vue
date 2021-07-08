@@ -285,7 +285,6 @@ export default {
         serviceUrl: this.addServiceType.url,
         serviceType: this.addServiceType.serviceType
       }
-      console.log(info)
       editServiceType('/dadmin/type/create/type', info).then(res => {
         this.$Message.success({
           content: res.data.message

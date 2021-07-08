@@ -265,7 +265,9 @@ export default {
                     const info = {
                       id: params.row.id,
                       serviceTypeCode: params.row.serviceTypeCode,
-                      status: 0
+                      status: 0,
+                      manufacturerCode: params.row.manufacturerCode
+
                     }
                     toggle(info).then(res => {
                       this.getThirdService()

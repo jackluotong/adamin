@@ -218,7 +218,7 @@ export default {
               serviceModule: this.formInline.serviceModule
             }
             console.log(info)
-            editServiceModule('/daamin/type/update/module', info).then(res => {
+            editServiceModule('/dadmin/type/update/module', info).then(res => {
               this.getInfo()
               this.$Message['success']({
                 background: true,

@@ -321,10 +321,13 @@ export default {
   },
   methods: {
     searchType () {
-      console.log('111')
       searchByApp(this.formInline.applicationCode).then(res => {
-        console.log(res)
-        this.typeOption = res.data.data
+        if (res.data.data.length !== 0) {
+          this.typeOption = res.data.data
+        } else {
+          this.formInline.serviceTypeCode = ''
+          this.typeOption = []
+        }
       })
     },
     onpagesizechange (e) {
