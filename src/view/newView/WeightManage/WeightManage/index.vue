@@ -590,7 +590,9 @@ export default {
     },
     edit (index, row) {
       this.getManufacture(this.confData[index].serviceTypeCode)
-      this.editObj.checkedDataEdit = row.weightRatioKey.replace(new RegExp(/(:)/g), ',').split(',')
+      setTimeout(() => {
+        this.editObj.checkedDataEdit = row.weightRatioKey.replace(new RegExp(/(:)/g), ',').split(',')
+      }, 600)
       this.editObj.moduleEdit = row.serviceModule
       this.editObj.serviceTypeEdit = row.serviceType
       if (this.confData[index].weightType === '1') {
