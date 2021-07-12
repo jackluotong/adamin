@@ -185,7 +185,6 @@ export default {
             phone: this.phone
           }
           userAdd(info).then(res => {
-            console.log(res)
             this.$Message.info({
               content: res.data.message
             })
@@ -213,7 +212,6 @@ export default {
           array.push(this.checkData[i])
         }
       }
-      console.log(array)
     },
     onpagesizechange (e) {
       this.pageSize = e
@@ -274,7 +272,6 @@ export default {
         userCode: this.formInline.userCode,
         roles: array
       }
-      console.log(info)
       roleConnect(info).then(res => {
         this.modalAddOrUpdate = false
         this.getInfoUser()
@@ -299,7 +296,6 @@ export default {
     },
     translate (arr) {
       let array = []
-      console.log(arr)
       arr.map((item) => {
         let roleName = ''
         let roleCode = ''
@@ -324,7 +320,6 @@ export default {
           })
         }
       })
-      console.log(array)
       return array
     },
     getInfoUser () {
@@ -338,7 +333,6 @@ export default {
         const total = res.data.data.total
         this.confData = this.translate(data)
         this.total = total
-        console.log(data)
       }).catch(err => { console.log(err) })
     }
 
@@ -349,6 +343,7 @@ export default {
       roleCode: this.roleCode
     }
     getInfoRole(data).then(res => {
+      console.log(res)
       const data = res.data.data
       this.checkList = data
     })
