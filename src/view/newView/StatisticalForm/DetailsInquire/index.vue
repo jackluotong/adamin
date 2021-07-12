@@ -123,12 +123,6 @@ export default {
           align: 'center'
         },
         {
-          title: '服务模块',
-          key: 'serviceModule',
-          width: 100,
-          align: 'center'
-        },
-        {
           title: '厂商名称',
           key: 'manufacturerName',
           width: 100,

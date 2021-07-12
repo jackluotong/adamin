@@ -26,6 +26,9 @@
     position: relative;
     word-break: break-all;
 }
+.edit{
+
+}
 </style>
 
 <template>
@@ -64,6 +67,7 @@
                         size="small"
                         style="margin-right: 5px"
                         @click="edit(index,row)"
+                        class="edit"
                         v-show="permission.includes('weight:manage:edit')"
                         >编辑</Button
                     >
@@ -223,7 +227,13 @@
                         <Input class="inputClasee" v-model.trim="editObj.usingEdit" v-show="this.editObj.weightEit==='通用权重'?false:true"
                         readonly/>
             <div style="display:flex,flex-direction:row,justify-content:flex-start">
-            <Checkbox-group
+                <el-checkbox-group v-model="editObj.checkedDataEdit" >
+                      <el-checkbox  v-for="(item, index) in editObj.checkListEdit"
+                    :key="index"
+                    :label="item.manufacturerCode"
+                    :value="item.manufacturerName">{{item.manufacturerName}}</el-checkbox>
+                </el-checkbox-group>
+           <!--  <Checkbox-group
                 v-model="editObj.checkedDataEdit"
                 @on-change="selectedEdit"
             >
@@ -236,9 +246,9 @@
                     ref="checkBox"
                     >{{ item.manufacturerName }}</Checkbox
                 >
-              </Checkbox-group>
+              </Checkbox-group> -->
 
-               <span>权重</span>
+               <span style="padding:10px">权重</span>
                 <Input style="width:320px" v-model="inputValue">
                 </Input>
         </div>
@@ -258,16 +268,32 @@
                 >
             </div>
         </Modal>
+          <Modal v-model.trim="modalRestore" width="450" title="权重恢复">
+            <div>
+                <p>确定恢复该权重吗？</p>
+            </div>
+            <div slot="footer">
+                <Button type="text" @click="cancelRestore" size="large"
+                    >取消</Button
+                >
+                <Button type="primary" @click="handleRestore" size="large"
+                    >确定</Button
+                >
+            </div>
+        </Modal>
     </div>
 </template>
 
 <script>
 import { inquireServiceModule, serarchTypeByModule } from '@/api/data'
-import { getWeight, searchManufacture, addWeight, deleteWeight, editWeight } from '@/api/weightManage'
+import { getWeight, searchManufacture, addWeight, deleteWeight, editWeight, weightRestore } from '@/api/weightManage'
 import { getAllApp } from '@/api/thresholdManage'
 export default {
   data () {
     return {
+      checkedCities: '',
+      reatoreId: '',
+      modalRestore: false,
       editObj: {
         serviceTypeEdit: '',
         moduleEdit: '',
@@ -399,16 +425,19 @@ export default {
         {
           title: '权重恢复',
           key: 'noticeType',
-          width: 100,
+          width: 200,
           render: (h, params, column) => {
             if (params.row.isAbnormalWeightId === false) {
-              return h('Button', {
-                on: {
-                  click: () => {
-                    alert('等待开发')
+              return h('Button',
+                {
+                  on: {
+                    click: () => {
+                      this.modalRestore = true
+                      this.reatoreId = params.row.id
+                    }
                   }
                 }
-              }, '权重恢复')
+                , '权重恢复')
             } else {
               return h('span', {
               }, '正常权重')
@@ -419,6 +448,18 @@ export default {
     }
   },
   methods: {
+    handleRestore () {
+      weightRestore(this.reatoreId).then(res => {
+        this.$Message.info({
+          content: res.data.message
+        })
+        this.getWeight(1, 1)
+      })
+      this.modalRestore = false
+    },
+    cancelRestore () {
+      this.modalRestore = false
+    },
     getManufacture (serviceTypeCode) {
       const info = {
         currentPage: 1,
@@ -561,20 +602,21 @@ export default {
       this.modalAdd = false
     },
     edit (index, row) {
-      console.log(row.weightRatioKey, row.weightType)
       this.getManufacture(this.confData[index].serviceTypeCode)
-      this.editObj.checkedDataEdit = row.weightRatioKey.replace(new RegExp(/(:)/g), ',').split(',')
-      this.editObj.moduleEdit = row.serviceModule
-      this.editObj.serviceTypeEdit = row.serviceType
-      //   this.editObj.weightEit = this.confData[index].weightType
-      if (this.confData[index].weightType === '1') {
-        this.editObj.weightEit = '通用权重'
-      } else if (this.confData[index].weightType === '2') {
-        this.editObj.weightEit = '应用权重'
-      }
-      this.editObj.usingEdit = row.applicationCode
-      this.inputValue = row.weightRatioValue
-      this.editObj.serviceTypeCode = row.serviceTypeCode
+      setTimeout(() => {
+        this.editObj.checkedDataEdit = row.weightRatioKey.replace(new RegExp(/(:)/g), ',').split(',')
+        this.editObj.moduleEdit = row.serviceModule
+        this.editObj.serviceTypeEdit = row.serviceType
+        if (this.confData[index].weightType === '1') {
+          this.editObj.weightEit = '通用权重'
+        } else if (this.confData[index].weightType === '2') {
+          this.editObj.weightEit = '应用权重'
+        }
+        this.editObj.usingEdit = row.applicationCode
+        this.inputValue = row.weightRatioValue
+        this.editObj.serviceTypeCode = row.serviceTypeCode
+      }, 200)
+
       this.modalEdit = true
     },
     lookAbnormalWeight (index) {

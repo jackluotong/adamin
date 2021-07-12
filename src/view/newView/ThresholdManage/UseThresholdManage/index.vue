@@ -73,7 +73,7 @@
                         >编辑</Button
                     >
                     <Button
-                        type="primary"
+                        type="error"
                         size="small"
                         style="margin-right: 5px"
                         @click="deleteThreshold(index)"
@@ -85,6 +85,7 @@
             </template>
         </Table>
         <Page
+            :current="current"
             :total="total"
             :page-size="pageSize"
             :show-total="true"
@@ -178,11 +179,12 @@
 </template>
 
 <script>
-import { getAllApp, getUseThreShold, editUseThreShold, addUseThreShold, deleteUseThreShold, searchByApp } from '@/api/thresholdManage'
+import { getAllApp, getUseThreShold, editUseThreShold, addUseThreShold, deleteUseThreShold, searchByApp, cancelUseThreShold } from '@/api/thresholdManage'
 
 export default {
   data () {
     return {
+      current: 1,
       fusingId: '',
       permission: sessionStorage.getItem('permission'),
       applicationCodeSelected: [],
@@ -245,7 +247,7 @@ export default {
           title: '服务类型',
           key: 'serviceType',
           align: 'center',
-          width: 60,
+          width: 300,
           render: (h, params) => {
             return h('div', [
               h('Tooltip', {
@@ -311,7 +313,7 @@ export default {
                       this.fusingId = params.row.id
                     }
                   }
-                }, '熔断')
+                }, '手动撤销熔断')
               }
             }
           }
@@ -360,6 +362,7 @@ export default {
       this.editId = this.confData[index].id
     },
     search () {
+      this.current = 1
       this.getUseThreShold(this.applicationCode, this.applicationName)
     },
     reset (obj) {
@@ -484,9 +487,9 @@ export default {
         pageSize: this.pageSize,
         currentPage: this.pageNum
       }
-      console.log(info)
       getUseThreShold(info).then(res => {
         console.log(res)
+        this.current = 1
         this.renderPage(res.data.data.records, res.data.data.total)
       })
     }

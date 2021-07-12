@@ -40,6 +40,12 @@ export const searchManufacture = (info) => {
   })
 }
 
+export const weightRestore = (info) => {
+  return axios.request({
+    url: '/dadmin/weightInfo/restore/' + info,
+    method: 'get'
+  })
+}
 /*
     judge is longin
 */

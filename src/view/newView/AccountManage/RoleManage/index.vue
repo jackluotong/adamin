@@ -214,7 +214,7 @@ export default {
       this.modalAddOrUpdate = true
     },
     handleSubmitAddOrUpdate (index) {
-      console.log(this.$refs.tree.getCheckedNodes())
+    //   console.log(this.$refs.tree.getCheckedNodes())
       this.$refs[index].validate((valid) => {
         if (valid) {
           if (this.showType === 'edit') {
@@ -235,28 +235,33 @@ export default {
               })
               this.modalAddOrUpdate = false
               this.$refs[index].resetFields()
+              this.$router.go(0)
             }).catch(err => console.log(err))
           } else if (this.showType === 'add') {
-            const info = {
-              roleName: this.formInline.roleName,
-              auths: this.$refs.tree.getCheckedNodes().map((item) => {
-                return item.authCode
+            if (this.formInline.roleName.length !== 0) {
+              const info = {
+                roleName: this.formInline.roleName,
+                auths: this.$refs.tree.getCheckedNodes().map((item) => {
+                  return item.authCode
+                })
+              }
+              editRole(info).then(res => {
+                this.$Message['success']({
+                  background: true,
+                  content: res.data.message
+                })
+                this.modalAddOrUpdate = false
+                this.renderPangeAgain()
+                this.checkedData = []
+                this.formInline.roleName = null
+                this.$router.go(0)
+              }).catch(err => {
+                console.log(err)
               })
+            } else {
+              this.$Message.info('请输入角色名称')
             }
-            editRole(info).then(res => {
-              this.$Message['success']({
-                background: true,
-                content: res.data.message
-              })
-              this.modalAddOrUpdate = false
-              this.renderPangeAgain()
-              this.checkedData = []
-              this.formInline.roleName = null
-            }).catch(err => {
-              console.log(err)
-            })
           }
-          this.$router.go(0)
         } else {
           this.$Message.error('请检查参数配置！')
         }

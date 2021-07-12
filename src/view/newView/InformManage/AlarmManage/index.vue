@@ -27,6 +27,8 @@
             :show-total="true"
             show-sizer
             style="text-align: center;margin-top: 5px"
+            @on-change='changePage'
+            @on-page-size-change='onpagesizechange'
         />
     </div>
 </template>
@@ -41,7 +43,7 @@ export default {
       deleteId: '',
       total: 0,
       pageNum: 1,
-      pageSize: 30,
+      pageSize: 10,
       modalEdit: false,
       detailTitle: '',
       modalDelete: false,
@@ -59,69 +61,8 @@ export default {
           aligin: 'center'
         },
         {
-          title: '应用名称',
-          key: 'applicationName',
-          tooltip: true,
-          width: 300,
-          align: 'center'
-        },
-        {
-          title: '应用简称',
-          key: 'applicationCode',
-          width: 300,
-          align: 'center'
-        },
-        {
           title: '服务模块',
           key: 'serviceModule',
-          width: 300,
-          align: 'center'
-        },
-        {
-          title: '联系人邮箱',
-          key: 'contactMail',
-          width: 300,
-          align: 'center'
-        },
-        {
-          title: '联系人电话',
-          key: 'contactMobile',
-          width: 300,
-          align: 'center'
-        },
-        {
-          title: '内容',
-          key: 'content',
-          width: 300,
-          align: 'center'
-        },
-        {
-          title: '厂商code',
-          key: 'manufacturerCode',
-          width: 300,
-          align: 'center'
-        },
-        {
-          title: '厂商名称',
-          key: 'manufacturerName',
-          width: 300,
-          align: 'center'
-        },
-        {
-          title: '通知类型',
-          key: 'noticeType',
-          width: 300,
-          align: 'center'
-        },
-        {
-          title: '场景类型',
-          key: 'sceneType',
-          width: 300,
-          align: 'center'
-        },
-        {
-          title: '发送状态',
-          key: 'sendStatus',
           width: 300,
           align: 'center'
         },
@@ -138,21 +79,96 @@ export default {
           align: 'center'
         },
         {
+          title: '内容',
+          key: 'content',
+          width: 300,
+          align: 'center'
+        },
+        {
+          title: '应用名称',
+          key: 'applicationName',
+          tooltip: true,
+          width: 300,
+          align: 'center'
+        },
+        {
+          title: '应用简称',
+          key: 'applicationCode',
+          width: 300,
+          align: 'center'
+        },
+        {
+          title: '厂商code',
+          key: 'manufacturerCode',
+          width: 300,
+          align: 'center'
+        },
+        {
+          title: '厂商名称',
+          key: 'manufacturerName',
+          width: 300,
+          align: 'center'
+        },
+        {
+          title: '联系人电话',
+          key: 'contactMobile',
+          width: 300,
+          align: 'center'
+        },
+        {
+          title: '联系人邮箱',
+          key: 'contactMail',
+          width: 300,
+          align: 'center'
+        },
+        {
+          title: '通知类型',
+          key: 'noticeType',
+          width: 300,
+          align: 'center'
+        },
+        {
+          title: '场景类型',
+          key: 'sceneType',
+          width: 300,
+          align: 'center'
+        },
+        {
           title: '切换类型',
           key: 'triggerType',
           width: 300,
           align: 'center'
+        },
+        {
+          title: '发送状态',
+          key: 'sendStatus',
+          width: 300,
+          align: 'center'
         }
-      /*   {
-          title: '操作',
-          slot: 'action',
-          align: 'center',
-          width: 100
-        } */
       ]
     }
   },
   methods: {
+    onpagesizechange (e) {
+      this.pageSize = e
+      const info = {
+        pageSize: e,
+        currentPage: this.pageNum
+
+      }
+      getInfoWarning(info).then(res => {
+        this.renderPage(res.data.data.records, res.data.data.total)
+      })
+    },
+    changePage (e) {
+      const info = {
+        pageSize: this.pageSize,
+        currentPage: e
+      }
+      getInfoWarning(info).then(res => {
+        this.renderPage(res.data.data.records, res.data.data.total)
+      })
+    },
     renderPage (data, total) {
       this.confData = data
       this.total = total

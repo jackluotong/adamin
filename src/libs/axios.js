@@ -1,10 +1,11 @@
 import axios from 'axios'
-import store from '@/store'
+/* import store from '@/store'
+ */
 import { getToken } from '@/libs/util'
 import Res from '@/libs/global'
 import { Message } from 'iview'
 import router from '../router/index'
-const addErrorLog = errorInfo => {
+/* const addErrorLog = errorInfo => {
   const { statusText, status, request: { responseURL } } = errorInfo
   let info = {
     type: 'ajax',
@@ -13,7 +14,7 @@ const addErrorLog = errorInfo => {
     url: responseURL
   }
   if (!responseURL.includes('save_error_logger')) store.dispatch('addErrorLog', info)
-}
+} */
 class HttpRequest {
   constructor (baseUrl = baseURL) {
     this.baseUrl = baseUrl
@@ -159,7 +160,7 @@ class HttpRequest {
           request: { responseURL: config.url }
         }
       }
-      addErrorLog(errorInfo)
+      //   addErrorLog(errorInfo)
       return Promise.reject(error)
     })
   }
