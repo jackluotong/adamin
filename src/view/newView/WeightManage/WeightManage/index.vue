@@ -322,11 +322,6 @@ export default {
           width: 60,
           align: 'center'
         },
-        {
-          type: 'index',
-          width: 60,
-          align: 'center'
-        },
         { title: '服务模块',
           key: 'serviceModule',
           align: 'center'
@@ -429,8 +424,7 @@ export default {
         this.editObj.checkListEdit = res.data.data
       })
     },
-    selectedEdit (e) {
-      console.log(e, this.editObj.checkedDataEdit)
+    selectedEdit () {
     },
     onpagesizechange (e) {
       this.pageSize = e
@@ -461,11 +455,8 @@ export default {
       const info = {
         serviceTypeCode: e
       }
-      console.log(info)
       searchManufacture(info).then(res => {
-        console.log(res)
         this.checkList = res.data.data
-        console.log(this.checkList)
       })
     },
     selectedModuleClick (e) {
@@ -485,9 +476,7 @@ export default {
         pageSize: this.pageSize,
         abnormalWeightType: 1
       }
-      console.log(info)
       getWeight(info).then(res => {
-        console.log(res)
         this.confData = res.data.data.records
         this.total = res.data.data.total
       }).catch(
@@ -517,7 +506,6 @@ export default {
             weightType: this.selectedWeight,
             serviceModuleCode: this.selectedModuleTwo
           }
-          console.log(info)
           addWeight(info).then(res => {
             this.$Message.success({
               content: res.data.message
@@ -539,7 +527,6 @@ export default {
         weightRatioValue: this.inputValue,
         weightType: this.editObj.weightEit === '通用权重' ? 1 : 2
       }
-      console.log(info)
       editWeight(info).then(res => {
         this.$Message.success({
           content: res.data.message
@@ -561,12 +548,10 @@ export default {
       this.modalAdd = false
     },
     edit (index, row) {
-      console.log(row.weightRatioKey, row.weightType)
       this.getManufacture(this.confData[index].serviceTypeCode)
       this.editObj.checkedDataEdit = row.weightRatioKey.replace(new RegExp(/(:)/g), ',').split(',')
       this.editObj.moduleEdit = row.serviceModule
       this.editObj.serviceTypeEdit = row.serviceType
-      //   this.editObj.weightEit = this.confData[index].weightType
       if (this.confData[index].weightType === '1') {
         this.editObj.weightEit = '通用权重'
       } else if (this.confData[index].weightType === '2') {
@@ -618,9 +603,7 @@ export default {
         currentPage: this.pageNum,
         pageSize: this.pageSize
       }
-      console.log(info)
       getWeight(info).then(res => {
-        console.log(res)
         this.renderPage(res.data.data.records, res.data.data.total, flag)
       }).catch()
     }
