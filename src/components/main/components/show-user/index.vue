@@ -18,7 +18,7 @@ export default {
   props: {
     user: {
       type: String,
-      default: 'xxxx'
+      default: '张三'
     }
   }
 }

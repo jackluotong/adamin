@@ -28,7 +28,7 @@
         <Option v-for="(item,id) in manufacturerOption" :key="id" :value="item.manufacturerCode">{{item.manufacturerName}}</Option>
       </Select>
 <span style="padding:10px 10px 10px 10px ">服务模块</span>
- <Select label="" v-model.trim="serviceModule" style="width:150px; margin-right:20px;" clearable >
+ <Select label="" v-model.trim="serviceModule" style="width:150px; margin-right:20px;" clearable @on-change='selectedClick'>
         <Option v-for="(item,id) in moduleOption" :key="id" :value="item.serviceModuleCode">{{item.serviceModule}}</Option>
       </Select>
 <span style="padding:10px 10px 10px 10px ">服务类型</span>
@@ -112,7 +112,7 @@
 </template>
 
 <script>
-import { getServiceTypeInfo, inquireServiceModule } from '@/api/data'
+import { inquireServiceModule, serarchTypeByModule } from '@/api/data'
 import { getServiceThreShold, addServiceThreShold, editServiceThreShold, searchByCode, deleteServiceThreShold } from '@/api/thresholdManage'
 import { getManufacture } from '@/api/thirdPart'
 export default {
@@ -231,6 +231,16 @@ export default {
     }
   },
   methods: {
+    selectedClick (e) {
+      serarchTypeByModule(e).then(res => {
+        if (res.data.data.length !== 0) {
+          this.typeOption = res.data.data
+        } else {
+          this.typeOption = []
+          this.serviceType = ''
+        }
+      }).catch()
+    },
     selectedModuleClick (e) {
       searchByCode(e).then(res => {
         if (res.data.data.length !== 0) {
@@ -373,9 +383,6 @@ export default {
     }).catch()
     inquireServiceModule(info).then(res => {
       this.moduleOption = res.data.data.records
-    })
-    getServiceTypeInfo(info).then(res => {
-      this.typeOption = res.data.data.records
     })
   }
 }

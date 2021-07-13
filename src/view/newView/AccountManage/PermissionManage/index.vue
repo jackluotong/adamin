@@ -106,8 +106,13 @@
           <Input  v-model.number="formInline.AuthSeq"/>
         </FormItem>
         <FormItem label="权限等级"  style="width:270px;" >
-          <Input  v-model.number="formInline.AuthLevel" placeholder="权限等级为1,2,3"/>
+        <Select v-model="formInline.AuthLevel" clearable style="width:270px">
+        <Option v-for="(item,id) in authOptions" :value="item.value" :key="id">{{ item.label }}</Option>
+        </Select>
         </FormItem>
+       <!--  <FormItem label="权限等级"  style="width:270px;" >
+          <Input  v-model.number="formInline.AuthLevel" placeholder="权限等级为1,2,3"/>
+        </FormItem> -->
          </div>
           <FormItem label="权限名称"  style="width:270px;">
           <Input  v-model.trim="formInline.AuthName"/>
@@ -152,6 +157,7 @@ import { getAuthTree, createParent, deletePermission, editPermission } from '@/a
 export default {
   data () {
     return {
+      authOptions: [{ value: 1, label: 1, id: 1 }, { value: 2, label: 2, id: 2 }, { value: 3, label: 3, id: 3 }],
       mail: '',
       permission: sessionStorage.getItem('permission'),
       modalDelete: false,
@@ -272,6 +278,7 @@ export default {
           Controller: this.formInline.Controller,
           method: this.formInline.Method
         }
+        console.log(info)
         createParent(info).then(res => {
           this.getAuthTree()
           this.$Message.success({

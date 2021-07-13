@@ -26,8 +26,15 @@
     position: relative;
     word-break: break-all;
 }
-.edit{
-
+.showDiv{
+    display: flex;
+    flex-direction: column;
+    Input{
+        width: 270px;
+    }
+    span{
+        width:270px
+    }
 }
 </style>
 
@@ -216,6 +223,7 @@
             :closable="false"
             title="编辑权重"
         >
+            <div class="showDiv">
 
             <span style="padding:10px">服务模块</span>
                         <Input class="inputClasee" v-model.trim="editObj.moduleEdit" readonly/>
@@ -233,25 +241,11 @@
                     :label="item.manufacturerCode"
                     :value="item.manufacturerName">{{item.manufacturerName}}</el-checkbox>
                 </el-checkbox-group>
-           <!--  <Checkbox-group
-                v-model="editObj.checkedDataEdit"
-                @on-change="selectedEdit"
-            >
-                <Checkbox
-                    v-for="(item, index) in editObj.checkListEdit"
-                    :key="index"
-                    :label="item.manufacturerCode"
-                    :value="item.manufacturerName"
-                    size="large"
-                    ref="checkBox"
-                    >{{ item.manufacturerName }}</Checkbox
-                >
-              </Checkbox-group> -->
-
                <span style="padding:10px">权重</span>
                 <Input style="width:320px" v-model="inputValue">
                 </Input>
         </div>
+    </div>
             <div slot="footer">
                 <Button
                     type="primary"
@@ -472,7 +466,8 @@ export default {
       const info = {
         pageSize: e,
         currentPage: this.pageNum,
-        serviceModule: this.selectedModule
+        serviceModule: this.selectedModule,
+        abnormalWeightType: 1
 
       }
       getWeight(info).then(res => {
@@ -483,7 +478,8 @@ export default {
       const info = {
         pageSize: this.pageSize,
         currentPage: e,
-        serviceModule: this.selectedModule
+        serviceModule: this.selectedModule,
+        abnormalWeightType: 1
 
       }
       getWeight(info).then(res => {
@@ -618,9 +614,13 @@ export default {
     handleSubmitDelete () {
       deleteWeight(this.deleteOject).then(res => {
         this.getWeight(1, 1)
+        this.$Message.success({
+          content: res.data.message
+        })
         this.modalDelete = false
-      }).catch()
-      this.modalDelete = false
+      }).catch(
+
+      )
     },
     cancelDelete () {
       this.modalDelete = false

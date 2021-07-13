@@ -90,7 +90,8 @@ export default {
         }).then(res => {
           const userInfo = res.data.data.userInfo
           const userAccess = res.data.data.permsSet
-          sessionStorage.setItem('userName', userInfo.userName)
+          console.log(res)
+          sessionStorage.setItem('userName', userInfo.nickName)
           commit('setPermission', userAccess)
           commit('setUserName', userInfo.userName)
           commit('setUserCode', userInfo.userCode)

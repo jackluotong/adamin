@@ -29,7 +29,7 @@
         <Option v-for="(item,id) in manufacturerOption" :key="id" :value="item.manufacturerCode">{{item.manufacturerName}}</Option>
       </Select>
       <span style="padding:10px 10px 10px 10px ">服务模块</span>
- <Select label="" v-model.trim="serviceModule" style="width:150px; margin-right:20px;"  clearable >
+ <Select label="" v-model.trim="serviceModule" style="width:150px; margin-right:20px;"  clearable @on-change='selectedModuleClick'>
         <Option v-for="(item,id) in moduleOption" :key="id" :value="item.serviceModuleCode">{{item.serviceModule}}</Option>
       </Select>
 <span style="padding:10px 10px 10px 0 ">服务类型</span>
@@ -108,7 +108,7 @@
 
 <script>
 import { getThirdService, getManufacture, toggle, addThirdService, deleteThirdService, editThirdService } from '@/api/thirdPart'
-import { inquireServiceModule, serarchTypeByModule, getServiceTypeInfo } from '@/api/data'
+import { inquireServiceModule, serarchTypeByModule } from '@/api/data'
 
 export default {
   data () {
@@ -421,12 +421,11 @@ export default {
     },
     selectedModuleClick (e) {
       serarchTypeByModule(e).then(res => {
-        console.log(res)
         if (res.data.data.length !== 0) {
           this.typeOption = res.data.data
         } else {
           this.typeOption = []
-          this.formInline.serviceTypeCode = ''
+          this.serviceType = ''
         }
       }).catch(err => console.log(err))
     }
@@ -443,9 +442,6 @@ export default {
     })
     inquireServiceModule(info).then(res => {
       this.moduleOption = res.data.data.records
-    })
-    getServiceTypeInfo(info).then(res => {
-      this.typeOption = res.data.data.records
     })
   }
 }

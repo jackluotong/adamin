@@ -235,7 +235,9 @@ export default {
               })
               this.modalAddOrUpdate = false
               this.$refs[index].resetFields()
-              this.$router.go(0)
+              setTimeout(() => {
+                this.$router.go(0)
+              }, 600)
             }).catch(err => console.log(err))
           } else if (this.showType === 'add') {
             if (this.formInline.roleName.length !== 0) {
@@ -246,6 +248,7 @@ export default {
                 })
               }
               editRole(info).then(res => {
+                console.log(res)
                 this.$Message['success']({
                   background: true,
                   content: res.data.message
@@ -254,7 +257,9 @@ export default {
                 this.renderPangeAgain()
                 this.checkedData = []
                 this.formInline.roleName = null
-                this.$router.go(0)
+                setTimeout(() => {
+                  this.$router.go(0)
+                }, 600)
               }).catch(err => {
                 console.log(err)
               })

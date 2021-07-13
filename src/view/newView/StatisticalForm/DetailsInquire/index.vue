@@ -36,7 +36,7 @@
              </div>
              <div style="display:flex">
             <span style="padding:10px 10px 10px 10px ">服务模块</span>
-            <Select label="" v-model.trim="serviceModuleSelected" style="width:150px; margin-right:20px;">
+            <Select label="" v-model.trim="serviceModuleSelected" style="width:150px; margin-right:20px;" @on-change='selectedModuleClick'>
                 <Option v-for="(item,id) in serviceModuleOption" :key="id" :value="item.serviceModuleCode">{{item.serviceModule}}</Option>
             </Select>
                 <span style="padding:10px 10px 10px 10px ">服务类型</span>
@@ -78,7 +78,7 @@
 <script>
 import { getInfoDetails } from '@/api/detailsInquire'
 import { getManufacture } from '@/api/thirdPart'
-import { getServiceTypeInfo, inquireServiceModule } from '@/api/data'
+import { inquireServiceModule, serarchTypeByModule } from '@/api/data'
 export default {
   data () {
     return {
@@ -321,6 +321,16 @@ export default {
     }
   },
   methods: {
+    selectedModuleClick (e) {
+      serarchTypeByModule(e).then(res => {
+        if (res.data.data.length !== 0) {
+          this.serviceTypeOption = res.data.data
+        } else {
+          this.serviceTypeOption = []
+          this.serviceTypeSelected = ''
+        }
+      }).catch()
+    },
     onpagesizechange (e) {
       this.pageSize = e
       const info = {
@@ -438,9 +448,6 @@ export default {
     this.getInfo()
     getManufacture(info).then(res => {
       this.manufacturerOption = res.data.data.records
-    })
-    getServiceTypeInfo(info).then(res => {
-      this.serviceTypeOption = res.data.data.records
     })
     inquireServiceModule(info).then(res => {
       this.serviceModuleOption = res.data.data.records

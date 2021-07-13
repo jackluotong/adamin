@@ -27,13 +27,23 @@
   position: relative;
   word-break: break-all;
 }
+.showDiv{
+    display: flex;
+    height: 100%;
+    flex-direction: column;
+    width: 100%;
+    span{
+        margin-inline: 10px;
+        margin: 10px 10px 10px 10px ;
+    }
+}
 </style>
 
 <template>
   <div class="user-content">
     <h1 style="margin:10px 10px 10px 10px">账户管理-用户管理</h1>
     <div class="content-button" >
-      <span style="padding:10px">用户code</span>
+      <span style="padding:10px">用户名</span>
       <Input v-model.trim="userCode" @on-enter="enter"/>
       <Button type="primary" icon="md-search" @click="search()" style="margin:0 10px 0 20px">查询</Button>
       <Button type="primary" icon="md-refresh" @click="reset()">重置</Button>
@@ -44,7 +54,7 @@
        <template slot-scope="{ index }" slot="action">
           <div>
             <Button type="primary" size="small" style="margin-right: 5px" @click="edit(index)"
-                        v-show="permission.includes('account:user:roleConnect')"
+                v-show="permission.includes('account:user:roleConnect')"
 >角色关联</Button>
           </div>
         </template>
@@ -90,15 +100,20 @@
      </Modal>
 
      <Modal v-model.trim="modalAddUser" width="600" :mask-closable="false" :closable="true" title="新增用户">
-         <span>
-             姓名
+
+         <div  class="showDiv">
+        <span>
+             用户名
          </span>
-         <Input type="text"  v-model.trim="userName"/>
+         <Input type="text"  v-model.trim="userName" style="width:270px"/>
          <span>
              电话号码
          </span>
-        <Input type="text" v-model.trim=" phone"/>
-         <div>
+        <Input type="text" v-model.trim="phone" style="width:270px"/>
+        <span>
+            用户昵称
+        </span>
+        <Input type="text" v-model.trim="nickName" style="width:270px"/>
         </div>
       <div slot="footer">
         <Button type="primary" ghost size="large" @click="cancelUser()">返回</Button>
@@ -113,6 +128,7 @@ import { getInfoUser, getInfoRole, roleConnect, userAdd } from '@/api/data'
 export default {
   data () {
     return {
+      nickName: '',
       userName: '',
       phone: '',
       modalAddUser: false,
@@ -137,7 +153,7 @@ export default {
         checkList: '',
         roleName: ''
       },
-      confData: [ ],
+      confData: [],
       columns: [
         {
           type: 'index',
@@ -151,8 +167,8 @@ export default {
           align: 'center'
         },
         {
-          title: '用户code',
-          key: 'userCode',
+          title: '用户昵称',
+          key: 'nickName',
           width: 300,
           align: 'center'
         },
@@ -161,7 +177,33 @@ export default {
           key: 'roleName',
           tooltip: true,
           width: 300,
-          align: 'center'
+          align: 'center',
+          render: (h, params) => {
+            return h('span', [
+              h('Tooltip', {
+                props: {
+                  placement: 'top',
+                  transfer: true
+                },
+                style: {
+                  display: 'inline-block',
+                  width: '100%',
+                  overflow: 'hidden',
+                  textOverflow: 'ellipsis',
+                  whiteSpace: 'nowrap',
+                  borderColor: '1px',
+                  borderWidth: 'red'
+                }
+              }, [params.row.roleName, h('span', {
+                slot: 'content',
+                style: {
+                  whiteSpace: 'normal',
+                  wordBreak: 'break-all'
+                }
+              }, params.row.roleName)
+              ])
+            ])
+          }
         },
         {
           title: '操作',
@@ -182,7 +224,8 @@ export default {
         if (rule.test(this.phone) === true & this.userName !== '') {
           const info = {
             userName: this.userName,
-            phone: this.phone
+            phone: this.phone,
+            nickName: this.nickName
           }
           userAdd(info).then(res => {
             this.$Message.info({
@@ -199,11 +242,13 @@ export default {
       }
       this.userName = null
       this.phone = null
+      this.nickName = null
     },
     cancelUser () {
       this.modalAddUser = false
       this.userName = null
       this.phone = null
+      this.nickName = null
     },
     selected (e) {
       let array = []
@@ -249,7 +294,7 @@ export default {
 
     search () {
       const info = {
-        userCode: this.userCode,
+        userName: this.userCode,
         pageSize: this.pageSize,
         currentPage: this.pageNum
       }
@@ -308,7 +353,8 @@ export default {
             userCode: item.userCode,
             userName: item.userName,
             roleName,
-            roleCode
+            roleCode,
+            nickName: item.nickName
 
           })
         } else {
@@ -316,10 +362,12 @@ export default {
             userCode: item.userCode,
             roleName,
             roleCode,
-            userName: item.userName
+            userName: item.userName,
+            nickName: item.nickName
           })
         }
       })
+      console.log(array)
       return array
     },
     getInfoUser () {
@@ -329,6 +377,7 @@ export default {
         currentPage: this.pageNum
       }
       getInfoUser(info).then(res => {
+        console.log(res)
         const data = res.data.data.records
         const total = res.data.data.total
         this.confData = this.translate(data)
