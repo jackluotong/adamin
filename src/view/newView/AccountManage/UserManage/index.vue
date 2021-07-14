@@ -50,12 +50,18 @@
       <Button type="primary" icon="md-refresh" @click="addUser()" v-show="permission.includes('account:user:add')">新增用户</Button>
 
     </div>
-    <Table highlight-row stripe :columns="columns" :data="confData" style="margin-top: 5px">
+    <Table highlight-row stripe :columns="columns" :data="confData" style="margin-top: 50px">
        <template slot-scope="{ index }" slot="action">
           <div>
             <Button type="primary" size="small" style="margin-right: 5px" @click="edit(index)"
                 v-show="permission.includes('account:user:roleConnect')"
->角色关联</Button>
+            >角色关联</Button>
+             <Button type="primary" size="small" style="margin-right: 5px" @click="editClick(index)"
+                v-show="permission.includes('account:user:edit')"
+            >编辑</Button>
+             <Button type="error" size="small" style="margin-right: 5px" @click="deleteClick(index)"
+                v-show="permission.includes('account:user:delete')"
+            >删除</Button>
           </div>
         </template>
      </Table>
@@ -74,7 +80,6 @@
       font-weight: 400;
       color: black;" >{{formInline.userCode}}</span>
         </FormItem>
-
       </Form>
          <div>
             <Checkbox-group
@@ -100,7 +105,6 @@
      </Modal>
 
      <Modal v-model.trim="modalAddUser" width="600" :mask-closable="false" :closable="true" title="新增用户">
-
          <div  class="showDiv">
         <span>
              用户名
@@ -120,14 +124,50 @@
         <Button type="primary" size="large" @click="submitUser()">保存</Button>
       </div>
      </Modal>
+     <Modal v-model.trim="modalEdit" title="编辑用户" width='600' :mask-closable="false" :closable="true">
+          <div  class="showDiv">
+         <span>
+             电话号码
+         </span>
+        <Input type="text" v-model.trim="editObj.phone" style="width:270px"/>
+        <span>
+            用户昵称
+        </span>
+        <Input type="text" v-model.trim="editObj.nickName" style="width:270px"/>
+        </div>
+         <div slot="footer">
+        <Button type="primary" ghost size="large" @click="cancelEdit()">返回</Button>
+        <Button type="primary" size="large" @click="submitEdit()">保存</Button>
+      </div>
+     </Modal>
+       <Modal v-model.trim="modalDelete" width="450" title="删除用户">
+            <div>
+                <p>确定删除该用户嘛？</p>
+            </div>
+            <div slot="footer">
+                <Button type="text" @click="cancelDelete" size="large"
+                    >取消</Button
+                >
+                <Button type="primary" @click="handlerDelete" size="large"
+                    >确定</Button
+                >
+            </div>
+        </Modal>
   </div>
 </template>
 
 <script>
-import { getInfoUser, getInfoRole, roleConnect, userAdd } from '@/api/data'
+import { getInfoUser, getInfoRole, roleConnect, userAdd, userDelete, userEdit } from '@/api/data'
 export default {
   data () {
     return {
+      editObj: {
+        nickName: '',
+        phone: '',
+        id: '',
+        userCode: ''
+      },
+      modalEdit: false,
       nickName: '',
       userName: '',
       phone: '',
@@ -173,6 +213,12 @@ export default {
           align: 'center'
         },
         {
+          title: '电话号码',
+          key: 'phone',
+          width: 300,
+          align: 'center'
+        },
+        {
           title: '已有角色',
           key: 'roleName',
           tooltip: true,
@@ -208,13 +254,56 @@ export default {
         {
           title: '操作',
           slot: 'action',
-          align: 'center'
+          align: 'center',
+          width: '300'
         }
       ]
 
     }
   },
   methods: {
+    editClick (index) {
+      console.log(this.confData[index])
+      this.modalEdit = true
+      this.editObj.nickName = this.confData[index].nickName
+      this.editObj.phone = this.confData[index].phone
+      this.editObj.id = this.confData[index].userId
+      this.editObj.userCode = this.confData[index].userCode
+    },
+    submitEdit () {
+      console.log(this.editObj, '--==----')
+      let rule = /1[3,4,5,7,8][0-9]{9}$/
+      if (rule.test(this.editObj.phone) === true && this.editObj.nickName !== '') {
+        userEdit(this.editObj).then(res => {
+          this.$Message.success({
+            content: res.data.message
+          })
+          this.modalEdit = false
+          this.getInfoUser()
+        })
+      } else {
+        this.$Message.info('请输入正确的信息')
+      }
+    },
+    cancelEdit () {
+      this.modalEdit = false
+    },
+    deleteClick (index) {
+      this.modalDelete = true
+      this.editObj.userCode = this.confData[index].userCode
+    },
+    cancelDelete () {
+      this.modalDelete = false
+    },
+    handlerDelete () {
+      userDelete(this.editObj.userCode).then(res => {
+        this.$Message.success({
+          content: res.data.message
+        })
+        this.modalDelete = false
+        this.getInfoUser()
+      })
+    },
     addUser () {
       this.modalAddUser = true
     },
@@ -264,7 +353,6 @@ export default {
         pageSize: e,
         currentPage: this.pageNum,
         userCode: this.userCode
-
       }
       getInfoUser(info).then(res => {
         const data = res.data.data.records
@@ -273,6 +361,7 @@ export default {
       })
     },
     changePage (e) {
+      console.log(e)
       const info = {
         pageSize: this.pageSize,
         currentPage: e,
@@ -340,6 +429,7 @@ export default {
       this.total = total
     },
     translate (arr) {
+      console.log(arr)
       let array = []
       arr.map((item) => {
         let roleName = ''
@@ -354,7 +444,9 @@ export default {
             userName: item.userName,
             roleName,
             roleCode,
-            nickName: item.nickName
+            nickName: item.nickName,
+            phone: item.phone,
+            userId: item.userId
 
           })
         } else {
@@ -363,11 +455,13 @@ export default {
             roleName,
             roleCode,
             userName: item.userName,
-            nickName: item.nickName
+            nickName: item.nickName,
+            phone: item.phone,
+            userId: item.userId
+
           })
         }
       })
-      console.log(array)
       return array
     },
     getInfoUser () {
@@ -377,7 +471,6 @@ export default {
         currentPage: this.pageNum
       }
       getInfoUser(info).then(res => {
-        console.log(res)
         const data = res.data.data.records
         const total = res.data.data.total
         this.confData = this.translate(data)

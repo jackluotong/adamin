@@ -4,6 +4,8 @@ switch (process.env.VUE_APP_TITLE) {
   case 'dev':
     prefixStr = '/dev/giq/tsam/'
     break
+  case 'pro':
+    prefixStr = '/dev/giq/tsam/'
 }
 const resolve = dir => {
   return path.join(__dirname, dir)
@@ -15,7 +17,7 @@ module.exports = {
   lintOnSave: false,
   chainWebpack: config => {
     config.resolve.alias
-      .set('@', resolve('src')) // key,value自行定义，比如.set('@@', resolve('src/components'))
+      .set('@', resolve('src'))
       .set('_c', resolve('src/components'))
   },
 

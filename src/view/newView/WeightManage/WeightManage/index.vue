@@ -122,7 +122,7 @@
                     prop="confName"
                     style="width:270px;"
                 >
-                   <Select v-model.trim="selectedModuleTwo" style="width:200px" @on-change='selectedModuleClick' clearable>
+                <Select v-model.trim="selectedModuleTwo" style="width:200px" @on-change='selectedModuleClick' clearable>
                 <Option v-for="(item,id) in modulesOption" :key="id" :value="item.serviceModuleCode">
                     {{ item.serviceModule }}
                 </Option>
@@ -295,7 +295,8 @@ export default {
         weightEit: '',
         checkedDataEdit: [],
         checkListEdit: [],
-        serviceTypeCode: ''
+        serviceTypeCode: '',
+        id: ''
       },
       modalEdit: false,
       permission: sessionStorage.getItem('permission'),
@@ -562,7 +563,8 @@ export default {
         serviceTypeCode: this.editObj.serviceTypeCode,
         weightRatioKey: this.editObj.checkedDataEdit.join(':'),
         weightRatioValue: this.inputValue,
-        weightType: this.editObj.weightEit === '通用权重' ? 1 : 2
+        weightType: this.editObj.weightEit === '通用权重' ? 1 : 2,
+        id: this.editObj.id
       }
       editWeight(info).then(res => {
         this.$Message.success({
@@ -589,6 +591,7 @@ export default {
       setTimeout(() => {
         this.editObj.checkedDataEdit = row.weightRatioKey.replace(new RegExp(/(:)/g), ',').split(',')
       }, 600)
+      this.editObj.id = row.id
       this.editObj.moduleEdit = row.serviceModule
       this.editObj.serviceTypeEdit = row.serviceType
       if (this.confData[index].weightType === '1') {

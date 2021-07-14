@@ -166,7 +166,7 @@
                 <Button type="primary" @click="handleSubmitDelete" size="large">确定</Button>
             </div>
         </Modal>
-         <Modal v-model.trim="modalFusing" width="450" title="删除参数配置提示">
+         <Modal v-model.trim="modalFusing" width="450" title="阈值熔断提示">
             <div>
                 <p>确定熔断该配置吗？</p>
             </div>

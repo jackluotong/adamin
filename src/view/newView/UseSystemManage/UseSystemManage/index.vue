@@ -351,6 +351,7 @@ export default {
             background: true,
             content: res.data.message
           })
+          this.getInfo()
           this.modalDelete = false
         })
         .catch(err => {

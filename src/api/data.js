@@ -33,6 +33,19 @@ export const userAdd = (info) => {
   })
 }
 
+export const userEdit = (info) => {
+  return axios.request({
+    url: '/dadmin/userInfo/update',
+    method: 'post',
+    data: info
+  })
+}
+export const userDelete = (info) => {
+  return axios.request({
+    url: `/dadmin/userInfo/remove/${info}`,
+    method: 'get'
+  })
+}
 // #endregion
 
 /*

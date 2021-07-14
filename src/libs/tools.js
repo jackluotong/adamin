@@ -261,3 +261,11 @@ export const debounce = (fn, wait) => {
  *
  * throttling
  */
+
+/**
+ *
+ * refresh
+ */
+export const refreshTable = (pageNum) => {
+  this.pageNum = 1
+}

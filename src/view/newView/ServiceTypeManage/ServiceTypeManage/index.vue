@@ -24,7 +24,12 @@
           </div>
         </template>
      </Table>
-     <Page :total='total' :page-size='pageSize' :show-total="true" show-sizer style="text-align: center;margin-top: 5px"
+     <Page
+     :total='total'
+     :page-size='pageSize'
+     :show-total="true"
+     show-sizer
+     style="text-align: center;margin-top: 5px"
      @on-change='changePage'
      @on-page-size-change='onpagesizechange'
      />
