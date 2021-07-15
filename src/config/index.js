@@ -17,8 +17,10 @@ export default {
    * @description api请求基础路径
    */
   baseUrl: {
-    dev: '',
-    pro: 'https://wxcs.internal.manulife-sinochem.com/dev/giq/'
+    dev: 'https://wxcs.internal.manulife-sinochem.com/dev/giq',
+    prod: 'http://tsam.manulife-sinochem.com',
+    sit: 'https://tsam-sit.internal.manulife-sinochem.com',
+    uat: 'https://tsam-uat.internal.manulife-sinochem.com'
   },
   /**
    * @description 默认打开的首页的路由name值，默认为home

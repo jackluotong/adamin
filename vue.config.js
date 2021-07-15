@@ -1,19 +1,26 @@
 const path = require('path')
 const webpack = require('webpack')
+let prefixStr = ''
 switch (process.env.VUE_APP_TITLE) {
   case 'dev':
     prefixStr = '/dev/giq/tsam/'
     break
-  case 'pro':
-    prefixStr = '/dev/giq/tsam/'
+  case 'prod':
+    prefixStr = '/tsam/'
+    break
+  case 'sit':
+    prefixStr = '/tsam/'
+    break
+  case 'uat':
+    prefixStr = '/tsam/'
+    break
+  default: console.log(process.env.VUE_APP_TITLE)
 }
 const resolve = dir => {
   return path.join(__dirname, dir)
 }
-const BASE_URL = process.env.NODE_ENV === 'production' ? '/dev/giq/tsam' : ''
-
 module.exports = {
-  baseUrl: BASE_URL,
+  publicPath: prefixStr,
   lintOnSave: false,
   chainWebpack: config => {
     config.resolve.alias
@@ -44,5 +51,4 @@ module.exports = {
       filename: this.mode === 'production' ? 'js/[name].[contenthash:10].js' : 'js/[name].[hash:10].js'
     }
   }
-
 }
