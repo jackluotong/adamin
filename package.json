@@ -8,6 +8,7 @@
     "dev": "vue-cli-service build --mode dev",
     "sit":"vue-cli-service build --mode sit",
     "uat":"vue-cli-service build --mode uat",
+    "prod":"vue-cli-service build --mode prod",
     "build": "vue-cli-service build",
     "lint": "vue-cli-service lint",
     "test:unit": "vue-cli-service test:unit",

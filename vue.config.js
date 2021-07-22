@@ -39,6 +39,7 @@ module.exports = {
         target: 'https://wxcs.internal.manulife-sinochem.com/dev/giq/',
         changeOrigin: true,
         pathRewrite: {
+          '^/dadmin': ''
         }
       }
     }

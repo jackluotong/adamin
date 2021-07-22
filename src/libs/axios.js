@@ -37,9 +37,7 @@ class HttpRequest {
     }
   }
   interceptors (instance, url) {
-    // 请求拦截
     instance.interceptors.request.use(config => {
-    // 添加全局的loading...
       if (!Object.keys(this.queue).length) {
         // Spin.show()
       }

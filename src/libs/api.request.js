@@ -1,7 +1,6 @@
 import HttpRequest from '@/libs/axios'
 import config from '@/config'
 let baseUrl = ''
-console.log(process.env.VUE_APP_TITLE, '----env-----')
 switch (process.env.VUE_APP_TITLE) {
   case 'sit':
     baseUrl = config.baseUrl.sit
@@ -19,5 +18,6 @@ switch (process.env.VUE_APP_TITLE) {
     baseUrl = config.baseUrl.dev
     break
 }
+console.log(baseUrl, '----baseUrl-----')
 const axios = new HttpRequest(baseUrl)
 export default axios
