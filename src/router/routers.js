@@ -334,7 +334,8 @@ export default[
         component: () => import ('@/view/newView/InformManage/AlarmManage')
       }
     ]
-  }, {
+  },
+  {
     path: '/StatisticalForm',
     name: '_StatisticalForm',
     meta: {
@@ -355,6 +356,30 @@ export default[
           hideInMenu: false
         },
         component: () => import ('@/view/newView/StatisticalForm/DetailsInquire')
+      }
+    ]
+  },
+  {
+    path: '/WhiteList',
+    name: 'WhiteList',
+    meta: {
+      icon: 'ios-construct',
+      title: '白名单管理',
+      access: 'whitelisting',
+      hideInMenu: false
+    },
+    component: Main,
+    children: [
+      {
+        path: '/WhiteListManage',
+        name: 'WhiteListManage',
+        meta: {
+          icon: 'ios-settings',
+          title: '白名单管理',
+          access: 'whitelisting:manage',
+          hideInMenu: false
+        },
+        component: () => import ('@/view/newView/WhiteList/WhiteListManage')
       }
     ]
   }
