@@ -1,3 +1,11 @@
+<!--
+ * @Author: william
+ * @Date: 2021-05-25 22:08:27
+ * @LastEditTime: 2021-07-27 22:24:05
+ * @LastEditors: Please set LastEditors
+ * @Description: In User Settings Edit
+ * @FilePath: \Admin\src\view\newView\WeightManage\WeightManage\index.vue
+-->
 <style lang="less" scoped>
 .user-content {
     .content-button {
@@ -102,6 +110,7 @@
             :total="total"
             :page-size="pageSize"
             :show-total="true"
+            :current.sync='pageNum'
             show-sizer
             style="text-align: center;margin-top: 5px"
             @on-change='changePage'
@@ -508,6 +517,7 @@ export default {
       }).catch()
     },
     search () {
+      this.pageNum = 1
       const info = {
         serviceModule: this.selectedModule,
         currentPage: this.pageNum,
