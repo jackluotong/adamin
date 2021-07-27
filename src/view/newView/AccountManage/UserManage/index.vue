@@ -1,3 +1,11 @@
+<!--
+ * @Author: william
+ * @Date: 2021-05-26 16:51:38
+ * @LastEditTime: 2021-07-27 22:35:23
+ * @LastEditors: Please set LastEditors
+ * @Description: In User Settings Edit
+ * @FilePath: \Admin\src\view\newView\AccountManage\UserManage\index.vue
+-->
 <style lang="less" scoped>
 .user-content{
   .content-button {
@@ -385,7 +393,7 @@ export default {
       const info = {
         userName: this.userCode,
         pageSize: this.pageSize,
-        currentPage: this.pageNum
+        currentPage: 1
       }
       getInfoUser(info).then(res => {
         const data = res.data.data.records

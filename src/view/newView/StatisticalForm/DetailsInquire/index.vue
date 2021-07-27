@@ -1,3 +1,11 @@
+<!--
+ * @Descripttion:
+ * @version: 1.0.0
+ * @Author: william
+ * @Date: 2021-05-25 22:14:56
+ * @LastEditors: william
+ * @LastEditTime: 2021-07-27 22:52:51
+-->
  <style lang="less" scoped="scoped">
     .user-content {
         .content-button {
@@ -69,6 +77,7 @@
             </template>
         </Table>
         <Page :total='total' :page-size='pageSize' :show-total="true" show-sizer="show-sizer" style="text-align: center;margin-top: 5px"
+            :current.sync='pageNum'
          @on-change='changePage'
          @on-page-size-change='onpagesizechange'/>
 
@@ -370,9 +379,11 @@ export default {
       this.time = e
     },
     search () {
+      this.pageNum = 1
+
       const info =
        {
-         currentPage: 1,
+         currentPage: this.pageNum,
          pageSize: 10,
          applicationCode: this.applicationCode,
          serviceTypeCode: this.serviceTypeSelected,

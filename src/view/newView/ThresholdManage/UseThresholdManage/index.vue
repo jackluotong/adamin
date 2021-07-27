@@ -1,3 +1,11 @@
+<!--
+ * @Descripttion:
+ * @version: 1.0.0
+ * @Author: william
+ * @Date: 2021-05-25 22:09:58
+ * @LastEditors: william
+ * @LastEditTime: 2021-07-27 22:53:05
+-->
 <style lang="less" scoped>
 .user-content {
     .content-button {
@@ -85,10 +93,10 @@
             </template>
         </Table>
         <Page
-            :current="current"
             :total="total"
             :page-size="pageSize"
             :show-total="true"
+                            :current.sync='pageNum'
             show-sizer
             style="text-align: center;margin-top: 5px"
             @on-change='changePage'
@@ -362,7 +370,7 @@ export default {
       this.editId = this.confData[index].id
     },
     search () {
-      this.current = 1
+      this.pageNum = 1
       this.getUseThreShold(this.applicationCode, this.applicationName)
     },
     reset (obj) {
@@ -481,6 +489,8 @@ export default {
       this.total = total
     },
     getUseThreShold (code, name) {
+      this.pageNum = 1
+
       const info = {
         applicationName: name,
         applicationCode: code,

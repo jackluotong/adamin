@@ -1,3 +1,11 @@
+<!--
+ * @Descripttion:
+ * @version: 1.0.0
+ * @Author: william
+ * @Date: 2021-06-25 19:03:56
+ * @LastEditors: william
+ * @LastEditTime: 2021-07-27 22:52:43
+-->
 <style lang="less" scoped>
 .user-content{
   .content-button {
@@ -53,8 +61,9 @@
         </template>
      </Table>
      <Page :total='total' :page-size='pageSize' :show-total="true" show-sizer style="text-align: center;margin-top: 5px"
+      :current.sync='pageNum'
       @on-change='changePage'
-     @on-page-size-change='onpagesizechange'/>
+      @on-page-size-change='onpagesizechange'/>
      <Modal
      v-model.trim="modalAddOrUpdate"
      width="600"
@@ -194,6 +203,7 @@ export default {
       this.getInfo()
     },
     search () {
+      this.pageNum = 1
       const data = {
         serviceModule: this.serviceModule,
         currentPage: this.pageNum,

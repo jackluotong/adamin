@@ -1,3 +1,11 @@
+<!--
+ * @Descripttion:
+ * @version: 1.0.0
+ * @Author: william
+ * @Date: 2021-05-25 22:34:31
+ * @LastEditors: william
+ * @LastEditTime: 2021-07-27 22:52:54
+-->
 <style lang="less" scoped>
 .user-content {
     .content-button {
@@ -74,6 +82,7 @@
             :show-total="true"
             show-sizer
             style="text-align: center;margin-top: 5px"
+                        :current.sync='pageNum'
             @on-change='changePage'
             @on-page-size-change='onpagesizechange'
         />
@@ -251,6 +260,8 @@ export default {
       obj.manufacturerContactType = ''
     },
     search () {
+      this.pageNum = 1
+
       this.getManufacture(this.manufacturerName)
     },
     addSetting () {
@@ -334,6 +345,8 @@ export default {
       this.total = total
     },
     getManufacture (name) {
+      this.pageNum = 1
+
       const info = {
         currentPage: this.pageNum,
         pageSize: this.pageSize,

@@ -1,3 +1,11 @@
+<!--
+ * @Descripttion:
+ * @version: 1.0.0
+ * @Author: william
+ * @Date: 2021-05-25 22:10:30
+ * @LastEditors: william
+ * @LastEditTime: 2021-07-27 22:53:02
+-->
 <style lang="less" scoped>
 .user-content{
   .content-button {
@@ -62,6 +70,8 @@
         </template>
     </Table>
     <Page :total='total' :page-size='pageSize' :show-total="true" show-sizer style="text-align: center;margin-top: 5px"
+                :current.sync='pageNum'
+
             @on-change='changePage'
             @on-page-size-change='onpagesizechange'/>
     <Modal v-model="modalCheck" width="30%" height="40%"  :mask-closable="false" :closable="true" title="详情" >
@@ -277,6 +287,8 @@ export default {
       })
     },
     search () {
+      this.pageNum = 1
+
       this.getServiceThreShold(this.manufacturerName, this.serviceType, this.serviceModule)
     },
     reset () {
@@ -354,6 +366,8 @@ export default {
       }
     },
     getServiceThreShold (manufacturerCode, serviceTypeCode, serviceModuleCode) {
+      this.pageNum = 1
+
       const info = {
         currentPage: this.pageNum,
         pageSize: this.pageSize,

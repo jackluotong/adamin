@@ -1,3 +1,11 @@
+<!--
+ * @Descripttion:
+ * @version: 1.0.0
+ * @Author: william
+ * @Date: 2021-05-25 22:31:56
+ * @LastEditors: william
+ * @LastEditTime: 2021-07-27 22:52:46
+-->
 <template>
   <div class="user-content">
     <h1 style="margin:10px 10px 10px 10px">服务类型管理-服务类型管理</h1>
@@ -28,6 +36,7 @@
      :total='total'
      :page-size='pageSize'
      :show-total="true"
+     :current.sync='pageNum'
      show-sizer
      style="text-align: center;margin-top: 5px"
      @on-change='changePage'
@@ -236,10 +245,12 @@ export default {
       this.addServiceType.serviceType = e.label
     },
     search () {
+      this.pageNum = 1
+
       const info = {
         serviceModule: this.serviceModule,
         serviceType: this.serviceType,
-        currentPage: this.pageNum,
+        currentPage: 1,
         pageSize: this.pageSize
       }
       getServiceTypeInfo(info).then(res => {

@@ -1,3 +1,11 @@
+<!--
+ * @Descripttion:
+ * @version: 1.0.0
+ * @Author: william
+ * @Date: 2021-05-25 19:29:36
+ * @LastEditors: william
+ * @LastEditTime: 2021-07-27 22:53:11
+-->
 <style lang="less" scoped>
 .user-content {
   .content-button {
@@ -73,6 +81,7 @@
       :page-size="pageSize"
       :show-total="true"
       show-sizer
+                                              :current.sync='pageNum'
       style="text-align: center;margin-top: 5px"
       @on-change='changePage'
       @on-page-size-change='onpagesizechange'
@@ -233,6 +242,8 @@ export default {
       })
     },
     search () {
+      this.pageNum = 1
+
       const info = {
         pageSize: this.pageSize,
         currentPage: this.pageNum,

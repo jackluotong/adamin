@@ -1,3 +1,11 @@
+<!--
+ * @Descripttion:
+ * @version: 1.0.0
+ * @Author: william
+ * @Date: 2021-05-25 19:29:36
+ * @LastEditors: william
+ * @LastEditTime: 2021-07-27 22:53:08
+-->
 <style lang="less" scoped>
 .user-content {
     .content-button {
@@ -84,6 +92,7 @@
         </Table>
         <Page
             :total="total"
+                                        :current.sync='pageNum'
             :page-size="pageSize"
             :show-total="true"
             show-sizer
@@ -339,6 +348,8 @@ export default {
       }).catch(err => console.log(err))
     },
     search () {
+      this.pageNum = 1
+
       this.getInfo(this.applicationCode, this.applicationName, this.selectedModule)
       let a = document.getElementsByClassName('ivu-page-item')
       console.log(a)
@@ -415,6 +426,8 @@ export default {
       this.total = total
     },
     getInfo (code, name, serviceModuleCode) {
+      this.pageNum = 1
+
       const info = {
         applicationCode: code,
         applicationName: name,
