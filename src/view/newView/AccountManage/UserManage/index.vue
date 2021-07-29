@@ -1,8 +1,8 @@
 <!--
  * @Author: william
  * @Date: 2021-05-26 16:51:38
- * @LastEditTime: 2021-07-27 22:35:23
- * @LastEditors: Please set LastEditors
+ * @LastEditTime: 2021-07-28 13:51:21
+ * @LastEditors: william
  * @Description: In User Settings Edit
  * @FilePath: \Admin\src\view\newView\AccountManage\UserManage\index.vue
 -->
@@ -76,6 +76,7 @@
      <Page :total='total'
      :page-size='pageSize'
      :show-total="true"
+     :current.sync='pageNum'
      show-sizer
      style="text-align: center;margin-top: 5px"
      @on-change='changePage'
@@ -390,6 +391,7 @@ export default {
     },
 
     search () {
+      this.pageNum = 1
       const info = {
         userName: this.userCode,
         pageSize: this.pageSize,
