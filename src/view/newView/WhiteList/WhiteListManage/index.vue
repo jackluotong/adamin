@@ -4,7 +4,7 @@
  * @Author: william
  * @Date: 2021-07-25 11:23:17
  * @LastEditors: william
- * @LastEditTime: 2021-07-28 11:01:58
+ * @LastEditTime: 2021-08-05 18:16:49
 -->
 <style lang="less" scoped>
 .user-content{
@@ -74,14 +74,14 @@
         <FormItem label="身份证" style="width:270px;">
           <Input v-model.trim="formInline.idCardNo"/>
         </FormItem>
-        <FormItem label="手机" style="width:270px;">
+        <FormItem label="手机" style="width:270px;" v-show='isShow'>
           <Input  v-model.trim="formInline.mobile" />
         </FormItem>
          <FormItem label="姓名" style="width:270px;">
           <Input  v-model.trim="formInline.name" />
         </FormItem>
          <FormItem label="类型"  style="width:270px;">
-        <Select v-model="formInline.type" clearable style="width:270px">
+        <Select v-model="formInline.type" clearable style="width:270px" @on-change='selectedModuleClick'>
         <Option v-for="(item,id) in authOptions" :value="item.value" :key="id">{{ item.label }}</Option>
         </Select>
         </FormItem>
@@ -110,6 +110,7 @@ import { getInfo, deleteInfo, addInfo } from '@/api/whiteList'
 export default {
   data () {
     return {
+      isShow: false,
       authOptions: [{ value: 1, label: '身份验证' }, { value: 2, label: '手机号验证' }],
       permission: sessionStorage.getItem('permission'),
       deleteId: '',
@@ -167,6 +168,14 @@ export default {
     }
   },
   methods: {
+    selectedModuleClick (e) {
+      if (e === 2 || this.formInline.type === '2') {
+        this.isShow = true
+      } else {
+        this.formInline.mobile = ''
+        this.isShow = false
+      }
+    },
     onpagesizechange (e) {
       this.pageSize = e
       const info = {
@@ -187,6 +196,10 @@ export default {
       })
     },
     addSetting () {
+      this.formInline.mobile = ''
+      this.formInline.idCardNo = ''
+      this.formInline.name = ''
+      this.formInline.type = ''
       this.showType = 'add'
       this.detailTitle = '新增白名单'
       this.modalAddOrUpdate = true
